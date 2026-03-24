@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prueba Comunicación</title>
+</head>
+<body>
+    <h1>Labertit Front</h1>
+    <button onclick="enviarPregunta()">Lanzar pregunta al Back</button>
+    <h2 id="resultado">Esperando...</h2>
+
+    <script>
+        async function enviarPregunta() {
+            // 1. Mensaje en consola del Front
+            console.log("Pregunta del front_end: Solicitando datos...");
+
+            try {
+                // 2. Llamada al Back (Proyecto demo)
+                const response = await fetch('http://localhost:8080/api/conectar');
+                const json = await response.json();
+
+                // 3. Mostrar respuesta en pantalla
+                if (json.success) {
+                    document.getElementById("resultado").innerText = json.mensaje;
+                    console.log("Recibido con éxito.");
+                }
+            } catch (error) {
+                console.error("Error: ¿Está el Back encendido?");
+                document.getElementById("resultado").innerText = "Back-end apagado";
+            }
+        }
+    </script>
+</body>
+</html>
