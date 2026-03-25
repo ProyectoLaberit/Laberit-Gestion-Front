@@ -22,12 +22,50 @@
                 // 3. Mostrar respuesta en pantalla
                 if (json.success) {
                     document.getElementById("resultado").innerText = json.mensaje;
+                    crearTabla(json.datos);
                     console.log("Recibido con éxito.");
                 }
             } catch (error) {
                 console.error("Error: ¿Está el Back encendido?");
                 document.getElementById("resultado").innerText = "Back-end apagado";
             }
+        }
+
+
+        function crearTabla(datos){
+            // Elimina tabla previa si existe
+            const existente = document.getElementById('tabla-datos');
+            if (existente) {
+                existente.remove();
+            }
+
+            if (!Array.isArray(datos) || datos.length === 0) {
+                console.warn('crearTabla: datos no es array válido o está vacío');
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.id = 'tabla-datos';
+            table.style.borderCollapse = 'collapse';
+            table.style.marginTop = '1rem';
+            table.style.width = '100%';
+
+            datos.forEach((fila, i) => {
+                const tr = document.createElement('tr');
+
+                fila.forEach(celda => {
+                    const td = document.createElement('td');
+                    td.innerText = String(celda);
+                    td.style.border = '1px solid #333';
+                    td.style.padding = '6px 8px';
+                    td.style.textAlign = 'left';
+                    tr.appendChild(td);
+                });
+
+                table.appendChild(tr);
+            });
+
+            document.body.appendChild(table);
         }
     </script>
 </body>
