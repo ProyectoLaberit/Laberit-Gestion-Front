@@ -3,9 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>Prueba Comunicación</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-family: Arial, sans-serif; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .activo { color: green; font-weight: bold; }
+        .inactivo { color: red; font-weight: bold; }
+    </style>
 </head>
-<body>
+<body onload="cargarProyectos()">
     <h1>Labertit Front</h1>
+
+    <table id="tabla-proyectos" style="display: none;">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Fecha Inicio</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpo-tabla"></tbody>
+    </table>
+
+    <script>
+        async function cargarProyectos() {
+            const tabla = document.getElementById("tabla-proyectos");
+            const cuerpo = document.getElementById("cuerpo-tabla");
+
+            try {
+                const response = await fetch('http://localhost:8080/api/proyecto/lista');
+                const proyectos = await response.json();
+
+                cuerpo.innerHTML = "";
+                proyectos.forEach(pro => {
+                    const fila = document.createElement("tr");
+                    fila.innerHTML = `
+                        <td><strong>${pro.nombre}</strong></td>
+                        <td>${pro.descripcion}</td>
+                        <td>${pro.fechaInicio}</td>
+                        <td><span class="${pro.activo ? 'activo' : 'inactivo'}">${pro.activo ? 'Activo' : 'Pausado'}</span></td>
+                    `;
+                    cuerpo.appendChild(fila);
+                });
+
+                tabla.style.display = "table";
+                mensaje.style.display = "none"; // Ocultamos el mensaje cuando ya hay tabla
+
+            } catch (error) {
+                mensaje.innerText = "Error: No se pudo conectar con el Back-end.";
+            }
+        }
+    </script>
+
+    <br><br><br><br>
     <button onclick="enviarPregunta()">Lanzar pregunta al Back</button>
     <h2 id="resultado">Esperando...</h2>
 
