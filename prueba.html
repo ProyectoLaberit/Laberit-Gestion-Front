@@ -1,85 +1,258 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <title>Prueba Comunicación</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos Labertit</title>
     <style>
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-family: Arial, sans-serif; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        .activo { color: green; font-weight: bold; }
-        .inactivo { color: red; font-weight: bold; }
+        :root {
+            --bg: #f4f7fb;
+            --card: #ffffff;
+            --primary: #2b6cb0;
+            --primary-strong: #234e8f;
+            --text: #2d3748;
+            --text-muted: #4a5568;
+            --border: #e2e8f0;
+            --success: #38a169;
+            --error: #e53e3e;
+            --radius: 14px;
+            --shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #e8f1fb 0%, var(--bg) 100%);
+        }
+
+        .container {
+            max-width: 940px;
+            margin: 2.3rem auto;
+            padding: 1.1rem;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.6rem;
+        }
+
+        h1 {
+            margin: 0 0 0.35rem;
+            font-size: clamp(1.3rem, 2vw, 2rem);
+            color: var(--primary-strong);
+        }
+
+        p.lead {
+            margin: 0 0 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            border: 0;
+            padding: 0.7rem 1.1rem;
+            cursor: pointer;
+            transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(43, 108, 176, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-strong);
+            transform: translateY(-1px);
+        }
+
+        #mensaje {
+            margin: 0.1rem 0 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            min-height: 1.25rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        thead tr {
+            background: #2c5282;
+            color: #f7fafc;
+        }
+
+        th,
+        td {
+            padding: 0.8rem 0.7rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.92rem;
+        }
+
+        tbody tr:hover {
+            background: #ebf4ff;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.75rem;
+            }
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                margin: 0 0 0.8rem;
+                background: #fff;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            }
+
+            td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50%;
+            }
+
+            td:before {
+                position: absolute;
+                top: 0.75rem;
+                left: 0.75rem;
+                width: 45%;
+                padding-right: 0.5rem;
+                white-space: nowrap;
+                font-weight: 700;
+                color: #4a5568;
+                content: attr(data-label);
+            }
+
+            td:last-child {
+                border-bottom: 0;
+            }
+        }
     </style>
 </head>
-<body onload="cargarProyectos()">
-    <h1>Labertit Front</h1>
 
-    <table id="tabla-proyectos" style="display: none;">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Fecha Inicio</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody id="cuerpo-tabla"></tbody>
-    </table>
+<body>
+    <div class="container">
+        <div class="panel">
+            <h1>Proyectos Labertit</h1>
+            <p class="lead">Carga y visualiza tus proyectos desde el backend rápidamente.</p>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="cargarProyectos()">Cargar Proyectos</button>
+            </div>
+
+            <p id="mensaje"></p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla">
+                        <tr>
+                            <td colspan="3" style="text-align:center; padding: 1rem; color: #718096;">No hay datos aún. Pulsa "Cargar Proyectos".</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <script>
         async function cargarProyectos() {
-            const tabla = document.getElementById("tabla-proyectos");
-            const cuerpo = document.getElementById("cuerpo-tabla");
+            const mensaje = document.getElementById("mensaje");
+            const tabla = document.getElementById("tabla");
+
+            mensaje.textContent = "Cargando...";
+            mensaje.style.color = "#2b6cb0";
 
             try {
-                const response = await fetch('http://localhost:8080/api/proyecto/lista');
-                const proyectos = await response.json();
+                const res = await fetch("http://localhost:8080/api/conectar");
+                if (!res.ok) throw new Error("Error en la petición");
 
-                cuerpo.innerHTML = "";
-                proyectos.forEach(pro => {
-                    const fila = document.createElement("tr");
-                    fila.innerHTML = `
-                        <td><strong>${pro.nombre}</strong></td>
-                        <td>${pro.descripcion}</td>
-                        <td>${pro.fechaInicio}</td>
-                        <td><span class="${pro.activo ? 'activo' : 'inactivo'}">${pro.activo ? 'Activo' : 'Pausado'}</span></td>
-                    `;
-                    cuerpo.appendChild(fila);
-                });
+                const data = await res.json();
 
-                tabla.style.display = "table";
-                mensaje.style.display = "none"; // Ocultamos el mensaje cuando ya hay tabla
+                if (data.success) {
+                    mensaje.textContent = data.mensaje || "Proyectos cargados correctamente.";
+                    mensaje.style.color = "#38a169";
 
-            } catch (error) {
-                mensaje.innerText = "Error: No se pudo conectar con el Back-end.";
-            }
-        }
-    </script>
+                    const proyectos = data.datos;
+                    tabla.innerHTML = "";
 
-    <br><br><br><br>
-    <button onclick="enviarPregunta()">Lanzar pregunta al Back</button>
-    <h2 id="resultado">Esperando...</h2>
+                    if (!proyectos || proyectos.length <= 1) {
+                        tabla.innerHTML = "<tr><td colspan='3' style='text-align:center; padding: 1rem; color: #718096;'>No hay datos disponibles.</td></tr>";
+                        return;
+                    }
 
-    <script>
-        async function enviarPregunta() {
-            // 1. Mensaje en consola del Front
-            console.log("Pregunta del front_end: Solicitando datos...");
+                    proyectos.slice(1).forEach(p => {
+                        const id = p[0] || "-";
+                        const nombre = p[1] || "Sin nombre";
+                        const desc = p[2] || "Sin descripción";
 
-            try {
-                // 2. Llamada al Back (Proyecto demo)
-                const response = await fetch('http://localhost:8080/api/conectar');
-                const json = await response.json();
-
-                // 3. Mostrar respuesta en pantalla
-                if (json.success) {
-                    document.getElementById("resultado").innerText = json.mensaje;
-                    console.log("Recibido con éxito.");
+                        const fila = document.createElement("tr");
+                        fila.innerHTML = `
+                            <td data-label="ID">${id}</td>
+                            <td data-label="Nombre">${nombre}</td>
+                            <td data-label="Descripción">${desc}</td>
+                        `;
+                        tabla.appendChild(fila);
+                    });
+                } else {
+                    throw new Error(data.mensaje || "Respuesta no válida");
                 }
-            } catch (error) {
-                console.error("Error: ¿Está el Back encendido?");
-                document.getElementById("resultado").innerText = "Back-end apagado";
+
+            } catch (err) {
+                mensaje.textContent = "Error: no se pudo conectar con el backend";
+                mensaje.style.color = "#e53e3e";
+                tabla.innerHTML = "<tr><td colspan='3' style='text-align:center; padding: 1rem; color: #e53e3e;'>Error cargando datos</td></tr>";
+                console.error(err);
             }
         }
     </script>
 </body>
+
 </html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Labertit</title>
+    <style>
+        :root {
+            --bg: #f3f8ff;
+            --surface: #ffffff;
+            --primary: #2f6ad3;
+            --primary-dark: #2059b0;
+            --text: #1f2a44;
+            --muted: #6b7b95;
+            --border: #d8e4f3;
+            --radius: 16px;
+            --shadow: 0 10px 26px rgba(38, 80, 148, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at top, #e9f2ff 0%, var(--bg) 50%, #f7fbff 100%);
+            color: var(--text);
+            display: grid;
+            place-items: center;
+            padding: 1rem;
+        }
+
+        .login-card {
+            width: min(420px, 100%);
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+
+        .login-card h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.7rem;
+            color: var(--primary-dark);
+            text-align: center;
+        }
+
+        .login-card p {
+            margin: 0 0 1.5rem;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .login-card .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .login-card label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: #2f4a6c;
+        }
+
+        .login-card input {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0.82rem 0.85rem;
+            font-size: 0.96rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .login-card input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(47, 106, 211, 0.18);
+        }
+
+        .login-card button {
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            padding: 0.88rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            background-color: var(--primary);
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+
+        .login-card button:hover,
+        .login-card button:focus {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .login-card small {
+            display: block;
+            margin-top: 0.75rem;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .status {
+            margin-top: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            min-height: 1.2rem;
+        }
+
+        .status.success {
+            color: #16a34a;
+        }
+
+        .status.error {
+            color: #dc2626;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 1.2rem;
+            }
+
+            .login-card h2 {
+                font-size: 1.3rem;
+            }
+
+            .login-card p {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <h2>Bienvenido a Labertit</h2>
+        <p>Introduce tus credenciales para acceder al panel.</p>
+
+        <form id="loginForm" action="http://localhost:8080/login" method="POST">
+            <div class="input-group">
+                <label for="usuario">Usuario</label>
+                <input id="usuario" name="usuario" type="text" placeholder="Usuario" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input id="password" name="password" type="password" placeholder="Contraseña" required>
+            </div>
+
+            <button type="submit">Entrar</button>
+            <div class="status" id="status"></div>
+            <small>Si no tienes cuenta, contacta al administrador.</small>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const status = document.getElementById('status');
+
+        form.addEventListener('submit', function (ev) {
+            status.textContent = 'Enviando...';
+            status.className = 'status';
+        });
+
+        // Si quieres manejar la respuesta con fetch, puedes usar esto en vez de submit directo.
+        // form.addEventListener('submit', async function (ev) {
+        //     ev.preventDefault();
+        //     const data = new FormData(form);
+        //     status.textContent = 'Enviando...';
+        //     status.className = 'status';
+        //     try {
+        //         const res = await fetch(form.action, { method: 'POST', body: data });
+        //         const json = await res.json();
+        //         if (res.ok && json.success) {
+        //             status.textContent = 'Login exitoso';
+        //             status.classList.add('success');
+        //             // window.location.href = '/dashboard';
+        //         } else {
+        //             status.textContent = json.message || 'Error al iniciar sesión.';
+        //             status.classList.add('error');
+        //         }
+        //     } catch (error) {
+        //         status.textContent = 'Error de red. Intenta de nuevo.';
+        //         status.classList.add('error');
+        //     }
+        // });
+    </script>
+</body>
+
+</html>
