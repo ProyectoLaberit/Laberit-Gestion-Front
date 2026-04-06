@@ -46,21 +46,11 @@ body {
 /* Ajuste de logo simulado */
 .logo-squares {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
     width: 24px;
     height: 24px;
 }
 
-.logo-squares div {
-    background-color: var(--principal);
-    border-radius: 2px;
-}
 
-.logo-squares div:nth-child(2) {
-    opacity: 0.7;
-}
 
-.logo-squares div:nth-child(3) {
-    opacity: 0.5;
-}
+
+

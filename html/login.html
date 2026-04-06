@@ -2,106 +2,184 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Proyectos y Tareas</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheCubeFactory - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/CSS/style.css">
+    <script src="/JS/prueba.js"></script>
 </head>
 <body>
 
-<div class="container">
-    <div id="login-section">
-        <h2>Bienvenido</h2>
-        <input type="text" id="email" placeholder="Usuario" value="admin">
-        <input type="password" id="password" placeholder="Contraseña" value="1234">
-        <br>
-        <button onclick="realizarLogin()">Entrar</button>
-        <p id="msg-login" style="color:red"></p>
-    </div>
+    <div id="login-section" class="container-fluid vh-100 bg-white">
+        <div class="row h-100">
+            
+            <div class="col-12 col-lg-6 d-flex flex-column justify-content-center align-items-center px-4">
+                <div class="w-100" style="max-width: 420px;">
+                    
+                    <div class="d-flex align-items-center mb-5">
+                        <div class="logo-squares me-2">
+                            <img style="height: 23px;" src="../img/logo.png">
+                        </div>
+                        <h4 class="mb-0 fw-semibold" style="letter-spacing: -0.5px;">Laberit</h4>
+                    </div>
 
-    <div id="app-section">
-        <h2>Tus Proyectos</h2>
-        <div id="lista-proyectos" class="scroll-container"></div>
-        <hr>
-        <h3>Imputaciones del Proyecto</h3>
-        <div id="lista-tareas">
-            <p style="color: #888">Haz clic en un proyecto para ver sus tiempos registrados.</p>
+                    <h1 class="fw-bold mb-2 fs-2">Bienvenido</h1>
+                    <p class="text-muted mb-4">Introuce tus datos</p>
+
+                    <form onsubmit="event.preventDefault(); realizarLogin();">
+                        <div class="mb-3">
+                            <label for="" class="form-label fw-medium fs-6">Email</label>
+                            <input type="" class="form-control py-2" id="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-medium fs-6">Contraseña</label>
+                            <input type="password" class="form-control py-2" id="password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-brand w-100 py-2 mb-2">Iniciar Sesion</button>
+                        
+                        <div id="msg-login" class="text-danger text-center mb-3 fw-medium" style="min-height: 24px;"></div>
+                        
+                    </form>
+
+
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6 d-none d-lg-flex bg-illustration-panel justify-content-center align-items-center">
+                <div class="text-center w-75">
+                   <img style="width:110%; height: 110%;" src="../img/logo2.png">
+                </div>
+            </div>
+            
         </div>
     </div>
-</div>
 
-<script>
-    const URL_BASE = "http://localhost:8080/api";
+    <div id="app-section" class="container-fluid vh-100 p-4" style="display: none;">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div class="d-flex align-items-center">
+                <div class="logo-squares me-3">
+                    <div></div><div></div><div></div><div></div>
+                </div>
+                <h3 class="mb-0 fw-semibold">Dashboard</h3>
+            </div>
+            <button onclick="location.reload()" class="btn btn-outline-secondary btn-sm">Cerrar sesión</button>
+        </div>
 
-    async function realizarLogin() {
-        const loginData = {
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value
-        };
+        <div class="row">
+            <div class="col-12 col-md-4 mb-4">
+                <h5 class="fw-bold text-muted mb-3">Tus Proyectos</h5>
+                <div id="lista-proyectos" class="d-flex flex-column gap-3">
+                    </div>
+            </div>
 
-        try {
-            const response = await fetch(`${URL_BASE}/usuarios/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(loginData)
-            });
+            <div class="col-12 col-md-8">
+                <h5 class="fw-bold text-muted mb-3">Imputaciones de Tiempo</h5>
+                <div id="lista-tareas" class="d-flex flex-column">
+                    <div class="text-muted p-4 text-center border rounded bg-white">
+                        Selecciona un proyecto para ver sus tareas.
+                    </div>
+                    </div>
+            </div>
+        </div>
+    </div>
 
-            const result = await response.json(); 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-            if (result.success) {
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('app-section').style.display = 'block';
-                pintarProyectos(result.data); 
-            } else {
-                document.getElementById('msg-login').innerText = result.mensaje;
-            }
-        } catch (error) {
-            alert("Error de conexión con el servidor.");
-        }
-    }
+    <script>
+        const URL_BASE = "http://localhost:8080/api";
 
-    function pintarProyectos(proyectos) {
-        const contenedor = document.getElementById('lista-proyectos');
-        contenedor.innerHTML = "";
+        async function realizarLogin() {
+            const loginData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
 
-        proyectos.forEach(p => {
-            const div = document.createElement('div');
-            div.className = 'proyecto-card';
-            div.onclick = () => buscarTareas(p.clockifyProyectoId); 
-            div.innerHTML = `<strong>${p.nombre}</strong><br><small>${p.descripcion}</small>`;
-            contenedor.appendChild(div);
-        });
-    }
+            try {
+                const response = await fetch(`${URL_BASE}/usuarios/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData)
+                });
 
-    async function buscarTareas(proyectoId) {
-        const contenedorTareas = document.getElementById('lista-tareas');
-        contenedorTareas.innerHTML = "<p>Buscando imputaciones...</p>";
+                const result = await response.json(); 
 
-        try {
-            const response = await fetch(`${URL_BASE}/clockify/tareas/${proyectoId}`);
-            const result = await response.json(); 
-
-            if (result.success) {
-                contenedorTareas.innerHTML = "";
-                
-                if (result.data.length === 0) {
-                    contenedorTareas.innerHTML = "<p>No hay tiempo registrado en este proyecto.</p>";
+                if (result.success) {
+                    // Ocultar login, mostrar app
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('app-section').style.display = 'block';
+                    
+                    // Renderizar proyectos
+                    pintarProyectos(result.data); 
                 } else {
-                    result.data.forEach(t => {
-                        const div = document.createElement('div');
-                        div.className = 'task-card';
-                        div.innerHTML = `
-                            <span class="tag-numero">${t.numero}</span> 
-                            <span>${t.nombre}</span>
-                            <div style="font-size: 0.8em; color: #777; margin-top:5px">Tiempo real: ${t.ptiempo}</div>
-                        `;
-                        contenedorTareas.appendChild(div);
-                    });
+                    document.getElementById('msg-login').innerText = result.mensaje;
                 }
+            } catch (error) {
+                document.getElementById('msg-login').innerText = "Error de conexión con el servidor.";
+                console.error("Error:", error);
             }
-        } catch (error) {
-            contenedorTareas.innerHTML = "<p style='color:red'>Error al recuperar imputaciones.</p>";
         }
-    }
-</script>
 
+        function pintarProyectos(proyectos) {
+            const contenedor = document.getElementById('lista-proyectos');
+            contenedor.innerHTML = "";
+
+            proyectos.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'proyecto-card';
+                div.onclick = () => buscarTareas(p.clockifyProyectoId); 
+                div.innerHTML = `<strong class="text-dark">${p.nombre}</strong><br><small class="text-muted">${p.descripcion}</small>`;
+                contenedor.appendChild(div);
+            });
+        }
+
+        async function buscarTareas(proyectoId) {
+            const contenedorTareas = document.getElementById('lista-tareas');
+            
+            // Efecto visual de carga
+            contenedorTareas.innerHTML = `
+                <div class="text-center p-4">
+                    <div class="spinner-border text-brand" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-2">Buscando imputaciones...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${URL_BASE}/clockify/tareas/${proyectoId}`);
+                const result = await response.json(); 
+
+                if (result.success) {
+                    contenedorTareas.innerHTML = "";
+                    
+                    if (result.data.length === 0) {
+                        contenedorTareas.innerHTML = "<div class='alert alert-info text-center'>No hay tiempo registrado en este proyecto.</div>";
+                    } else {
+                        result.data.forEach(t => {
+                            const div = document.createElement('div');
+                            div.className = 'task-card d-flex flex-column';
+                            div.innerHTML = `
+                                <div>
+                                    <span class="tag-numero">#${t.numero}</span> 
+                                    <span class="fw-medium">${t.nombre}</span>
+                                </div>
+                                <div class="mt-2 text-muted" style="font-size: 0.85em;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    Tiempo real: <strong>${t.ptiempo}</strong>
+                                </div>
+                            `;
+                            contenedorTareas.appendChild(div);
+                        });
+                    }
+                }
+            } catch (error) {
+                contenedorTareas.innerHTML = "<div class='alert alert-danger text-center'>Error al recuperar imputaciones del servidor.</div>";
+                console.error("Error:", error);
+            }
+        }
+    </script>
 </body>
 </html>
