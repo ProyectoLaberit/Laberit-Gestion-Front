@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Iniciar Sesión</h2>
+    <input type="text" id="email" placeholder="Usuario">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button onclick="hacerLogin()">Entrar</button>
+    <p id="mensajeError" style="color:red;"></p>
+
+    <script>
+        const URL_BASE = "http://localhost:8080/api";
+
+        async function hacerLogin() {
+            const datosLogin = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                // 1. Llamamos al endpoint de validación
+                const respuesta = await fetch(`${URL_BASE}/usuarios/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosLogin)
+                });
+                
+                const resultado = await respuesta.json();
+
+                if (resultado.success) {
+                    // 2. Guardamos en el navegador que el usuario es válido
+                    localStorage.setItem("sesionActiva", "true");
+                    
+                    // 3. Redirigimos físicamente al otro archivo HTML
+                    window.location.href = "proyectos.html";
+                } else {
+                    document.getElementById('mensajeError').innerText = resultado.mensaje;
+                }
+            } catch (error) {
+                console.error("Error en login:", error);
+            }
+        }
+    </script>
+</body>
+</html>

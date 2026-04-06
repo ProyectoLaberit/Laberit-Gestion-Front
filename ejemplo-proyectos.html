@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Proyectos</title>
+</head>
+<body>
+    <h2>Listado de Proyectos</h2>
+    <button onclick="cerrarSesion()">Salir</button>
+    
+    <div id="contenedor-proyectos">Cargando...</div>
+
+    <script>
+        const URL_BASE = "http://localhost:8080/api";
+
+        // 1. Se ejecuta automáticamente al abrir la página
+        window.onload = function() {
+            // Verificamos si la memoria tiene la llave del login
+            const sesion = localStorage.getItem("sesionActiva");
+            
+            if (!sesion) {
+                // Si alguien entra por URL directa sin loguearse, lo echamos
+                window.location.href = "login.html";
+                return;
+            }
+
+            // Si está logueado, pedimos los datos al backend
+            cargarProyectos();
+        };
+
+        async function cargarProyectos() {
+            try {
+                // 2. Hacemos un GET al controlador de proyectos
+                const respuesta = await fetch(`${URL_BASE}/proyectos`);
+                const resultado = await respuesta.json();
+
+                if (resultado.success) {
+                    pintarHTML(resultado.data);
+                } else {
+                    document.getElementById('contenedor-proyectos').innerText = "Error al cargar la lista.";
+                }
+            } catch (error) {
+                console.error("Error de red:", error);
+            }
+        }
+
+        function pintarHTML(listaProyectos) {
+            const contenedor = document.getElementById('contenedor-proyectos');
+            contenedor.innerHTML = ""; // Limpiamos el texto de "Cargando..."
+
+            // 3. Recorremos la lista y creamos etiquetas HTML dinámicas
+            listaProyectos.forEach(proyecto => {
+                const parrafo = document.createElement('p');
+                parrafo.innerHTML = `<strong>${proyecto.nombre}</strong> - ${proyecto.descripcion}`;
+                contenedor.appendChild(parrafo);
+            });
+        }
+
+        function cerrarSesion() {
+            // 4. Borramos la memoria y volvemos al login
+            localStorage.removeItem("sesionActiva");
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
