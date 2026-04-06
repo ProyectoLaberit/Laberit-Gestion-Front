@@ -1,80 +1,66 @@
+/* Estilos personalizados para igualar el diseño */
+:root {
+    --brand-purple: #624b9e;
+    --brand-purple-hover: #4e3c7e;
+    --bg-illustration: #a98ee0;
+    --text-dark: #1a1a1a;
+    --text-muted: #6c757d;
+}
+
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #f4f7f6;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-dark);
 }
 
-.container {
-    width: 100%;
-    max-width: 800px;
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-#login-section {
-    text-align: center;
-}
-
-input {
-    width: 90%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-}
-
-button {
-    background: #007bff;
+.btn-brand {
+    background-color: var(--brand-purple);
+    border-color: var(--brand-purple);
     color: white;
-    border: none;
-    padding: 12px 25px;
-    cursor: pointer;
-    border-radius: 6px;
-    font-weight: bold;
+    font-weight: 500;
 }
 
-#app-section {
-    display: none;
+.btn-brand:hover {
+    background-color: var(--brand-purple-hover);
+    border-color: var(--brand-purple-hover);
+    color: white;
 }
 
-.scroll-container {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #eee;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    background: #fafafa;
+.text-brand {
+    color: var(--brand-purple);
 }
 
-.proyecto-card {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: background 0.2s;
+.text-brand:hover {
+    color: var(--brand-purple-hover);
 }
 
-.proyecto-card:hover {
-    background: #eef6ff;
+.form-control:focus,
+.form-check-input:focus {
+    border-color: var(--brand-purple);
+    box-shadow: 0 0 0 0.25rem rgba(98, 75, 158, 0.25);
 }
 
-.task-card {
-    background: #fff;
-    border-left: 5px solid #007bff;
-    padding: 10px;
-    margin: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+.bg-illustration-panel {
+    background-color: var(--bg-illustration);
 }
 
-.tag-numero {
-    font-weight: bold;
-    color: #555;
-    background: #eee;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.8em;
+/* Ajuste de logo simulado */
+.logo-squares {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    width: 24px;
+    height: 24px;
+}
+
+.logo-squares div {
+    background-color: var(--brand-purple);
+    border-radius: 2px;
+}
+
+.logo-squares div:nth-child(2) {
+    opacity: 0.7;
+}
+
+.logo-squares div:nth-child(3) {
+    opacity: 0.5;
 }
