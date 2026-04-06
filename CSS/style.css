@@ -1,8 +1,8 @@
 /* Estilos personalizados para igualar el diseño */
 :root {
-    --brand-purple: #624b9e;
-    --brand-purple-hover: #4e3c7e;
-    --bg-illustration: #a98ee0;
+    --principal: #C01717;
+    --principal-hover: #8e1212;
+    --bg-illustration: #7b0707;
     --text-dark: #1a1a1a;
     --text-muted: #6c757d;
 }
@@ -13,29 +13,29 @@ body {
 }
 
 .btn-brand {
-    background-color: var(--brand-purple);
-    border-color: var(--brand-purple);
+    background-color: var(--principal);
+    border-color: var(--principal);
     color: white;
     font-weight: 500;
 }
 
 .btn-brand:hover {
-    background-color: var(--brand-purple-hover);
-    border-color: var(--brand-purple-hover);
+    background-color: var(--principal-hover);
+    border-color: var(--principal-hover);
     color: white;
 }
 
 .text-brand {
-    color: var(--brand-purple);
+    color: var(--principal);
 }
 
 .text-brand:hover {
-    color: var(--brand-purple-hover);
+    color: var(--principal-hover);
 }
 
 .form-control:focus,
 .form-check-input:focus {
-    border-color: var(--brand-purple);
+    border-color: var(--principal);
     box-shadow: 0 0 0 0.25rem rgba(98, 75, 158, 0.25);
 }
 
@@ -53,7 +53,7 @@ body {
 }
 
 .logo-squares div {
-    background-color: var(--brand-purple);
+    background-color: var(--principal);
     border-radius: 2px;
 }
 
