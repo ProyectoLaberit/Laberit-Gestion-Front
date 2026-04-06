@@ -15,58 +15,29 @@
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-3" href="#">
                 <div class="bg-white text-dark rounded d-flex align-items-center justify-content-center fw-bold"
-                    style="width: 40px; height: 40px;">
-                    L
-                </div>
+                    style="width: 40px; height: 40px;">L</div>
                 <div class="navbar-brand-custom">
                     SISTEMA DE SEGUIMIENTO
                     <span class="navbar-brand-sub">PROYECTOS</span>
                 </div>
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
-
                     <li class="nav-item">
-                        <form class="d-flex">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-white text-black border-secondary">Q</span>
-                                <input class="form-control border-secondary bg-white text-black" type="search"
-                                    placeholder="Buscar..." aria-label="Search">
-                            </div>
-                        </form>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Proyectos</a>
+                        <a class="nav-link active" href="#">Proyectos</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Perfil</a>
                     </li>
-
                     <li class="nav-item border-start border-secondary ps-3 ms-2 d-none d-lg-block"></li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown"
-                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white"
-                                style="width: 32px; height: 32px; font-size: 0.8rem;">
-                                NU
-                            </div>
-                            <span>nombre usario</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item text-danger" href="#">Salir</a></li>
-                        </ul>
+                    <li class="nav-item">
+                        <!-- Botón cerrar sesión -->
+                        <button onclick="cerrarSesion()" class="btn btn-sm btn-outline-light">Salir</button>
                     </li>
                 </ul>
             </div>
@@ -79,127 +50,80 @@
             <div>
                 <h1 class="h3 fw-bold mb-0 text-dark">Proyectos Asociados</h1>
             </div>
-
             <div class="d-flex align-items-center gap-2 bg-white p-2 rounded border shadow-sm">
                 <span class="text-muted small fw-medium ps-2 text-nowrap">Filtrar por:</span>
-                <select class="form-select form-select-sm border-0 bg-light" aria-label="Filtro Estado">
+                <select class="form-select form-select-sm border-0 bg-light">
                     <option selected>Estado</option>
-                    <option value="1">Activo</option>
-                    <option value="2">En Pausa</option>
-                    <option value="3">Completado</option>
+                    <option>Activo</option>
+                    <option>En Pausa</option>
+                    <option>Completado</option>
                 </select>
-                <select class="form-select form-select-sm border-0 bg-light" aria-label="Filtro Fecha">
+                <select class="form-select form-select-sm border-0 bg-light">
                     <option selected>Fecha</option>
-                    <option value="1">Más recientes</option>
-                    <option value="2">Más antiguos</option>
+                    <option>Más recientes</option>
+                    <option>Más antiguos</option>
                 </select>
             </div>
         </div>
 
-        <div class="row g-4">
-
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card project-card p-3">
-                    <div class="card-body">
-                        <div class="card-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                                class="bi bi-folder" viewBox="0 0 16 16">
-                                <path
-                                    d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z" />
-                            </svg>
-                        </div>
-                        <h5 class="card-title fw-bold">Nombre del Proyecto</h5>
-                        <p class="card-text text-muted small mb-4">Breve descripción o metadatos del proyecto pueden ir
-                            en esta sección para dar contexto.</p>
-                        <a href="#" class="btn btn-outline-dark btn-sm w-100 fw-medium">[Ver Detalles]</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card project-card p-3">
-                    <div class="card-body">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                fill="currentColor" viewBox="0 0 16 16">
-                                <path
-                                    d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z" />
-                            </svg></div>
-                        <h5 class="card-title fw-bold">Nombre del Proyecto</h5>
-                        <p class="card-text text-muted small mb-4">Breve descripción o metadatos del proyecto pueden ir
-                            en esta sección para dar contexto.</p>
-                        <a href="#" class="btn btn-outline-dark btn-sm w-100 fw-medium">[Ver Detalles]</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card project-card p-3">
-                    <div class="card-body">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                fill="currentColor" viewBox="0 0 16 16">
-                                <path
-                                    d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z" />
-                            </svg></div>
-                        <h5 class="card-title fw-bold">Nombre del Proyecto</h5>
-                        <p class="card-text text-muted small mb-4">Breve descripción o metadatos del proyecto pueden ir
-                            en esta sección para dar contexto.</p>
-                        <a href="#" class="btn btn-outline-dark btn-sm w-100 fw-medium">[Ver Detalles]</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card project-card p-3">
-                    <div class="card-body">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                fill="currentColor" viewBox="0 0 16 16">
-                                <path
-                                    d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z" />
-                            </svg></div>
-                        <h5 class="card-title fw-bold">Nombre del Proyecto</h5>
-                        <p class="card-text text-muted small mb-4">Breve descripción o metadatos del proyecto pueden ir
-                            en esta sección para dar contexto.</p>
-                        <a href="#" class="btn btn-outline-dark btn-sm w-100 fw-medium">[Ver Detalles]</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card project-card p-3">
-                    <div class="card-body">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                fill="currentColor" viewBox="0 0 16 16">
-                                <path
-                                    d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z" />
-                            </svg></div>
-                        <h5 class="card-title fw-bold">Nombre del Proyecto</h5>
-                        <p class="card-text text-muted small mb-4">Breve descripción o metadatos del proyecto pueden ir
-                            en esta sección para dar contexto.</p>
-                        <a href="#" class="btn btn-outline-dark btn-sm w-100 fw-medium">[Ver Detalles]</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card project-card p-3">
-                    <div class="card-body">
-                        <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                fill="currentColor" viewBox="0 0 16 16">
-                                <path
-                                    d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z" />
-                            </svg></div>
-                        <h5 class="card-title fw-bold">Nombre del Proyecto</h5>
-                        <p class="card-text text-muted small mb-4">Breve descripción o metadatos del proyecto pueden ir
-                            en esta sección para dar contexto.</p>
-                        <a href="#" class="btn btn-outline-dark btn-sm w-100 fw-medium">[Ver Detalles]</a>
-                    </div>
-                </div>
-            </div>
-
+        <!-- Contenedor dinámico de proyectos -->
+        <div class="row g-4" id="lista-proyectos">
+            <div class="col-12 text-center text-muted py-5">Cargando proyectos...</div>
         </div>
+
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 
+    <script>
+        // ─── Guard de sesión ───────────────────────────────────────────────────────
+        if (!localStorage.getItem("sesionActiva")) {
+            window.location.href = "login.html";
+        }
+
+        // ─── Cerrar sesión ─────────────────────────────────────────────────────────
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+
+        // ─── Pintar proyectos ──────────────────────────────────────────────────────
+        function pintarProyectos(proyectos) {
+            const contenedor = document.getElementById('lista-proyectos');
+
+            if (!proyectos || proyectos.length === 0) {
+                contenedor.innerHTML = `<div class="col-12 text-center text-muted py-5">No tienes proyectos asociados.</div>`;
+                return;
+            }
+
+            contenedor.innerHTML = proyectos.map(p => `
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card project-card p-3">
+                        <div class="card-body">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
+                                </svg>
+                            </div>
+                            <h5 class="card-title fw-bold">${p.nombre}</h5>
+                            <p class="card-text text-muted small mb-4">${p.descripcion}</p>
+                            <button onclick="verDetalles('${p.clockifyProyectoId}')" class="btn btn-outline-dark btn-sm w-100 fw-medium">Ver Detalles</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function verDetalles(proyectoId) {
+            // Aquí puedes navegar a una página de detalle o abrir un modal
+            console.log("Ver detalles del proyecto:", proyectoId);
+        }
+
+        // ─── Cargar proyectos desde localStorage ───────────────────────────────────
+        const usuarioData = localStorage.getItem("usuarioData");
+        const proyectos = usuarioData ? JSON.parse(usuarioData) : [];
+        pintarProyectos(proyectos);
+    </script>
+
+</body>
 </html>

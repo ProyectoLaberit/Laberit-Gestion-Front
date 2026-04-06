@@ -2,64 +2,78 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mis Proyectos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheCubeFactory - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .bg-illustration-panel { background-color: #f8f9fa; }
+        .btn-brand { background-color: #000; color: #fff; }
+        .btn-brand:hover { background-color: #333; color: #fff; }
+    </style>
 </head>
 <body>
-    <h2>Listado de Proyectos</h2>
-    <button onclick="cerrarSesion()">Salir</button>
-    
-    <div id="contenedor-proyectos">Cargando...</div>
+    <div id="login-section" class="container-fluid vh-100 bg-white">
+        <div class="row h-100">
+            <div class="col-12 col-lg-6 d-flex flex-column justify-content-center align-items-center px-4">
+                <div class="w-100" style="max-width: 420px;">
+                    <div class="d-flex align-items-center mb-5">
+                        <img style="height: 23px;" src="../img/logo.png" class="me-2"> 
+                        <h4 class="mb-0 fw-semibold">Laberit</h4>
+                    </div>
+                    <h1 class="fw-bold mb-2 fs-2">Bienvenido</h1> [cite: 4]
+                    <p class="text-muted mb-4">Introduce tus datos</p>
+                    <form onsubmit="event.preventDefault(); realizarLogin();">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium fs-6">Email</label> [cite: 5]
+                            <input type="email" class="form-control py-2" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-medium fs-6">Contraseña</label> [cite: 6]
+                            <input type="password" class="form-control py-2" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-brand w-100 py-2 mb-2">Iniciar Sesión</button> [cite: 7]
+                        <div id="msg-login" class="text-danger text-center mb-3 fw-medium" style="min-height: 24px;"></div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6 d-none d-lg-flex bg-illustration-panel justify-content-center align-items-center">
+                <div class="text-center w-75">
+                    <img style="width:110%; height: 110%;" src="../img/logo2.png"> [cite: 9, 10]
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const URL_BASE = "http://localhost:8080/api";
+        const URL_BASE = "http://localhost:8080/api"; [cite: 16]
 
-        // 1. Se ejecuta automáticamente al abrir la página
-        window.onload = function() {
-            // Verificamos si la memoria tiene la llave del login
-            const sesion = localStorage.getItem("sesionActiva");
-            
-            if (!sesion) {
-                // Si alguien entra por URL directa sin loguearse, lo echamos
-                window.location.href = "login.html";
-                return;
-            }
+        async function realizarLogin() {
+            const loginData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            }; [cite: 16]
 
-            // Si está logueado, pedimos los datos al backend
-            cargarProyectos();
-        };
-
-        async function cargarProyectos() {
             try {
-                // 2. Hacemos un GET al controlador de proyectos
-                const respuesta = await fetch(`${URL_BASE}/proyectos`);
-                const resultado = await respuesta.json();
+                const response = await fetch(`${URL_BASE}/usuarios/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData)
+                }); [cite: 17, 18]
 
-                if (resultado.success) {
-                    pintarHTML(resultado.data);
+                const result = await response.json(); [cite: 18]
+
+                if (result.success) {
+                    // Guardamos la sesión en el navegador
+                    localStorage.setItem("sesionActiva", "true"); [cite: 87]
+                    // Redirigimos al archivo de proyectos
+                    window.location.href = "proyectos.html"; [cite: 88, 98]
                 } else {
-                    document.getElementById('contenedor-proyectos').innerText = "Error al cargar la lista.";
+                    document.getElementById('msg-login').innerText = result.mensaje; [cite: 21]
                 }
             } catch (error) {
-                console.error("Error de red:", error);
+                document.getElementById('msg-login').innerText = "Error de conexión con el servidor.";
+                console.error("Error:", error); [cite: 23]
             }
-        }
-
-        function pintarHTML(listaProyectos) {
-            const contenedor = document.getElementById('contenedor-proyectos');
-            contenedor.innerHTML = ""; // Limpiamos el texto de "Cargando..."
-
-            // 3. Recorremos la lista y creamos etiquetas HTML dinámicas
-            listaProyectos.forEach(proyecto => {
-                const parrafo = document.createElement('p');
-                parrafo.innerHTML = `<strong>${proyecto.nombre}</strong> - ${proyecto.descripcion}`;
-                contenedor.appendChild(parrafo);
-            });
-        }
-
-        function cerrarSesion() {
-            // 4. Borramos la memoria y volvemos al login
-            localStorage.removeItem("sesionActiva");
-            window.location.href = "login.html";
         }
     </script>
 </body>
