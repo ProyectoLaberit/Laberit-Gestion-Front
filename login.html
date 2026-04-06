@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Proyectos y Tareas</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 800px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        #login-section { text-align: center; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; }
+        button { background: #007bff; color: white; border: none; padding: 12px 25px; cursor: pointer; border-radius: 6px; font-weight: bold; }
+        #app-section { display: none; }
+        .scroll-container { max-height: 300px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 20px; border-radius: 8px; background: #fafafa; }
+        .proyecto-card { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
+        .proyecto-card:hover { background: #eef6ff; }
+        .task-card { background: #fff; border-left: 5px solid #007bff; padding: 10px; margin: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tag-numero { font-weight: bold; color: #555; background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="login-section">
+        <h2>Bienvenido</h2>
+        <input type="text" id="email" placeholder="Usuario" value="admin">
+        <input type="password" id="password" placeholder="Contraseña" value="1234">
+        <br>
+        <button onclick="realizarLogin()">Entrar</button>
+        <p id="msg-login" style="color:red"></p>
+    </div>
+
+    <div id="app-section">
+        <h2>Tus Proyectos</h2>
+        <div id="lista-proyectos" class="scroll-container"></div>
+        <hr>
+        <h3>Imputaciones del Proyecto</h3>
+        <div id="lista-tareas">
+            <p style="color: #888">Haz clic en un proyecto para ver sus tiempos registrados.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const URL_BASE = "http://localhost:8080/api";
+
+    async function realizarLogin() {
+        const loginData = {
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        };
+
+        try {
+            const response = await fetch(`${URL_BASE}/usuarios/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loginData)
+            });
+
+            const result = await response.json(); 
+
+            if (result.success) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('app-section').style.display = 'block';
+                pintarProyectos(result.data); 
+            } else {
+                document.getElementById('msg-login').innerText = result.mensaje;
+            }
+        } catch (error) {
+            alert("Error de conexión con el servidor.");
+        }
+    }
+
+    function pintarProyectos(proyectos) {
+        const contenedor = document.getElementById('lista-proyectos');
+        contenedor.innerHTML = "";
+
+        proyectos.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'proyecto-card';
+            div.onclick = () => buscarTareas(p.clockifyProyectoId); 
+            div.innerHTML = `<strong>${p.nombre}</strong><br><small>${p.descripcion}</small>`;
+            contenedor.appendChild(div);
+        });
+    }
+
+    async function buscarTareas(proyectoId) {
+        const contenedorTareas = document.getElementById('lista-tareas');
+        contenedorTareas.innerHTML = "<p>Buscando imputaciones...</p>";
+
+        try {
+            const response = await fetch(`${URL_BASE}/clockify/tareas/${proyectoId}`);
+            const result = await response.json(); 
+
+            if (result.success) {
+                contenedorTareas.innerHTML = "";
+                
+                if (result.data.length === 0) {
+                    contenedorTareas.innerHTML = "<p>No hay tiempo registrado en este proyecto.</p>";
+                } else {
+                    result.data.forEach(t => {
+                        const div = document.createElement('div');
+                        div.className = 'task-card';
+                        div.innerHTML = `
+                            <span class="tag-numero">${t.numero}</span> 
+                            <span>${t.nombre}</span>
+                            <div style="font-size: 0.8em; color: #777; margin-top:5px">Tiempo real: ${t.ptiempo}</div>
+                        `;
+                        contenedorTareas.appendChild(div);
+                    });
+                }
+            }
+        } catch (error) {
+            contenedorTareas.innerHTML = "<p style='color:red'>Error al recuperar imputaciones.</p>";
+        }
+    }
+</script>
+
+</body>
+</html>
