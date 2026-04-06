@@ -1,5 +1,5 @@
         :root {
-            --brand-primary: #2c3e50;
+            --brand-primary: #C01717;
             --brand-secondary: #18bc9c;
             --bg-light: #f8f9fa;
         }
@@ -10,6 +10,11 @@
         }
 
         /* Estilos de la barra de navegación */
+        .navbar {
+            background-color: var(--brand-primary);
+
+        }
+
         .navbar-brand-custom {
             font-weight: 700;
             font-size: 1.1rem;
@@ -49,4 +54,9 @@
             justify-content: center;
             color: var(--brand-primary);
             margin-bottom: 15px;
+        }
+
+        .btn {
+            background-color: var(--brand-primary);
+            color: var(--bg-light);
         }
