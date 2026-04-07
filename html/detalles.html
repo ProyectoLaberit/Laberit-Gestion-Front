@@ -3,33 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA DE SEGUIMIENTO - Gestión de Proyectos</title>
+    <title>SISTEMA DE SEGUIMIENTO - Gestión de Estimaciones</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="../JS/detalles.js"></script>
-    <link rel="stylesheet" href="../CSS/proyectos.css">
+    <link rel="stylesheet" href="../CSS/style.css">
     <style>
+        .navbar-brand-custom { font-size: 0.9rem; line-height: 1.2; }
+        .navbar-brand-sub { font-size: 0.7rem; color: #adb5bd; }
+        .btn-brand { background-color: #000; color: #fff; }
+        .table-container { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .tag-info { font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: #e9ecef; color: #495057; }
     </style>
 </head>
 <body class="bg-light">
 
-    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-3" href="proyectos.html">
                 <div class="bg-white text-dark rounded d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">L</div>
                 <div class="navbar-brand-custom">
                     SISTEMA DE SEGUIMIENTO
-                    <span class="navbar-brand-sub d-block">PROYECTOS </span>
+                    <span class="navbar-brand-sub d-block">PROYECTOS</span>
                 </div>
             </a>
             
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav ms-auto align-items-center gap-3">
                     <li class="nav-item">
-                        <a class="nav-link" href="proyectos.html">Proyectos </a>
+                        <a class="nav-link" href="proyectos.html">Proyectos</a>
                     </li>
                     <li class="nav-item border-start border-secondary ps-3 ms-2">
-                        <span class="text-white-50 small me-3">nombre usuario </span>
-                        <button onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm">Salir </button>
+                        <span class="text-white-50 small me-3">nombre usuario</span>
+                        <button onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm">Salir</button>
                     </li>
                 </ul>
             </div>
@@ -38,21 +42,18 @@
 
     <main class="container py-5">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-            <h1 class="h4 fw-bold mb-0">Gestión de Proyectos (<span id="count-proyectos">0</span>) </h1>
+            <h1 class="h4 fw-bold mb-0 text-dark">Gestión de Proyectos (<span id="count-proyectos">0</span>)</h1>
             
             <div class="d-flex align-items-center gap-3">
                 <div class="input-group input-group-sm" style="max-width: 200px;">
-                    <span class="input-group-text bg-white border-end-0 text-muted">Q </span>
-                    <input type="text" class="form-control border-start-0" placeholder="Buscar...">
+                    <span class="input-group-text bg-white border-end-0 text-muted">Q</span>
+                    <input type="text" class="form-control border-start-0" placeholder="Buscar tarea...">
                 </div>
                 
                 <div class="d-flex align-items-center gap-2">
-                    <span class="text-muted small">Filtrar por: </span>
+                    <span class="text-muted small">Filtrar por:</span>
                     <select class="form-select form-select-sm" style="width: auto;">
-                        <option selected>Estado </option>
-                    </select>
-                    <select class="form-select form-select-sm" style="width: auto;">
-                        <option selected>Fecha </option>
+                        <option selected>Estado</option>
                     </select>
                 </div>
             </div>
@@ -63,18 +64,88 @@
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th scope="col" style="width: 80px;">ID </th>
-                            <th scope="col">Nombre Proyecto </th>
-                            <th scope="col" class="text-end">Acciones </th>
+                            <th scope="col" style="width: 60px;">ID</th>
+                            <th scope="col">Tarea</th>
+                            <th scope="col">Depto/Fase</th>
+                            <th scope="col">T. Mín</th>
+                            <th scope="col">T. Máx</th>
+                            <th scope="col" class="text-end">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tabla-proyectos-body">
+                    <tbody id="tabla-estimaciones-body">
                         </tbody>
                 </table>
             </div>
         </div>
     </main>
 
+    <script>
+        const URL_BASE = "http://localhost:8080/api";
 
+        window.onload = function() {
+            // Verificación de sesión
+            if (!localStorage.getItem("sesionActiva")) {
+                window.location.href = "login.html";
+                return;
+            }
+            cargarDatosEstimacion();
+        };
+
+        async function cargarDatosEstimacion() {
+            try {
+                // Hacemos el fetch al endpoint que devuelve la lista de DetalleEstimacion
+                const respuesta = await fetch(`${URL_BASE}/estimaciones`);
+                const resultado = await respuesta.json();
+
+                if (resultado.success) {
+                    renderizarTabla(resultado.data);
+                    document.getElementById('count-proyectos').innerText = resultado.data.length;
+                }
+            } catch (error) {
+                console.error("Error al cargar estimaciones:", error);
+            }
+        }
+
+        function renderizarTabla(lista) {
+            const body = document.getElementById('tabla-estimaciones-body');
+            body.innerHTML = "";
+
+            lista.forEach(item => {
+                const tr = document.createElement('tr');
+                // Mapeo directo de los campos de tu entidad Java
+                tr.innerHTML = `
+                    <td class="text-muted small">${item.id}</td>
+                    <td>
+                        <div class="fw-bold">${item.tarea}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Proyecto ID: ${item.idProyecto}</div>
+                    </td>
+                    <td>
+                        <span class="tag-info">D: ${item.idDepartamento}</span>
+                        <span class="tag-info">F: ${item.idFase}</span>
+                    </td>
+                    <td><span class="text-secondary">${item.tiempoMin}h</span></td>
+                    <td><span class="fw-medium">${item.tiempoMax}h</span></td>
+                    <td class="text-end">
+                        <button onclick="irAModificar(${item.id})" class="btn btn-sm btn-outline-secondary me-1">Modificar</button>
+                        <button onclick="irAEditar(${item.id})" class="btn btn-sm btn-dark">Editar</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function irAModificar(id) {
+            window.location.href = `editar_proyecto.html?id=${id}`;
+        }
+
+        function irAEditar(id) {
+            window.location.href = `editar_proyecto.html?id=${id}`;
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem("sesionActiva");
+            window.location.href = "login.html";
+        }
+    </script>
 </body>
 </html>
