@@ -30,9 +30,13 @@
 
             <form id="form-editar-proyecto" onsubmit="event.preventDefault(); guardarProyecto();">
                 <div class="row g-3">
-                    <div class="col-12">
+                    <div class="col-md-6">
                         <label for="nombre" class="form-label">Nombre</label>
                         <input type="text" class="form-control" id="nombre" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                        <input type="date" class="form-control" id="fechaInicio">
                     </div>
 
                     <div class="col-md-6">
@@ -72,7 +76,6 @@
     <script>
         const URL_BASE = "http://localhost:8080/api";
 
-        // Verificación de sesión al cargar
         window.onload = function() {
             if (!localStorage.getItem("sesionActiva")) {
                 window.location.href = "login.html";
@@ -83,6 +86,7 @@
             const feedback = document.getElementById('msg-feedback');
             const proyectoData = {
                 nombre: document.getElementById('nombre').value,
+                fechaInicio: document.getElementById('fechaInicio').value,
                 clockifyId: document.getElementById('clockifyId').value,
                 gitlabId: document.getElementById('gitlabId').value,
                 activo: document.getElementById('proyectoActivo').checked,
@@ -90,7 +94,6 @@
             };
 
             try {
-                // Asumimos un endpoint POST para crear o PUT para editar
                 const response = await fetch(`${URL_BASE}/proyectos`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
