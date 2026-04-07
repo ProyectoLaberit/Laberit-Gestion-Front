@@ -15,7 +15,7 @@
                 const resultado = await respuesta.json();
 
                 if (resultado.success) {
-                    renderizarTabla(resultado.data);
+                    renderizarTabla(resultado.data, id);
                     document.getElementById('count-proyectos').innerText = resultado.data.length;
                 }
             } catch (error) {
@@ -23,9 +23,10 @@
             }
         }
 
-        function renderizarTabla(lista) {
+        function renderizarTabla(lista, id) {
             const body = document.getElementById('tabla-estimaciones-body');
             body.innerHTML = "";
+            const id1 = id
 
             lista.forEach(item => {
                 const tr = document.createElement('tr');
@@ -49,6 +50,11 @@
                 `;
                 body.appendChild(tr);
             });
+            const b = document.createElement("tr");
+            b.innerHTML = `<td class="text-end"><button onclick="editar(${id})" class="btn btn-sm btn-dark">Editar Proyecto</button></td>`;
+
+            body.appendChild(b);
+
         }
 
         function irAModificar(id) {
@@ -58,6 +64,11 @@
         function irAEditar(id) {
             // Según tu lógica previa, Editar y Modificar podrían ir a la misma vista
             window.location.href = `editar_proyecto.html?id=${id}`;
+        }
+
+        function editar(id){
+            localStorage.setItem("proyectoId", id);
+            window.location.href = "editarproyecto.html";
         }
 
         function cerrarSesion() {
