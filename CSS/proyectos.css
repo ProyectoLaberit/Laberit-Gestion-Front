@@ -1,62 +1,68 @@
-        :root {
-            --brand-primary: #C01717;
-            --brand-secondary: #18bc9c;
-            --bg-light: #f8f9fa;
-        }
+:root {
+    --brand-primary: #C01717;
+    --brand-secondary: #18bc9c;
+    --principal-hover: #8e1212;
+    --bg-light: #f8f9fa;
+}
 
-        body {
-            background-color: var(--bg-light);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+body {
+    background-color: var(--bg-light);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
 
-        /* Estilos de la barra de navegación */
-        .navbar {
-            background-color: var(--brand-primary);
+/* Estilos de la barra de navegación */
+.navbar {
+    background-color: var(--brand-primary);
 
-        }
+}
 
-        .navbar-brand-custom {
-            font-weight: 700;
-            font-size: 1.1rem;
-            line-height: 1.2;
-            color: #fff !important;
-        }
+.navbar-brand-custom {
+    font-weight: 700;
+    font-size: 1.1rem;
+    line-height: 1.2;
+    color: #fff !important;
+}
 
-        .navbar-brand-sub {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 400;
-            opacity: 0.8;
-            letter-spacing: 1px;
-        }
+.navbar-brand-sub {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    opacity: 0.8;
+    letter-spacing: 1px;
+}
 
-        /* Estilos de las tarjetas de proyecto */
-        .project-card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            height: 100%;
-        }
+/* Estilos de las tarjetas de proyecto */
+.project-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
 
-        .project-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
 
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            background-color: #e9ecef;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--brand-primary);
-            margin-bottom: 15px;
-        }
+.card-icon {
+    width: 40px;
+    height: 40px;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-primary);
+    margin-bottom: 15px;
+}
 
-        .btn {
-            background-color: var(--brand-primary);
-            color: var(--bg-light);
-        }
+.btn {
+    background-color: var(--brand-primary);
+    color: var(--bg-light);
+}
+
+.btn:hover {
+    background-color: var(--principal-hover);
+    color: #fff;
+}
