@@ -1,4 +1,4 @@
-        const URL_BASE = "http://localhost:8080/api";
+        const URL_BASE = "http://localhost:8080/api/estimaciones/proyecto/";
 
         window.onload = function() {
             if (!localStorage.getItem("sesionActiva")) {
@@ -10,7 +10,8 @@
 
         async function cargarGestionProyectos() {
             try {
-                const respuesta = await fetch(`${URL_BASE}/proyectos`);
+                const id = localStorage.getItem("proyectoId");
+                const respuesta = await fetch(`${URL_BASE}${id}`);
                 const resultado = await respuesta.json();
 
                 if (resultado.success) {
@@ -22,18 +23,28 @@
             }
         }
 
-        function renderizarTabla(proyectos) {
-            const body = document.getElementById('tabla-proyectos-body');
+        function renderizarTabla(lista) {
+            const body = document.getElementById('tabla-estimaciones-body');
             body.innerHTML = "";
 
-            proyectos.forEach(p => {
+            lista.forEach(item => {
                 const tr = document.createElement('tr');
+                // Mapeo directo de los campos de tu entidad Java
                 tr.innerHTML = `
-                    <td class="fw-bold text-muted">${p.id || '—'}</td>
-                    <td>${p.nombre}</td>
+                    <td class="text-muted small">${item.id}</td>
+                    <td>
+                        <div class="fw-bold">${item.tarea}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Proyecto ID: ${item.idProyecto}</div>
+                    </td>
+                    <td>
+                        <span class="tag-info">D: ${item.idDepartamento}</span>
+                        <span class="tag-info">F: ${item.idFase}</span>
+                    </td>
+                    <td><span class="text-secondary">${item.tiempoMin}h</span></td>
+                    <td><span class="fw-medium">${item.tiempoMax}h</span></td>
                     <td class="text-end">
-                        <button onclick="irAModificar(${p.id})" class="btn btn-sm btn-outline-secondary me-2">Modificar </button>
-                        <button onclick="irAEditar(${p.id})" class="btn btn-sm btn-dark">Editar </button>
+                        <button onclick="irAModificar(${item.id})" class="btn btn-sm btn-outline-secondary me-1">Modificar</button>
+                        <button onclick="irAEditar(${item.id})" class="btn btn-sm btn-dark">Editar</button>
                     </td>
                 `;
                 body.appendChild(tr);
@@ -51,5 +62,5 @@
 
         function cerrarSesion() {
             localStorage.removeItem("sesionActiva");
-            window.location.href = "login.html"; [cite: 115]
+            window.location.href = "login.html";
         }

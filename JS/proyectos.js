@@ -29,7 +29,7 @@ function pintarProyectos(proyectos) {
                             </div>
                             <h5 class="card-title fw-bold">${p.nombre}</h5>
                             <p class="card-text text-muted small mb-4">${p.descripcion}</p>
-                            <button onclick="verDetalles('${p.clockifyProyectoId}')" class="btn btn-outline-dark btn-sm w-100 fw-medium">Ver Detalles</button>
+                            <button onclick="verDetalles('${p.id}')" class="btn btn-outline-dark btn-sm w-100 fw-medium">Ver Detalles</button>
                         </div>
                     </div>
                 </div>
