@@ -40,7 +40,7 @@ function verDetalles(proyectoId) {
     // Aquí puedes navegar a una página de detalle o abrir un modal
     console.log("Ver detalles del proyecto:", proyectoId);
     localStorage.setItem("proyectoId", proyectoId);
-    window.location.href = "editarproyecto.html";
+    window.location.href = "detalles.html";
 }
 
 // ─── Cargar proyectos desde localStorage ───────────────────────────────────
