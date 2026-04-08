@@ -50,10 +50,6 @@
                 `;
                 body.appendChild(tr);
             });
-            const b = document.createElement("tr");
-            b.innerHTML = `<td class="text-end"><button onclick="editar(${id})" class="btn btn-sm btn-dark">Editar Proyecto</button></td>`;
-
-            body.appendChild(b);
 
         }
 
@@ -66,8 +62,7 @@
             window.location.href = `editar_proyecto.html?id=${id}`;
         }
 
-        function editar(id){
-            localStorage.setItem("proyectoId", id);
+        function editar(){
             window.location.href = "editarproyecto.html";
         }
 
