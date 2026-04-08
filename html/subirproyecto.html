@@ -10,15 +10,38 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
         <div class="container-fluid px-4">
-            <div class="d-flex align-items-center gap-3">
-                <a href="proyectos.html" class="logo-l">L</a>
-                <span class="text-white fw-bold text-uppercase">Sistema de Seguimiento</span>
-            </div>
-            <div class="ms-auto d-flex align-items-center gap-3">
-                <span class="text-white-50 small">nombre usuario</span>
-                <button onclick="cerrarSesion()" class="btn btn-outline-light btn-sm">Salir</button>
+            <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+                <div class="bg-white text-dark rounded d-flex align-items-center justify-content-center fw-bold"
+                    style="width: 40px; height: 40px;">L</div>
+                <div class="navbar-brand-custom">
+                    SISTEMA DE SEGUIMIENTO
+                    <span class="navbar-brand-sub">PROYECTOS</span>
+                </div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="subirproyecto.html">Subir Proyecto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="proyectos.html">Proyectos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Perfil</a>
+                    </li>
+                    <li class="nav-item border-start border-secondary ps-3 ms-2 d-none d-lg-block"></li>
+                    <li class="nav-item">
+                        <!-- Botón cerrar sesión -->
+                        <button onclick="cerrarSesion()" class="btn btn-sm btn-outline-light">Salir</button>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>

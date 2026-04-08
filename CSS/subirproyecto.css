@@ -1,5 +1,6 @@
         :root {
-            --brand-primary: #C01717; /* Rojo principal */
+            --brand-primary: #C01717;
+            /* Rojo principal */
             --brand-dark: #a1160c;
         }
 
@@ -11,19 +12,22 @@
         /* Navbar estilo corporativo */
         .navbar {
             background-color: var(--brand-primary);
-            padding: 10px 20px;
+
         }
-        .logo-l {
-            background-color: white;
-            color: black;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            border-radius: 4px;
-            text-decoration: none;
+
+        .navbar-brand-custom {
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 1.2;
+            color: #fff !important;
+        }
+
+        .navbar-brand-sub {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 400;
+            opacity: 0.8;
+            letter-spacing: 1px;
         }
 
         /* Tarjeta de Formulario (Imagen image_e8ccc3.png) */
@@ -34,9 +38,9 @@
             max-width: 950px;
             margin: 50px auto;
             padding: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
-        
+
         .card-header-title {
             font-size: 1.6rem;
             font-weight: 700;
@@ -71,6 +75,7 @@
             text-align: center;
             color: #6c757d;
         }
+
         .btn-file-custom:hover {
             background-color: #e9ecef;
         }
@@ -83,8 +88,10 @@
             padding: 12px;
             border-radius: 8px;
             font-weight: 600;
-            flex-grow: 1; /* El más ancho */
+            flex-grow: 1;
+            /* El más ancho */
         }
+
         .btn-guardar:hover {
             background-color: var(--brand-dark);
             color: white;
@@ -98,6 +105,7 @@
             border-radius: 8px;
             font-weight: 600;
         }
+
         .btn-cancelar:hover {
             background-color: var(--brand-dark);
             color: white;
