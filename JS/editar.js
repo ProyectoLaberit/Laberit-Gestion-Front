@@ -11,7 +11,11 @@ async function guardarProyecto() {
     const feedback = document.getElementById('msg-feedback');
     const nombre = document.getElementById('nombre').value;
     const descripcion = document.getElementById('descripcion').value;
-    const fechaInicio = document.getElementById('fechaInicio').value;
+    
+    // El valor obtenido ya es un string en formato YYYY-MM-DD
+    const fechaInicioInput = document.getElementById('fechaInicio').value;
+    const fechaInicio = fechaInicioInput ? String(fechaInicioInput) : "";
+
     const activo = document.getElementById('proyectoActivo').checked;
     const gitlabId = document.getElementById('gitlabId').value;
     const clockifyId = document.getElementById('clockifyId').value;
@@ -21,7 +25,7 @@ async function guardarProyecto() {
             id: id,
             nombre: nombre,
             descripcion: descripcion,
-            fechaInicio: fechaInicio,
+            fechaInicio: fechaInicio, // Se envía como string "YYYY-MM-DD"
             activo: activo,
             gitlabId: gitlabId,
             clockifyId: clockifyId,
