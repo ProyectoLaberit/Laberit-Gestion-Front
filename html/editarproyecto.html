@@ -73,54 +73,6 @@
         </div>
     </main>
 
-    <script>
-        const URL_BASE = "http://localhost:8080/api";
-
-        window.onload = function() {
-            if (!localStorage.getItem("sesionActiva")) {
-                window.location.href = "login.html";
-            }
-        };
-
-        async function guardarProyecto() {
-            const feedback = document.getElementById('msg-feedback');
-            const proyectoData = {
-                nombre: document.getElementById('nombre').value,
-                fechaInicio: document.getElementById('fechaInicio').value,
-                clockifyId: document.getElementById('clockifyId').value,
-                gitlabId: document.getElementById('gitlabId').value,
-                activo: document.getElementById('proyectoActivo').checked,
-                descripcion: document.getElementById('descripcion').value
-            };
-
-            try {
-                const response = await fetch(`${URL_BASE}/proyectos`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(proyectoData)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    feedback.className = "mt-3 text-center text-success";
-                    feedback.innerText = "Proyecto guardado correctamente.";
-                    setTimeout(() => window.location.href = "proyectos.html", 1500);
-                } else {
-                    feedback.className = "mt-3 text-center text-danger";
-                    feedback.innerText = "Error: " + result.mensaje;
-                }
-            } catch (error) {
-                feedback.className = "mt-3 text-center text-danger";
-                feedback.innerText = "Error de conexión con el servidor.";
-                console.error("Error:", error);
-            }
-        }
-
-        function cerrarSesion() {
-            localStorage.removeItem("sesionActiva");
-            window.location.href = "login.html";
-        }
-    </script>
+    <script src="../JS/editar.js"></script>
 </body>
 </html>
