@@ -53,23 +53,42 @@ async function guardarProyecto() {
 
         if (result.success) {
             feedback.className = "mt-3 text-center text-success";
-            feedback.innerText = "Proyecto subido correctamente.";
-            const idPro = result.data.id;
+            feedback.innerText = "Proyecto subido correctamente. Importando Excel...";
+
+            // 1. Recogemos el ID (Esto lo estabais haciendo perfecto)
+            const idPro = result.data.id; 
 
             const fileInput = document.getElementById('archivoInput');
 
-            const excelData = new FormData();
-            formData.append('archivo', fileInput.files[0]);
-            formData.append('proyectoId', idPro);
-            formData.append('usuarioId', 1);
-            const response = await fetch(`${URL_BASE}/estimaciones/importar`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: excelData
-            });
-            const result = await response.json();
+            // 2. Comprobamos que haya un archivo seleccionado antes de enviarlo
+            if (fileInput.files.length > 0) {
+                const excelData = new FormData();
 
-            //setTimeout(() => window.location.href = "proyectos.html", 1500);
+                // 3. CAMBIO CLAVE: Usamos 'excelData.append', no 'formData'
+                excelData.append('archivo', fileInput.files[0]);
+                excelData.append('proyectoId', idPro);
+                excelData.append('usuarioId', 1);
+
+                // 4. CAMBIO CLAVE: Quitamos los headers para que el navegador gestione el Multipart
+                const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
+                    method: 'POST',
+                    body: excelData 
+                });
+
+                const excelResult = await excelResponse.json();
+
+                if (excelResult.success) {
+                    feedback.innerText = "Proyecto y Excel subidos correctamente.";
+                    setTimeout(() => window.location.href = "proyectos.html", 1500);
+                } else {
+                    feedback.className = "mt-3 text-center text-danger";
+                    feedback.innerText = "Proyecto creado, pero error en Excel: " + excelResult.mensaje;
+                }
+            } else {
+                feedback.innerText = "Proyecto creado sin Excel adjunto.";
+                setTimeout(() => window.location.href = "proyectos.html", 1500);
+            }
+
         } else {
             feedback.className = "mt-3 text-center text-danger";
             feedback.innerText = "Error: " + result.mensaje;
