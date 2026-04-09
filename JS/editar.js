@@ -33,8 +33,6 @@ async function guardarProyecto() {
     };
 
     try {
-        console.log("holaaaaaaa");
-        console.log(activo);
         // Asumimos un endpoint POST para crear o PUT para editar
         const response = await fetch(`${URL_BASE}${id}`, {
             method: 'POST',
