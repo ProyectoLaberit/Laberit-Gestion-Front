@@ -11,7 +11,6 @@ function cerrarSesion() {
 
 // ─── Pintar proyectos ──────────────────────────────────────────────────────
 function pintarProyectos(proyectos) {
-    sessionStorage.setItem("dato", "hola");
     const contenedor = document.getElementById('lista-proyectos');
 
     if (!proyectos || proyectos.length === 0) {
