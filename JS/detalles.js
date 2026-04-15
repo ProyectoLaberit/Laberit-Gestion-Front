@@ -1,72 +1,90 @@
-        const URL_BASE = "http://localhost:8080/api/estimaciones/proyecto/";
+// Estructura de fases y subfases
+const ESTRUCTURA_PROYECTO = {
+    "Analisis": ["Preventa", "Analisis", "Investigacion", "Infraestructura"],
+    "Desarrollo": [
+        "Discovery", "Sintesis", "Frontend", "Backend", "Maquetacion", 
+        "Ideacion", "Arquitectura", "Wireframes", "HF", "Evaluacion", 
+        "Contenidos", "Importaciones", "Ajustes"
+    ],
+    "Gestiones": ["Despliegue", "Direccion", "Material", "ReuCliente", "ReuInterna", "Terceros"]
+};
 
-        window.onload = function() {
-            if (!localStorage.getItem("sesionActiva")) {
-                window.location.href = "login.html";
-                return;
-            }
-            cargarGestionProyectos();
-        };
+window.onload = function() {
+    if (!localStorage.getItem("sesionActiva")) {
+        window.location.href = "login.html";
+        return;
+    }
+    cargarVistaDetalles();
+};
 
-        async function cargarGestionProyectos() {
-            try {
-                const id = localStorage.getItem("proyectoId");
-                const respuesta = await fetch(`${URL_BASE}${id}`);
-                const resultado = await respuesta.json();
+function cargarVistaDetalles() {
+    // Lógica para mostrar el nombre del proyecto
+    const proyectoId = localStorage.getItem("proyectoId");
+    const proyectos = JSON.parse(localStorage.getItem("usuarioData") || "[]");
+    const proyectoActual = proyectos.find(p => String(p.id) === String(proyectoId));
+    
+    document.getElementById('proyecto-nombre-display').innerText = proyectoActual ? proyectoActual.nombre : "Proyecto " + proyectoId;
 
-                if (resultado.success) {
-                    renderizarTabla(resultado.data, id);
-                    document.getElementById('count-proyectos').innerText = resultado.data.length;
-                }
-            } catch (error) {
-                console.error("Error al cargar la gestión:", error);
-            }
-        }
+    // CONFIGURACIÓN DEL BUSCADOR
+    const inputBusqueda = document.getElementById('input-busqueda');
+    if (inputBusqueda) {
+        // El evento 'input' se dispara cada vez que el usuario escribe una letra
+        inputBusqueda.addEventListener('input', (e) => {
+            const textoBusqueda = e.target.value;
+            renderizarTodo(textoBusqueda);
+        });
+    }
 
-        function renderizarTabla(lista, id) {
-            const body = document.getElementById('tabla-estimaciones-body');
-            body.innerHTML = "";
-            const id1 = id
+    renderizarTodo(); // Carga inicial sin filtro
+}
 
-            lista.forEach(item => {
-                const tr = document.createElement('tr');
-                // Mapeo directo de los campos de tu entidad Java
-                tr.innerHTML = `
-                    <td class="text-muted small">${item.id}</td>
-                    <td>
-                        <div class="fw-bold">${item.tarea}</div>
-                        <div class="text-muted" style="font-size: 0.75rem;">Proyecto ID: ${item.idProyecto}</div>
-                    </td>
-                    <td>
-                        <span class="tag-info">D: ${item.idDepartamento}</span>
-                        <span class="tag-info">F: ${item.idFase}</span>
-                    </td>
-                    <td><span class="text-secondary">${item.tiempoMin}h</span></td>
-                    <td><span class="fw-medium">${item.tiempoMax}h</span></td>
-                    <td class="text-end">
-                        <button onclick="irAModificar(${item.id})" class="btn btn-sm btn-outline-secondary me-1">Modificar</button>
-                        <button onclick="irAEditar(${item.id})" class="btn btn-sm btn-dark">Editar</button>
-                    </td>
-                `;
-                body.appendChild(tr);
-            });
+function renderizarTodo(filtro = "") {
+    const contenedor = document.getElementById('contenedor-fases');
+    contenedor.innerHTML = ""; 
+    
+    // Convertimos a minúsculas para que la búsqueda no distinga entre "A" y "a"
+    const filtroNormalizado = filtro.toLowerCase().trim();
 
-        }
+    for (const fase in ESTRUCTURA_PROYECTO) {
+        const subfases = ESTRUCTURA_PROYECTO[fase];
+        
+        // Filtramos las subfases que contienen el texto buscado
+        const subfasesFiltradas = subfases.filter(sub => 
+            sub.toLowerCase().includes(filtroNormalizado)
+        );
 
-        function irAModificar(id) {
-            window.location.href = `editar_proyecto.html?id=${id}`;
-        }
+        // Si después de filtrar no queda ninguna subfase en esta fase, no dibujamos la fase
+        if (subfasesFiltradas.length === 0) continue;
 
-        function irAEditar(id) {
-            // Según tu lógica previa, Editar y Modificar podrían ir a la misma vista
-            window.location.href = `editar_proyecto.html?id=${id}`;
-        }
+        const seccion = document.createElement('section');
+        seccion.className = "phase-section";
+        
+        let htmlContent = `<h3 class="phase-header h5">${fase}</h3>`;
+        htmlContent += `<div class="row g-3">`;
 
-        function editar(){
-            window.location.href = "editarproyecto.html";
-        }
+        subfasesFiltradas.forEach(sub => {
+            htmlContent += `
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}')">
+                        <div class="fw-bold text-dark">${sub}</div>
+                        <div class="text-muted small mt-2">Haga clic para ver tareas</div>
+                    </div>
+                </div>
+            `;
+        });
 
-        function cerrarSesion() {
-            localStorage.removeItem("sesionActiva");
-            window.location.href = "login.html";
-        }
+        htmlContent += `</div>`;
+        seccion.innerHTML = htmlContent;
+        contenedor.appendChild(seccion);
+    }
+}
+
+function irASubfase(nombreSubfase) {
+    localStorage.setItem("subfaseSeleccionada", nombreSubfase);
+    window.location.href = "subfase.html";
+}
+
+function cerrarSesion() {
+    localStorage.clear();
+    window.location.href = "login.html";
+}
