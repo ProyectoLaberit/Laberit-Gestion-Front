@@ -3,6 +3,9 @@ const URL_BASE = "http://localhost:8080/api";
 window.onload = function () {
     if (!localStorage.getItem("sesionActiva")) {
         window.location.href = "login.html";
+    } else {
+        cargarClockify();
+        cargarGitlab();
     }
 };
 
@@ -56,7 +59,7 @@ async function guardarProyecto() {
             feedback.innerText = "Proyecto subido correctamente. Importando Excel...";
 
             // 1. Recogemos el ID (Esto lo estabais haciendo perfecto)
-            const idPro = result.data.id; 
+            const idPro = result.data.id;
 
             const fileInput = document.getElementById('archivoInput');
 
@@ -72,7 +75,7 @@ async function guardarProyecto() {
                 // 4. CAMBIO CLAVE: Quitamos los headers para que el navegador gestione el Multipart
                 const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
                     method: 'POST',
-                    body: excelData 
+                    body: excelData
                 });
 
                 const excelResult = await excelResponse.json();
@@ -102,4 +105,60 @@ async function guardarProyecto() {
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
+}
+
+async function cargarClockify() {
+        const feedback = document.getElementById('msg-feedback');
+
+
+    try {
+        const response = await fetch(`${URL_BASE}/clockify/externos`);
+
+        const result = await response.json();
+
+        const select = document.getElementById("clockifyId");
+
+        select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+
+        result.data.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = item.nombre;
+            select.appendChild(option);
+        });
+
+
+    } catch (error) {
+        feedback.innerText = "Error de conexión con el servidor.";
+        console.error("Error:", error);
+    }
+
+}
+
+async function cargarGitLab() {
+        const feedback = document.getElementById('msg-feedback');
+
+
+    try {
+        const response = await fetch(`${URL_BASE}/gitlab/externos`);
+
+        const result = await response.json();
+
+        const select = document.getElementById("gitlabId");
+
+        select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+
+        result.data.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = item.nombre;
+            select.appendChild(option);
+        });
+
+
+    } catch (error) {
+        feedback.innerText = "Error de conexión con el servidor.";
+        console.error("Error:", error);
+    }
+
 }
