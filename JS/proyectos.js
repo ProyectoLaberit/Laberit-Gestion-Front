@@ -1,3 +1,5 @@
+const URL_BASE = "http://localhost:8080/api";
+
 // ─── Guard de sesión ───────────────────────────────────────────────────────
 if (!localStorage.getItem("sesionActiva")) {
     window.location.href = "login.html";
@@ -10,15 +12,22 @@ function cerrarSesion() {
 }
 
 // ─── Pintar proyectos ──────────────────────────────────────────────────────
-function pintarProyectos(proyectos) {
+async function pintarProyectos() {
+    
     const contenedor = document.getElementById('lista-proyectos');
+
+    const proyectos = await fetch(`${URL_BASE}/proyectos`);
+
+    const result = await proyectos.json();
+
+    localStorage.setItem("proyectos", result.data);
 
     if (!proyectos || proyectos.length === 0) {
         contenedor.innerHTML = `<div class="col-12 text-center text-muted py-5">No tienes proyectos asociados.</div>`;
         return;
     }
 
-    contenedor.innerHTML = proyectos.map(p => `
+    contenedor.innerHTML = result.data.foreach(p => `
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card project-card p-3">
                         <div class="card-body">
@@ -45,5 +54,4 @@ function verDetalles(proyectoId) {
 
 // ─── Cargar proyectos desde localStorage ───────────────────────────────────
 const usuarioData = localStorage.getItem("usuarioData");
-const proyectos = usuarioData ? JSON.parse(usuarioData) : [];
-pintarProyectos(proyectos);
+pintarProyectos();

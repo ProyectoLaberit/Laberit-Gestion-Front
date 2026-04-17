@@ -20,7 +20,7 @@ window.onload = function() {
 function cargarVistaDetalles() {
     // Lógica para mostrar el nombre del proyecto
     const proyectoId = localStorage.getItem("proyectoId");
-    const proyectos = JSON.parse(localStorage.getItem("usuarioData") || "[]");
+    const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoActual = proyectos.find(p => String(p.id) === String(proyectoId));
     
     document.getElementById('proyecto-nombre-display').innerText = proyectoActual ? proyectoActual.nombre : "Proyecto " + proyectoId;

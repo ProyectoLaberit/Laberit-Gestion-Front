@@ -21,7 +21,6 @@ async function realizarLogin() {
         if (result.success) {
             // Guardar sesión y datos en localStorage
             localStorage.setItem("sesionActiva", "true");
-            localStorage.setItem("usuarioData", JSON.stringify(result.data));
 
             // Redirigir a proyectos
             window.location.href = "proyectos.html";
