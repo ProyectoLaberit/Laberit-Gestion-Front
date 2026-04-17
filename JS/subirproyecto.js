@@ -135,7 +135,7 @@ async function cargarClockify() {
 
 }
 
-async function cargarGitLab() {
+async function cargarGitlab() {
         const feedback = document.getElementById('msg-feedback');
 
 
