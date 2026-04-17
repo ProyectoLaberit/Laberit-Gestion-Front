@@ -22,12 +22,6 @@ async function realizarLogin() {
 if (result.success) {
             // Guardar sesión
             localStorage.setItem("sesionActiva", "true");
-            
-            // Guardamos el usuario para el perfil
-            localStorage.setItem("usuarioData", JSON.stringify(result.data.usuario));
-            
-            // NUEVO: Guardamos los proyectos en su propia variable para que proyectos.js pueda leerlos
-            localStorage.setItem("proyectosData", JSON.stringify(result.data.proyectos));
 
             // Redirigir a proyectos
             window.location.href = "proyectos.html";
