@@ -45,5 +45,5 @@ function verDetalles(proyectoId) {
 
 // ─── Cargar proyectos desde localStorage ───────────────────────────────────
 const usuarioData = localStorage.getItem("usuarioData");
-const proyectos = usuarioData ? JSON.parse(usuarioData) : [];
+const proyectos = JSON.parse(localStorage.getItem("proyectosData"));
 pintarProyectos(proyectos);

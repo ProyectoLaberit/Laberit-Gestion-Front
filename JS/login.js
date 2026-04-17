@@ -9,6 +9,7 @@ async function realizarLogin() {
         password: document.getElementById('password').value
     };
 
+    
     try {
         const response = await fetch(`${URL_BASE}/usuarios/login`, {
             method: 'POST',
@@ -18,10 +19,15 @@ async function realizarLogin() {
 
         const result = await response.json();
 
-        if (result.success) {
-            // Guardar sesión y datos en localStorage
+if (result.success) {
+            // Guardar sesión
             localStorage.setItem("sesionActiva", "true");
-            localStorage.setItem("usuarioData", JSON.stringify(result.data));
+            
+            // Guardamos el usuario para el perfil
+            localStorage.setItem("usuarioData", JSON.stringify(result.data.usuario));
+            
+            // NUEVO: Guardamos los proyectos en su propia variable para que proyectos.js pueda leerlos
+            localStorage.setItem("proyectosData", JSON.stringify(result.data.proyectos));
 
             // Redirigir a proyectos
             window.location.href = "proyectos.html";

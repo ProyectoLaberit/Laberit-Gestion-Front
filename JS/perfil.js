@@ -12,11 +12,16 @@ function cargarDatosPerfil() {
     const userData = JSON.parse(localStorage.getItem("usuarioData"));
     
     if (userData) {
-        // Asumiendo que userData tiene estos campos según tu backend
-        // Puedes personalizar qué datos mostrar aquí
-        document.getElementById('user-email').innerText = "admin"; // Simulado basándonos en tu UsuarioService
-        document.getElementById('user-fullname').innerText = "Administrador Laberit";
-        document.getElementById('user-role-display').innerText = "Rol: Admin";
+        // Rellenamos los campos mapeando las propiedades exactas del UsuarioDTO
+        document.getElementById('user-email').innerText = userData.email || "Sin email";
+        document.getElementById('user-fullname').innerText = userData.nombre || "Sin nombre";
+        
+        // Si el usuario tiene un rol asignado, lo mostramos (opcional)
+        if (userData.rol) {
+            document.getElementById('user-role-display').innerText = "Rol: " + userData.rol;
+        } else {
+            document.getElementById('user-role-display').innerText = "Rol: Usuario";
+        }
     }
 }
 
