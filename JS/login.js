@@ -9,7 +9,6 @@ async function realizarLogin() {
         password: document.getElementById('password').value
     };
 
-    
     try {
         const response = await fetch(`${URL_BASE}/usuarios/login`, {
             method: 'POST',
@@ -19,9 +18,12 @@ async function realizarLogin() {
 
         const result = await response.json();
 
-if (result.success) {
+        if (result.success) {
             // Guardar sesión
             localStorage.setItem("sesionActiva", "true");
+            
+            // Accedemos a result.data.usuario gracias al Map de Java
+            localStorage.setItem("usuarioData", JSON.stringify(result.data.usuario));
 
             // Redirigir a proyectos
             window.location.href = "proyectos.html";

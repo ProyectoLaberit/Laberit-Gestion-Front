@@ -6,6 +6,10 @@
     <title>SISTEMA DE SEGUIMIENTO - Detalle de Subfase</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/proyectos.css">
+    <link rel="stylesheet" href="../CSS/subfase.css">
+        <link rel="stylesheet" href="../CSS/nav.css">
+
+
     <style>
         /* Estilos específicos para las columnas del wireframe */
         .column-header {
@@ -30,65 +34,98 @@
         }
     </style>
 </head>
-<body class="bg-light d-flex flex-column min-height-100">
 
-    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm laberit-navbar">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-3" href="proyectos.html">
                 <div class="bg-white text-dark rounded d-flex align-items-center justify-content-center fw-bold"
-                    style="width: 40px; height: 40px;">L</div>
+                    style="width:38px;height:38px;font-size:1.1rem;">L</div>
                 <div class="navbar-brand-custom">
                     SISTEMA DE SEGUIMIENTO
-                    <span class="navbar-brand-sub" id="header-sub-info">Nombre Proyecto - Fase - Subfase</span>
+                    <span class="navbar-brand-sub">PROYECTOS</span>
                 </div>
             </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav ms-auto align-items-center gap-3">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
+                    <li class="nav-item"><a class="nav-link" href="subirproyecto.html">Subir Proyecto</a></li>
                     <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Perfil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="altausuarios.html">Alta Usuarios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
+                    <li class="nav-item border-start border-secondary ps-3 ms-1 d-none d-lg-block"></li>
                     <li class="nav-item">
-                        <button onclick="cerrarSesion()" class="btn btn-sm btn-outline-light">Salir</button>
+                        <button onclick="cerrarSesion()" class="btn-outline-nav">Salir</button>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <main class="container py-5 flex-grow-1">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="column-header">Tarea Gitlab</div>
-                <div class="column-body" id="col-gitlab">
-                    <div class="item-card">Nombre Tarea...</div>
-                </div>
-            </div>
+    <!-- Main -->
+    <main class="container py-5">
+                <div class="task-name">
+            Nombre de la Tarea
+        </div>
 
-            <div class="col-md-4">
-                <div class="column-header">Tarea Clockify</div>
-                <div class="column-body" id="col-clockify">
-                    <div class="item-card">Nombre Tarea...</div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="column-header d-flex justify-content-between align-items-center px-3">
+        <!-- Board -->
+        <div class="board">
+            <!-- Header -->
+            <div class="board-head">
+                <div class="bh-cell">Tarea Gitlab</div>
+                <div class="bh-cell">Tarea Clockify</div>
+                <div class="bh-cell">
                     Estimaciones
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                    <svg class="edit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
                     </svg>
                 </div>
-                <div class="column-body" id="col-estimaciones">
-                    <div class="item-card">Estimación: 10h</div>
+            </div>
+
+            <!-- Body -->
+            <div class="board-body">
+                <!-- Col: Tarea Gitlab -->
+                <div class="b-col" id="col-gitlab">
+                    <div class="item">
+                        <div class="item-name">Nombre Tarea...</div>
+                    </div>
+                </div>
+
+                <!-- Col: Tarea Clockify -->
+                <div class="b-col" id="col-clockify">
+                    <div class="item">
+                        <div class="item-name">Nombre Tarea...</div>
+                    </div>
+                </div>
+
+                <!-- Col: Estimaciones -->
+                <div class="b-col" id="col-estimaciones">
+                    <div class="est-item">
+                        <div class="est-val">10h</div>
+                    </div>
                 </div>
             </div>
         </div>
+
     </main>
 
-    <footer class="bg-white border-top py-3 mt-auto shadow-sm">
+    <!-- Footer -->
+    <footer class="custom-footer py-3 mt-auto">
         <div class="container text-center">
-            <p class="mb-0 small">©2026 Laberit - Todos los derechos reservados</p>
+            <p class="mb-0 small text-muted">©2026 Laberit - Todos los derechos reservados</p>
         </div>
     </footer>
+
+    <script>
+        function cerrarSesion() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
 
     <script src="../JS/subfase.js"></script>
 </body>
