@@ -22,6 +22,13 @@ async function realizarLogin() {
 if (result.success) {
             // Guardar sesión
             localStorage.setItem("sesionActiva", "true");
+            localStorage.setItem("token", result.data.token);
+            localStorage.setItem("usuarioId", result.data.id);
+            localStorage.setItem("usuarioNombre", result.data.nombre);
+
+            if (result.data.rol) {
+                localStorage.setItem("usuarioRol", result.data.rol);
+            }
 
             // Redirigir a proyectos
             window.location.href = "proyectos.html";
