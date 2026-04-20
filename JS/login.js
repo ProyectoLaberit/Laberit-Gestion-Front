@@ -10,6 +10,7 @@ async function realizarLogin() {
     };
 
     try {
+        
         const response = await fetch(`${URL_BASE}/usuarios/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

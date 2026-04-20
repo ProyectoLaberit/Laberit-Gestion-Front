@@ -1,6 +1,6 @@
 // Estructura de fases y subfases
 const ESTRUCTURA_PROYECTO = {
-    "Analisis": ["Preventa", "Analisis", "Investigacion", "Infraestructura"],
+    "Analisis": ["Analisis", "Preventa", "Investigacion", "Infraestructura"],
     "Desarrollo": [
         "Discovery", "Sintesis", "Frontend", "Backend", "Maquetacion", 
         "Ideacion", "Arquitectura", "Wireframes", "HF", "Evaluacion", 
@@ -62,15 +62,18 @@ function renderizarTodo(filtro = "") {
         let htmlContent = `<h3 class="phase-header h5">${fase}</h3>`;
         htmlContent += `<div class="row g-3">`;
 
+        let aux = 4;
+
         subfasesFiltradas.forEach(sub => {
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}')">
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${aux}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
                 </div>
             `;
+            aux ++;
         });
 
         htmlContent += `</div>`;
@@ -79,8 +82,9 @@ function renderizarTodo(filtro = "") {
     }
 }
 
-function irASubfase(nombreSubfase) {
-    localStorage.setItem("subfaseSeleccionada", nombreSubfase);
+function irASubfase(idSubfase) {
+    console.log(idSubfase);
+    localStorage.setItem("idSubfase", idSubfase);
     window.location.href = "subfase.html";
 }
 
