@@ -97,8 +97,8 @@
                 });
 
                 if (data && data.success) {
-                    mostrarExito(`Usuario "${nombre}" creado correctamente.`);
                     resetForm();
+                    mostrarExito(`Usuario "${nombre}" creado correctamente.`);
                 } else {
                     mostrarError(data.message || 'Error al crear el usuario.');
                 }

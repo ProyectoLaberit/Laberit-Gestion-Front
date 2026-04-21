@@ -75,6 +75,8 @@ async function guardarProyecto() {
                 excelData.append('proyectoId', idPro);
                 excelData.append('usuarioId', 1);
 
+                const token = localStorage.getItem("token");
+
                 // 4. CAMBIO CLAVE: Quitamos los headers para que el navegador gestione el Multipart
                 const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
                     method: 'POST',
@@ -104,6 +106,7 @@ async function guardarProyecto() {
             feedback.innerText = "Error: " + result.mensaje;
         }
     } catch (error) {
+        console.error("Detalle del error exacto:", error);
         feedback.className = "mt-3 text-center text-danger";
         feedback.innerText = "Error de conexión con el servidor.";
     }
