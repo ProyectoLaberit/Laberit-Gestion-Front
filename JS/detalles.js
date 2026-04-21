@@ -21,7 +21,7 @@ async function cargarSubfases() {
 
     fases.forEach(p => {
         ESTRUCTURA_PROYECTO[p.nombre] = p.subfases.map(a => a.nombre);
-        p.subfases.map(s=> 
+        p.subfases.map(s =>
             ids[s.nombre] = s.id
         );
     });
@@ -83,7 +83,7 @@ function renderizarTodo(filtro = "", estr, ids) {
         subfasesFiltradas.forEach(sub => {
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}`, `${ids[sub]}')">
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub} ,${ids[sub]}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
@@ -97,9 +97,12 @@ function renderizarTodo(filtro = "", estr, ids) {
     }
 }
 
-function irASubfase(nombreSubfase, id) {
-    localStorage.setItem("idSubfase", id);
-    localStorage.setItem("subfaseSeleccionada", nombreSubfase);
+function irASubfase(nombreSubfase) {
+
+    const partes = nombreSubfase.split(',');
+
+    localStorage.setItem("idSubfase", partes[1]);
+    localStorage.setItem("subfaseSeleccionada", partes[0]);
     window.location.href = "subfase.html";
 }
 
