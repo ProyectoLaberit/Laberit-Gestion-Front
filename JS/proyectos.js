@@ -1,4 +1,3 @@
-const URL_BASE = "http://localhost:8080/api";
 
 // ─── Guard de sesión ───────────────────────────────────────────────────────
 if (!localStorage.getItem("sesionActiva")) {
@@ -16,8 +15,16 @@ async function pintarProyectos() {
 
     const contenedor = document.getElementById('lista-proyectos');
 
-    const response = await fetch(`${URL_BASE}/proyectos/cargar`);
-    const result = await response.json();
+    // Recuperamos el token que guardamos en el login
+    const token = localStorage.getItem("token");
+
+    // Usamos nuestra función mágica: ella ya sabe la URL_BASE y el Token
+    const result = await peticionSegura("/proyectos/cargar");
+
+    // Si la petición falla o no hay éxito, paramos aquí
+    if (!result || !result.success) {
+        return; 
+    }
 
     const proyectos = result.data;
 

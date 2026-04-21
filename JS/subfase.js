@@ -1,6 +1,7 @@
 // Verificación de sesión
 window.onload = function() {
-    if (!localStorage.getItem("sesionActiva")) {
+    // if (!localStorage.getItem("sesionActiva")) {
+    if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
         return;
     }
@@ -17,6 +18,7 @@ async function cargarDatosSubfase() {
 }
 
 function cerrarSesion() {
-    localStorage.removeItem("sesionActiva");
+    // localStorage.removeItem("sesionActiva");
+    localStorage.clear();
     window.location.href = "login.html";
 }

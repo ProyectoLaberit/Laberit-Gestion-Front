@@ -20,11 +20,17 @@ async function realizarLogin() {
         const result = await response.json();
 
 if (result.success) {
+            // Limpiamos rastros antiguos por seguridad
+            localStorage.clear();
+
             // Guardar sesión
             localStorage.setItem("sesionActiva", "true");
             localStorage.setItem("token", result.data.token);
             localStorage.setItem("usuarioId", result.data.id);
             localStorage.setItem("usuarioNombre", result.data.nombre);
+
+            // La caja entera que lee el perfil
+            localStorage.setItem("usuarioData", JSON.stringify(result.data));
 
             if (result.data.rol) {
                 localStorage.setItem("usuarioRol", result.data.rol);

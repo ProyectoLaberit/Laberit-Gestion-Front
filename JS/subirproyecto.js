@@ -1,7 +1,8 @@
-const URL_BASE = "http://localhost:8080/api";
+// const URL_BASE = "http://localhost:8080/api";
 
 window.onload = function () {
-    if (!localStorage.getItem("sesionActiva")) {
+    // if (!localStorage.getItem("sesionActiva")) {
+    if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
     }
 };
@@ -43,15 +44,20 @@ async function guardarProyecto() {
 
     try {
         feedback.innerText = "Subiendo proyecto...";
-        const response = await fetch(`${URL_BASE}/proyectos`, {
+        // const response = await fetch(`${URL_BASE}/proyectos`, {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify(formData) // FormData gestiona automáticamente el Content-Type
+        // });
+
+        // const result = await response.json();
+
+        const result = await peticionSegura("/proyectos", {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData) // FormData gestiona automáticamente el Content-Type
+            body: JSON.stringify(formData)
         });
 
-        const result = await response.json();
-
-        if (result.success) {
+        if (result && result.success) {
             feedback.className = "mt-3 text-center text-success";
             feedback.innerText = "Proyecto subido correctamente. Importando Excel...";
 
@@ -72,6 +78,10 @@ async function guardarProyecto() {
                 // 4. CAMBIO CLAVE: Quitamos los headers para que el navegador gestione el Multipart
                 const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
                     method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}` 
+                        // IMPORTANTE: No poner 'Content-Type' aquí, el navegador lo pone solo al ver FormData
+                    },
                     body: excelData 
                 });
 

@@ -10,7 +10,8 @@ const ESTRUCTURA_PROYECTO = {
 };
 
 window.onload = function() {
-    if (!localStorage.getItem("sesionActiva")) {
+    // if (!localStorage.getItem("sesionActiva")) {
+    if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
         return;
     }

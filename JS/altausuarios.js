@@ -1,5 +1,5 @@
         // ── Configuración ──
-        const API_BASE = 'http://localhost:8080/api/usuarios';
+        //const API_BASE = 'http://localhost:8080/api/usuarios';
 
         // ── Toggle visibilidad contraseña ──
         function togglePass(fieldId, btn) {
@@ -84,14 +84,19 @@
 
             setBusy(true);
             try {
-                const res = await fetch(API_BASE, {
+                // const res = await fetch(API_BASE, {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(payload)
+                // });
+                // const data = await res.json();
+
+                const data = await peticionSegura("/usuarios", {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                const data = await res.json();
 
-                if (data.success) {
+                if (data && data.success) {
                     mostrarExito(`Usuario "${nombre}" creado correctamente.`);
                     resetForm();
                 } else {
@@ -145,6 +150,7 @@
         }
 
         function cerrarSesion() {
-            sessionStorage.clear();
+            // sessionStorage.clear();
+            localStorage.clear();
             window.location.href = 'login.html';
         }

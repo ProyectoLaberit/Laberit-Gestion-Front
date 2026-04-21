@@ -1,8 +1,9 @@
-const URL_BASE = "http://localhost:8080/api/proyectos/";
+// const URL_BASE = "http://localhost:8080/api/proyectos/";
 
 // Verificación de sesión al cargar
 window.onload = function () {
-    if (!localStorage.getItem("sesionActiva")) {
+    // if (!localStorage.getItem("sesionActiva")) {
+    if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
     }
 };
@@ -34,13 +35,18 @@ async function guardarProyecto() {
 
     try {
         // Asumimos un endpoint POST para crear o PUT para editar
-        const response = await fetch(`${URL_BASE}${id}`, {
+        // const response = await fetch(`${URL_BASE}${id}`, {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify(proyectoData)
+        // });
+
+        // const result = await response.json();
+
+        const result = await peticionSegura(`/proyectos/${id}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(proyectoData)
         });
-
-        const result = await response.json();
 
         if (result.success) {
             feedback.className = "mt-3 text-center text-success";
@@ -58,6 +64,7 @@ async function guardarProyecto() {
 }
 
 function cerrarSesion() {
-    localStorage.removeItem("sesionActiva");
+    // localStorage.removeItem("sesionActiva");
+    localStorage.clear();
     window.location.href = "login.html";
 }
