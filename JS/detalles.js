@@ -97,7 +97,8 @@ function renderizarTodo(filtro = "", estr, ids) {
     }
 }
 
-function irASubfase(nombreSubfase) {
+function irASubfase(nombreSubfase, id) {
+    localStorage.setItem("idSubfase", id);
     localStorage.setItem("subfaseSeleccionada", nombreSubfase);
     window.location.href = "subfase.html";
 }
