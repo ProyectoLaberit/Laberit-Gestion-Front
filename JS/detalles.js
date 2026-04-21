@@ -83,7 +83,7 @@ function renderizarTodo(filtro = "", estr, ids) {
         subfasesFiltradas.forEach(sub => {
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${ids[sub]}')">
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}`, `${ids[sub]}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
