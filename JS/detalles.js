@@ -17,17 +17,21 @@ async function cargarSubfases() {
 
     const fases = result.data;
     const ESTRUCTURA_PROYECTO = {};
+    const ids = {};
 
     fases.forEach(p => {
         ESTRUCTURA_PROYECTO[p.nombre] = p.subfases.map(a => a.nombre);
+        p.subfases.map(s=> 
+            ids[s.nombre] = s.id
+        );
     });
 
-    cargarVistaDetalles(ESTRUCTURA_PROYECTO);
+    cargarVistaDetalles(ESTRUCTURA_PROYECTO, ids);
 
 
 }
 
-function cargarVistaDetalles(estructura) {
+function cargarVistaDetalles(estructura, ids) {
     // Lógica para mostrar el nombre del proyecto
     const proyectoId = localStorage.getItem("proyectoId");
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
@@ -41,16 +45,16 @@ function cargarVistaDetalles(estructura) {
         // El evento 'input' se dispara cada vez que el usuario escribe una letra
         inputBusqueda.addEventListener('input', (e) => {
             const textoBusqueda = e.target.value;
-            renderizarTodo(textoBusqueda, estructura);
+            renderizarTodo(textoBusqueda, estructura, ids);
         });
     }
 
     console.log(estructura);
 
-    renderizarTodo("", estructura); // Carga inicial sin filtro
+    renderizarTodo("", estructura, ids); // Carga inicial sin filtro
 }
 
-function renderizarTodo(filtro = "", estr) {
+function renderizarTodo(filtro = "", estr, ids) {
 
     ESTRUCTURA_PROYECTO = estr;
     const contenedor = document.getElementById('contenedor-fases');
@@ -79,7 +83,7 @@ function renderizarTodo(filtro = "", estr) {
         subfasesFiltradas.forEach(sub => {
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}')">
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${ids[sub]}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
