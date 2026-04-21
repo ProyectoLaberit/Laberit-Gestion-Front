@@ -1,5 +1,5 @@
 // Estructura de fases y subfases
-const URL_BASE = "http://localhost:8080/api/fases/jerarquia";
+const URL_BASE = "http://localhost:8080/api/fases";
 
 window.onload = function () {
     if (!localStorage.getItem("sesionActiva")) {
@@ -12,7 +12,9 @@ window.onload = function () {
 
 async function cargarSubfases() {
 
-    const response = await fetch(`${URL_BASE}`);
+    const idPro = localStorage.getItem("proyectoId");
+
+    const response = await fetch(`${URL_BASE}/${idPro}`);
     const result = await response.json();
 
     const fases = result.data;
