@@ -46,8 +46,33 @@ async function cargarDetallesTar(){
         const result = await response.json();
 
         if (result.success) {
-            console.log("¡Éxito! Tareas recuperadas:", result.data);
             // Aquí tu lógica para pintar la tabla
+            const espec = result.data;
+            const tabla = document.getElementById("tablaEspec");
+
+            tabla.innerHTML = espec.map(p =>`
+                <!-- Col: Departamento -->
+                <div class="b-col">
+                    <div class="item">
+                        <div class="item-name">${p.nombreDepartamento}</div>
+                    </div>
+                </div>
+ 
+                <!-- Col: Tiempo Mínimo -->
+                <div class="b-col">
+                    <div class="time-item">
+                        <div class="time-val time-min">${p.tiempoMin}</div>
+                        <div class="time-lbl">${p.nombreDepartamento}</div>
+                    </div>
+                </div>
+ 
+                <!-- Col: Tiempo Máximo -->
+                <div class="b-col">
+                    <div class="time-item">
+                        <div class="time-val time-max">${p.tiempoMax}</div>
+                        <div class="time-lbl">${p.nombreDepartamento}</div>
+                    </div>
+                </div>`).join('');
 
         } else {
             console.warn("Aviso del backend:", result.message);
