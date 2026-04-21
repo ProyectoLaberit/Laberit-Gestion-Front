@@ -76,7 +76,7 @@ async function guardarProyecto() {
                 // 3. CAMBIO CLAVE: Usamos 'excelData.append', no 'formData'
                 excelData.append('archivo', fileInput.files[0]);
                 excelData.append('proyectoId', idPro);
-                excelData.append('usuarioId', localStorage.getItem("usuarioId"));
+                excelData.append('usuarioId', 1);
 
                 const token = localStorage.getItem("token");
 
