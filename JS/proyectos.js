@@ -1,6 +1,7 @@
 
 // ─── Guard de sesión ───────────────────────────────────────────────────────
-if (!localStorage.getItem("sesionActiva")) {
+// if (!localStorage.getItem("sesionActiva")) {
+if (!localStorage.getItem("token")) {
     window.location.href = "login.html";
 }
 

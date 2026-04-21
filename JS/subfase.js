@@ -30,16 +30,24 @@ async function cargarDatosSubfase() {
     parametros.append('idSubfase', idSub);
 
     try {
-        const response = await fetch(`${URL_BASE}/subfase/tareas`, {
+        // const response = await fetch(`${URL_BASE}/subfase/tareas`, {
+        //     method: 'POST',
+        //     headers: {
+        //         // Le decimos a Spring Boot que le mandamos un formulario, no un JSON
+        //         'Content-Type': 'application/x-www-form-urlencoded' 
+        //     },
+        //     body: parametros // Metemos los parámetros en el vagón de carga
+        // });
+
+        // const result = await response.json();
+
+        const result = await peticionSegura(`/estimaciones/subfase/tareas`, {
             method: 'POST',
             headers: {
-                // Le decimos a Spring Boot que le mandamos un formulario, no un JSON
                 'Content-Type': 'application/x-www-form-urlencoded' 
             },
-            body: parametros // Metemos los parámetros en el vagón de carga
+            body: parametros
         });
-
-        const result = await response.json();
 
         if (result.success) {
             console.log("¡Éxito! Tareas recuperadas:", result.data);
