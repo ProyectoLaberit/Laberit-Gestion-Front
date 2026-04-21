@@ -1,7 +1,7 @@
-const URL_BASE = "http://localhost:8080/api/estimaciones";
+// const URL_BASE = "http://localhost:8080/api/estimaciones";
 
 window.onload = function () {
-    if (!localStorage.getItem("sesionActiva")) {
+    if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
     } else {
         cargarDetallesTar();
@@ -34,16 +34,24 @@ async function cargarDetallesTar(){
     parametros.append('tarea', nombreTar);
 
     try {
-        const response = await fetch(`${URL_BASE}/proyecto/${proyectoId}/especifica`, {
+        // const response = await fetch(`${URL_BASE}/proyecto/${proyectoId}/especifica`, {
+        //     method: 'POST',
+        //     headers: {
+        //         // Le decimos a Spring Boot que le mandamos un formulario, no un JSON
+        //         'Content-Type': 'application/x-www-form-urlencoded' 
+        //     },
+        //     body: parametros // Metemos los parámetros en el vagón de carga
+        // });
+
+        // const result = await response.json();
+
+        const result = await peticionSegura(`/estimaciones/proyecto/${proyectoId}/especifica`, {
             method: 'POST',
             headers: {
-                // Le decimos a Spring Boot que le mandamos un formulario, no un JSON
                 'Content-Type': 'application/x-www-form-urlencoded' 
             },
-            body: parametros // Metemos los parámetros en el vagón de carga
+            body: parametros
         });
-
-        const result = await response.json();
 
         if (result.success) {
             // Aquí tu lógica para pintar la tabla
@@ -57,7 +65,7 @@ async function cargarDetallesTar(){
                         <div class="item-name">${p.nombreDepartamento}</div>
                     </div>
                 </div>
- 
+
                 <!-- Col: Tiempo Mínimo -->
                 <div class="b-col">
                     <div class="time-item">
@@ -65,7 +73,7 @@ async function cargarDetallesTar(){
                         <div class="time-lbl">${p.nombreDepartamento}</div>
                     </div>
                 </div>
- 
+
                 <!-- Col: Tiempo Máximo -->
                 <div class="b-col">
                     <div class="time-item">

@@ -1,7 +1,8 @@
-const URL_BASE = "http://localhost:8080/api";
+// const URL_BASE = "http://localhost:8080/api";
 
 window.onload = function () {
-    if (!localStorage.getItem("sesionActiva")) {
+    // if (!localStorage.getItem("sesionActiva")) {
+    if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
     } else {
         cargarClockify();
@@ -46,15 +47,20 @@ async function guardarProyecto() {
 
     try {
         feedback.innerText = "Subiendo proyecto...";
-        const response = await fetch(`${URL_BASE}/proyectos`, {
+        // const response = await fetch(`${URL_BASE}/proyectos`, {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify(formData) // FormData gestiona automáticamente el Content-Type
+        // });
+
+        // const result = await response.json();
+
+        const result = await peticionSegura("/proyectos", {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData) // FormData gestiona automáticamente el Content-Type
+            body: JSON.stringify(formData)
         });
 
-        const result = await response.json();
-
-        if (result.success) {
+        if (result && result.success) {
             feedback.className = "mt-3 text-center text-success";
             feedback.innerText = "Proyecto subido correctamente. Importando Excel...";
 
@@ -70,17 +76,29 @@ async function guardarProyecto() {
                 // 3. CAMBIO CLAVE: Usamos 'excelData.append', no 'formData'
                 excelData.append('archivo', fileInput.files[0]);
                 excelData.append('proyectoId', idPro);
-                excelData.append('usuarioId', 1);
+                excelData.append('usuarioId', localStorage.getItem("usuarioId"));
+
+                const token = localStorage.getItem("token");
 
                 // 4. CAMBIO CLAVE: Quitamos los headers para que el navegador gestione el Multipart
-                const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
+                // const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
+                //     method: 'POST',
+                //     headers: { 
+                //         'Authorization': `Bearer ${token}` 
+                //         // IMPORTANTE: No poner 'Content-Type' aquí, el navegador lo pone solo al ver FormData
+                //     },
+                //     body: excelData 
+                // });
+
+                // const excelResult = await excelResponse.json();
+
+                const excelResult = await peticionSegura("/estimaciones/importar", {
                     method: 'POST',
-                    body: excelData
+                    body: excelData,
+                    headers: {} // Vacío para el Multipart
                 });
 
-                const excelResult = await excelResponse.json();
-
-                if (excelResult.success) {
+                if (excelResult && excelResult.success) {
                     feedback.innerText = "Proyecto y Excel subidos correctamente.";
                     setTimeout(() => window.location.href = "proyectos.html", 1500);
                 } else {
@@ -97,6 +115,7 @@ async function guardarProyecto() {
             feedback.innerText = "Error: " + result.mensaje;
         }
     } catch (error) {
+        console.error("Detalle del error exacto:", error);
         feedback.className = "mt-3 text-center text-danger";
         feedback.innerText = "Error de conexión con el servidor.";
     }
@@ -112,22 +131,25 @@ async function cargarClockify() {
 
 
     try {
-        const response = await fetch(`${URL_BASE}/clockify/externos`);
+        // const response = await fetch(`${URL_BASE}/clockify/externos`);
 
-        const result = await response.json();
+        // const result = await response.json();
 
-        const select = document.getElementById("clockifyId");
+        const result = await peticionSegura("/clockify/externos");
 
-        select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+        if(result && result.success){
+            const select = document.getElementById("clockifyId");
 
-        result.data.forEach(item => {
-            const option = document.createElement("option");
-            option.value = item.id;
-            option.textContent = item.nombre;
-            select.appendChild(option);
-        });
+            select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
 
+            result.data.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.id;
+                option.textContent = item.nombre;
+                select.appendChild(option);
+            });
 
+        }
     } catch (error) {
         feedback.innerText = "Error de conexión con el servidor.";
         console.error("Error:", error);
@@ -140,22 +162,26 @@ async function cargarGitlab() {
 
 
     try {
-        const response = await fetch(`${URL_BASE}/gitlab/externos`);
+        // const response = await fetch(`${URL_BASE}/gitlab/externos`);
 
-        const result = await response.json();
+        // const result = await response.json();
 
-        const select = document.getElementById("gitlabId");
+        const result = await peticionSegura("/gitlab/externos");
 
-        select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+        if (result && result.success) {
 
-        result.data.forEach(item => {
-            const option = document.createElement("option");
-            option.value = item.id;
-            option.textContent = item.nombre;
-            select.appendChild(option);
-        });
+            const select = document.getElementById("gitlabId");
 
+            select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
 
+            result.data.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.id;
+                option.textContent = item.nombre;
+                select.appendChild(option);
+            });
+
+        }
     } catch (error) {
         feedback.innerText = "Error de conexión con el servidor.";
         console.error("Error:", error);

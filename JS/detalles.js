@@ -1,8 +1,9 @@
 // Estructura de fases y subfases
-const URL_BASE = "http://localhost:8080/api/fases";
+// const URL_BASE = "http://localhost:8080/api/fases/jerarquia";
 
-window.onload = function () {
-    if (!localStorage.getItem("sesionActiva")) {
+window.onload = function() {
+    // if (!localStorage.getItem("sesionActiva")) {
+    if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
         return;
     }
@@ -12,10 +13,15 @@ window.onload = function () {
 
 async function cargarSubfases() {
 
-    const idPro = localStorage.getItem("proyectoId");
+    // const response = await fetch(`${URL_BASE}`);
+    // const result = await response.json();
+    const result = await peticionSegura("/fases/jerarquia");
 
-    const response = await fetch(`${URL_BASE}/${idPro}`);
-    const result = await response.json();
+    // Si la petición falla o el servidor nos rechaza, paramos
+    if (!result || !result.success) {
+        console.error("No se pudieron cargar las fases.");
+        return;
+    }
 
     const fases = result.data;
     const ESTRUCTURA_PROYECTO = {};

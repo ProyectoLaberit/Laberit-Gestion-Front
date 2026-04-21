@@ -1,8 +1,9 @@
-// Verificación de sesión
-const URL_BASE = "http://localhost:8080/api/estimaciones";
+// const URL_BASE = "http://localhost:8080/api/estimaciones";
 
-window.onload = function () {
-    if (!localStorage.getItem("sesionActiva")) {
+// Verificación de sesión
+window.onload = function() {
+    // if (!localStorage.getItem("sesionActiva")) {
+    if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
         return;
     }
@@ -29,16 +30,24 @@ async function cargarDatosSubfase() {
     parametros.append('idSubfase', idSub);
 
     try {
-        const response = await fetch(`${URL_BASE}/subfase/tareas`, {
+        // const response = await fetch(`${URL_BASE}/subfase/tareas`, {
+        //     method: 'POST',
+        //     headers: {
+        //         // Le decimos a Spring Boot que le mandamos un formulario, no un JSON
+        //         'Content-Type': 'application/x-www-form-urlencoded' 
+        //     },
+        //     body: parametros // Metemos los parámetros en el vagón de carga
+        // });
+
+        // const result = await response.json();
+
+        const result = await peticionSegura(`/estimaciones/subfase/tareas`, {
             method: 'POST',
             headers: {
-                // Le decimos a Spring Boot que le mandamos un formulario, no un JSON
                 'Content-Type': 'application/x-www-form-urlencoded' 
             },
-            body: parametros // Metemos los parámetros en el vagón de carga
+            body: parametros
         });
-
-        const result = await response.json();
 
         if (result.success) {
             console.log("¡Éxito! Tareas recuperadas:", result.data);
@@ -86,6 +95,7 @@ function detalleTarea(nombreTarea){
 }
 
 function cerrarSesion() {
-    localStorage.removeItem("sesionActiva");
+    // localStorage.removeItem("sesionActiva");
+    localStorage.clear();
     window.location.href = "login.html";
 }

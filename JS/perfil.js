@@ -1,6 +1,7 @@
 // Verificación de sesión al cargar
 window.onload = function() {
-    if (!localStorage.getItem("sesionActiva")) {
+    // if (!localStorage.getItem("sesionActiva")) {
+    if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
         return;
     }
