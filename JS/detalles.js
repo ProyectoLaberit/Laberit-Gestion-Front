@@ -1,13 +1,5 @@
 // Estructura de fases y subfases
-const ESTRUCTURA_PROYECTO = {
-    "Analisis": ["Preventa", "Analisis", "Investigacion", "Infraestructura"],
-    "Desarrollo": [
-        "Discovery", "Sintesis", "Frontend", "Backend", "Maquetacion", 
-        "Ideacion", "Arquitectura", "Wireframes", "HF", "Evaluacion", 
-        "Contenidos", "Importaciones", "Ajustes"
-    ],
-    "Gestiones": ["Despliegue", "Direccion", "Material", "ReuCliente", "ReuInterna", "Terceros"]
-};
+const URL_BASE = "http://localhost:8080/api/fases/jerarquia";
 
 window.onload = function() {
     // if (!localStorage.getItem("sesionActiva")) {
@@ -15,15 +7,37 @@ window.onload = function() {
         window.location.href = "login.html";
         return;
     }
-    cargarVistaDetalles();
+    cargarSubfases();
 };
 
-function cargarVistaDetalles() {
+
+async function cargarSubfases() {
+
+    const response = await fetch(`${URL_BASE}`);
+    const result = await response.json();
+
+    const fases = result.data;
+    const ESTRUCTURA_PROYECTO = {};
+    const ids = {};
+
+    fases.forEach(p => {
+        ESTRUCTURA_PROYECTO[p.nombre] = p.subfases.map(a => a.nombre);
+        p.subfases.map(s =>
+            ids[s.nombre] = s.id
+        );
+    });
+
+    cargarVistaDetalles(ESTRUCTURA_PROYECTO, ids);
+
+
+}
+
+function cargarVistaDetalles(estructura, ids) {
     // Lógica para mostrar el nombre del proyecto
     const proyectoId = localStorage.getItem("proyectoId");
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoActual = proyectos.find(p => String(p.id) === String(proyectoId));
-    
+
     document.getElementById('proyecto-nombre-display').innerText = proyectoActual ? proyectoActual.nombre : "Proyecto " + proyectoId;
 
     // CONFIGURACIÓN DEL BUSCADOR
@@ -32,25 +46,29 @@ function cargarVistaDetalles() {
         // El evento 'input' se dispara cada vez que el usuario escribe una letra
         inputBusqueda.addEventListener('input', (e) => {
             const textoBusqueda = e.target.value;
-            renderizarTodo(textoBusqueda);
+            renderizarTodo(textoBusqueda, estructura, ids);
         });
     }
 
-    renderizarTodo(); // Carga inicial sin filtro
+    console.log(estructura);
+
+    renderizarTodo("", estructura, ids); // Carga inicial sin filtro
 }
 
-function renderizarTodo(filtro = "") {
+function renderizarTodo(filtro = "", estr, ids) {
+
+    ESTRUCTURA_PROYECTO = estr;
     const contenedor = document.getElementById('contenedor-fases');
-    contenedor.innerHTML = ""; 
-    
+    contenedor.innerHTML = "";
+
     // Convertimos a minúsculas para que la búsqueda no distinga entre "A" y "a"
     const filtroNormalizado = filtro.toLowerCase().trim();
 
     for (const fase in ESTRUCTURA_PROYECTO) {
         const subfases = ESTRUCTURA_PROYECTO[fase];
-        
+
         // Filtramos las subfases que contienen el texto buscado
-        const subfasesFiltradas = subfases.filter(sub => 
+        const subfasesFiltradas = subfases.filter(sub =>
             sub.toLowerCase().includes(filtroNormalizado)
         );
 
@@ -59,14 +77,14 @@ function renderizarTodo(filtro = "") {
 
         const seccion = document.createElement('section');
         seccion.className = "phase-section";
-        
+
         let htmlContent = `<h3 class="phase-header h5">${fase}</h3>`;
         htmlContent += `<div class="row g-3">`;
 
         subfasesFiltradas.forEach(sub => {
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}')">
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub} ,${ids[sub]}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
@@ -81,7 +99,11 @@ function renderizarTodo(filtro = "") {
 }
 
 function irASubfase(nombreSubfase) {
-    localStorage.setItem("subfaseSeleccionada", nombreSubfase);
+
+    const partes = nombreSubfase.split(',');
+
+    localStorage.setItem("idSubfase", partes[1]);
+    localStorage.setItem("subfaseSeleccionada", partes[0]);
     window.location.href = "subfase.html";
 }
 

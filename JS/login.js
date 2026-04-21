@@ -9,8 +9,8 @@ async function realizarLogin() {
         password: document.getElementById('password').value
     };
 
-    
     try {
+        
         const response = await fetch(`${URL_BASE}/usuarios/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

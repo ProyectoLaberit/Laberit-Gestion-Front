@@ -4,6 +4,9 @@ window.onload = function () {
     // if (!localStorage.getItem("sesionActiva")) {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
+    } else {
+        cargarClockify();
+        cargarGitlab();
     }
 };
 
@@ -62,7 +65,7 @@ async function guardarProyecto() {
             feedback.innerText = "Proyecto subido correctamente. Importando Excel...";
 
             // 1. Recogemos el ID (Esto lo estabais haciendo perfecto)
-            const idPro = result.data.id; 
+            const idPro = result.data.id;
 
             const fileInput = document.getElementById('archivoInput');
 
@@ -115,4 +118,60 @@ async function guardarProyecto() {
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
+}
+
+async function cargarClockify() {
+        const feedback = document.getElementById('msg-feedback');
+
+
+    try {
+        const response = await fetch(`${URL_BASE}/clockify/externos`);
+
+        const result = await response.json();
+
+        const select = document.getElementById("clockifyId");
+
+        select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+
+        result.data.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = item.nombre;
+            select.appendChild(option);
+        });
+
+
+    } catch (error) {
+        feedback.innerText = "Error de conexión con el servidor.";
+        console.error("Error:", error);
+    }
+
+}
+
+async function cargarGitlab() {
+        const feedback = document.getElementById('msg-feedback');
+
+
+    try {
+        const response = await fetch(`${URL_BASE}/gitlab/externos`);
+
+        const result = await response.json();
+
+        const select = document.getElementById("gitlabId");
+
+        select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+
+        result.data.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = item.nombre;
+            select.appendChild(option);
+        });
+
+
+    } catch (error) {
+        feedback.innerText = "Error de conexión con el servidor.";
+        console.error("Error:", error);
+    }
+
 }
