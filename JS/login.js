@@ -1,4 +1,4 @@
-// const URL_BASE = "http://localhost:8080/api";
+const URL_BASE = "http://localhost:8080/api";
 
 async function realizarLogin() {
     const msgEl = document.getElementById('msg-login');
