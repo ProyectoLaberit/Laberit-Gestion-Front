@@ -60,7 +60,7 @@ async function cargarDatosSubfase() {
                 <!-- Col: Tarea Clockify -->
                 <div class="b-col" id="col-clockify">
                     <div class="item">
-                        <div class="item-name" id="${p.nombreTarea}">Tiempo Clockify</div>
+                        <div class="item-name" id="${p.nombreTarea}"></div>
                     </div>
                 </div>
 
