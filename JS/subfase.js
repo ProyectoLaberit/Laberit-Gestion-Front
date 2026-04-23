@@ -12,6 +12,7 @@ window.onload = function () {
 async function cargarDatosSubfase() {
     const proyectoId = localStorage.getItem("proyectoId");
     const idSub = localStorage.getItem("idSubfase");
+    const nomSub = localStorage.getItem("subfaseSeleccionada");
 
     // 1. DEBUG VITAL: Asegurarnos de que no estén viajando como "null" o "undefined"
     console.log("Comprobando variables antes de enviar:");
@@ -20,7 +21,7 @@ async function cargarDatosSubfase() {
 
     if (!proyectoId || !idSub) {
         console.error("Error: Falta el ID del proyecto o la subfase en el localStorage");
-        return; 
+        return;
     }
 
     // 2. Empaquetamos los datos como un formulario (Ideal para @RequestParam)
@@ -33,12 +34,16 @@ async function cargarDatosSubfase() {
             method: 'POST',
             headers: {
                 // Le decimos a Spring Boot que le mandamos un formulario, no un JSON
-                'Content-Type': 'application/x-www-form-urlencoded' 
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: parametros // Metemos los parámetros en el vagón de carga
         });
 
         const result = await response.json();
+
+        const resp = await fetch(`http://localhost:8080/api/clockify/${proyectoId}/${nomSub}`);
+
+        const res = await resp.json();
 
         if (result.success) {
             console.log("¡Éxito! Tareas recuperadas:", result.data);
@@ -46,7 +51,7 @@ async function cargarDatosSubfase() {
             const tar = result.data;
             const tabla = document.getElementById("tablaTar");
 
-            tabla.innerHTML = tar.map(p =>`<div class="b-col" id="col-nombre" onclick="detalleTarea('${p.nombreTarea}')">
+            tabla.innerHTML = tar.map(p => `<div class="b-col" id="col-nombre" onclick="detalleTarea('${p.nombreTarea}')">
                     <div class="item">
                         <div class="item-name">${p.nombreTarea}</div>
                     </div>
@@ -55,7 +60,7 @@ async function cargarDatosSubfase() {
                 <!-- Col: Tarea Clockify -->
                 <div class="b-col" id="col-clockify">
                     <div class="item">
-                        <div class="item-name">Tiempo Clockify</div>
+                        <div class="item-name" id="${p.nombreTarea}">Tiempo Clockify</div>
                     </div>
                 </div>
 
@@ -66,6 +71,12 @@ async function cargarDatosSubfase() {
                     </div>
                 </div>`).join('');
 
+            cargarClockify(res.data);
+
+
+
+
+
         } else {
             console.warn("Aviso del backend:", result.message);
         }
@@ -75,7 +86,20 @@ async function cargarDatosSubfase() {
     }
 }
 
-function detalleTarea(nombreTarea){
+function cargarClockify(tar) {
+    const tiemp = tar;
+    tiemp.map(p => {
+
+        let a = document.getElementById(p.titulo);
+
+        a.innerText = p.horasTrabajadas;
+
+    });
+
+
+}
+
+function detalleTarea(nombreTarea) {
 
     console.log(nombreTarea);
 
