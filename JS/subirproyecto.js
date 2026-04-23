@@ -76,27 +76,27 @@ async function guardarProyecto() {
                 // 3. CAMBIO CLAVE: Usamos 'excelData.append', no 'formData'
                 excelData.append('archivo', fileInput.files[0]);
                 excelData.append('proyectoId', idPro);
-                excelData.append('usuarioId', 1);
+                excelData.append('usuarioId', localStorage.getItem("usuarioId"));
 
                 const token = localStorage.getItem("token");
 
                 // 4. CAMBIO CLAVE: Quitamos los headers para que el navegador gestione el Multipart
-                // const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
-                //     method: 'POST',
-                //     headers: { 
-                //         'Authorization': `Bearer ${token}` 
-                //         // IMPORTANTE: No poner 'Content-Type' aquí, el navegador lo pone solo al ver FormData
-                //     },
-                //     body: excelData 
-                // });
-
-                // const excelResult = await excelResponse.json();
-
-                const excelResult = await peticionSegura("/estimaciones/importar", {
+                const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
                     method: 'POST',
-                    body: excelData,
-                    headers: {} // Vacío para el Multipart
+                    headers: { 
+                        'Authorization': `Bearer ${token}` 
+                        // IMPORTANTE: No poner 'Content-Type' aquí, el navegador lo pone solo al ver FormData
+                    },
+                    body: excelData 
                 });
+
+                const excelResult = await excelResponse.json();
+
+                // const excelResult = await peticionSegura("/estimaciones/importar", {
+                //     method: 'POST',
+                //     body: excelData,
+                //     headers: {} // Vacío para el Multipart
+                // });
 
                 if (excelResult && excelResult.success) {
                     feedback.innerText = "Proyecto y Excel subidos correctamente.";
