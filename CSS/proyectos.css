@@ -90,6 +90,10 @@ main {
 /* 3. Estilos específicos del footer */
 .custom-footer {
     background-color: #ffffff;
+<<<<<<< HEAD
+=======
+
+>>>>>>> ff9020db0f16e66347e138435b297e4126c88b75
     box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
     margin-top: 2rem;
 }
