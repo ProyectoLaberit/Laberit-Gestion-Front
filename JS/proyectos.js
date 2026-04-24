@@ -14,10 +14,36 @@ function cerrarSesion() {
 // ─── Pintar proyectos ──────────────────────────────────────────────────────
 async function pintarProyectos() {
 
+    // ESTE ES EL CHIVATO
+    console.log("¡EJECUTANDO PINTAR PROYECTOS! Leyendo filtros...");
+    // 1. Obtener los filtros seleccionados
+    const filtros = {
+        activo: document.getElementById('filtro-estado')?.value || "",
+        desde: document.getElementById('filtro-desde')?.value || "",
+        hasta: document.getElementById('filtro-hasta')?.value || ""
+    };
+
+    // 2. Limpiar el objeto (quitar los que estén vacíos)
+    const filtrosLimpios = Object.fromEntries(
+        Object.entries(filtros).filter(([key, value]) => value !== "" && value !== null)
+    );
+
+    // 3. Convertir a parámetros de URL
+    const parametrosURL = new URLSearchParams(filtrosLimpios).toString();
+    
+    // 4. Montar el endpoint final (si hay parámetros ponemos '?', si no, no)
+    const endpoint = parametrosURL ? `/proyectos/cargar?${parametrosURL}` : "/proyectos/cargar";
+
+    // AÑADE ESTO: Ver qué URL se ha montado
+    console.log("1. URL enviada al Backend:", endpoint);
+
     const contenedorExcel = document.getElementById('lista-proyectos-excel');
     const contenedorSinExcel = document.getElementById('lista-proyectos-sin-excel');
 
-    const result = await peticionSegura("/proyectos/cargar");
+    // 5. Enviar la petición al Backend CON los filtros aplicados
+    const result = await peticionSegura(endpoint);
+
+    console.log("2. Proyectos devueltos por el Backend:", result.data);
 
     // Si la petición falla o no hay éxito, mostramos error y paramos
     if (!result || !result.success) {
