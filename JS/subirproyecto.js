@@ -20,30 +20,21 @@ function mostrarNombre(input) {
 
 async function guardarProyecto() {
     const feedback = document.getElementById('msg-feedback');
-    // Recopilar archivo
-    /*const fileInput = document.getElementById('archivoInput');
-    if (fileInput.files[0]) {
-        formData.append('archivo', fileInput.files[0]);
-    }*/
 
-    console.log(document.getElementById('gitlabId').value);
+    // Comprobar si hay un archivo seleccionado en el input
+    const fileInput = document.getElementById('archivoInput');
+    const tieneExcel = fileInput.files.length > 0;
 
-    // Recopilar campos
+    // Recopilar campos incluyendo la bandera 'excels'
     const formData = {
         nombre: document.getElementById('nombre').value,
         descripcion: document.getElementById('descripcion').value,
-        fechaInicio: document.getElementById('fechaInicio').value, // Se envía como string "YYYY-MM-DD"
+        fechaInicio: document.getElementById('fechaInicio').value,
         activo: true,
         gitlabId: document.getElementById('gitlabId').value,
-        clockifyId: document.getElementById('clockifyId').value
+        clockifyId: document.getElementById('clockifyId').value,
+        excels: tieneExcel // Añadimos esta línea
     };
-    /*formData.append('nombre', document.getElementById('nombre').value);
-    formData.append('fechaInicio', document.getElementById('fechaInicio').value);
-    formData.append('clockifyId', document.getElementById('clockifyId').value);
-    formData.append('gitlabId', document.getElementById('gitlabId').value);
-    formData.append('activo', true);
-    formData.append('descripcion', document.getElementById('descripcion').value);
-    formData.append('fechaFin', null);*/
 
     try {
         feedback.innerText = "Subiendo proyecto...";
@@ -83,11 +74,11 @@ async function guardarProyecto() {
                 // 4. CAMBIO CLAVE: Quitamos los headers para que el navegador gestione el Multipart
                 const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
                     method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${token}` 
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                         // IMPORTANTE: No poner 'Content-Type' aquí, el navegador lo pone solo al ver FormData
                     },
-                    body: excelData 
+                    body: excelData
                 });
 
                 const excelResult = await excelResponse.json();
@@ -127,7 +118,7 @@ function cerrarSesion() {
 }
 
 async function cargarClockify() {
-        const feedback = document.getElementById('msg-feedback');
+    const feedback = document.getElementById('msg-feedback');
 
 
     try {
@@ -137,7 +128,7 @@ async function cargarClockify() {
 
         const result = await peticionSegura("/clockify/externos");
 
-        if(result && result.success){
+        if (result && result.success) {
             const select = document.getElementById("clockifyId");
 
             select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
@@ -158,7 +149,7 @@ async function cargarClockify() {
 }
 
 async function cargarGitlab() {
-        const feedback = document.getElementById('msg-feedback');
+    const feedback = document.getElementById('msg-feedback');
 
 
     try {

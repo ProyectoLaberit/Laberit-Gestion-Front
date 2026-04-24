@@ -14,16 +14,15 @@ function cerrarSesion() {
 // ─── Pintar proyectos ──────────────────────────────────────────────────────
 async function pintarProyectos() {
 
-    const contenedor = document.getElementById('lista-proyectos');
+    const contenedorExcel = document.getElementById('lista-proyectos-excel');
+    const contenedorSinExcel = document.getElementById('lista-proyectos-sin-excel');
 
-    // Recuperamos el token que guardamos en el login
-    const token = localStorage.getItem("token");
-
-    // Usamos nuestra función mágica: ella ya sabe la URL_BASE y el Token
     const result = await peticionSegura("/proyectos/cargar");
 
-    // Si la petición falla o no hay éxito, paramos aquí
+    // Si la petición falla o no hay éxito, mostramos error y paramos
     if (!result || !result.success) {
+        contenedorExcel.innerHTML = '<div class="col-12 text-center text-danger">Error al cargar proyectos.</div>';
+        contenedorSinExcel.innerHTML = '';
         return; 
     }
 
@@ -32,35 +31,50 @@ async function pintarProyectos() {
     // Guardar correctamente en localStorage
     localStorage.setItem("proyectos", JSON.stringify(proyectos));
 
-    // Validación correcta
+    // Validación correcta de lista vacía
     if (!proyectos || proyectos.length === 0) {
-        contenedor.innerHTML = `
+        contenedorExcel.innerHTML = `
             <div class="col-12 text-center text-muted py-5">
                 No tienes proyectos asociados.
             </div>`;
+        contenedorSinExcel.innerHTML = '';
         return;
     }
 
-    // 🔥 Aquí el cambio importante: usar map en vez de forEach
-    contenedor.innerHTML = proyectos.map(p => `
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card project-card p-3">
-                <div class="card-body">
-                          <div class="card-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
-                                </svg>
-                            </div>
-                    <h5 class="card-title fw-bold">${p.nombre}</h5>
-                    <p class="card-text text-muted small mb-4">${p.descripcion}</p>
-                    <button onclick="verDetalles('${p.id}')" 
-                        class="btn btn-outline-dark btn-sm w-100 fw-medium">
-                        Ver Detalles
-                    </button>
+    // Separar los proyectos usando el campo "excels" que viene del backend
+    const proyectosConExcel = proyectos.filter(p => p.excels === true || p.excels === "true");
+    const proyectosSinExcel = proyectos.filter(p => p.excels === false || p.excels === "false" || !p.excels);
+
+    // Función auxiliar para generar el HTML de las tarjetas
+    const generarTarjetas = (lista) => {
+        if (lista.length === 0) {
+            return `<div class="col-12 text-center text-muted py-4">No hay proyectos en esta categoría.</div>`;
+        }
+
+        return lista.map(p => `
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card project-card p-3">
+                    <div class="card-body">
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
+                            </svg>
+                        </div>
+                        <h5 class="card-title fw-bold">${p.nombre}</h5>
+                        <p class="card-text text-muted small mb-4">${p.descripcion || ''}</p>
+                        <button onclick="verDetalles('${p.id}')" 
+                            class="btn btn-outline-dark btn-sm w-100 fw-medium">
+                            Ver Detalles
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
+    };
+
+    // Inyectar el HTML generado en cada contenedor
+    contenedorExcel.innerHTML = generarTarjetas(proyectosConExcel);
+    contenedorSinExcel.innerHTML = generarTarjetas(proyectosSinExcel);
 }
 
 function verDetalles(proyectoId) {
