@@ -21,6 +21,11 @@ async function cargarDetallesTar(){
     const idSub = localStorage.getItem("idSubfase");
     const nombreTar = localStorage.getItem("nombreTarea");
 
+    const displayNombre = document.getElementById("tarea-nombre-display");
+    if (displayNombre) {
+        displayNombre.innerText = nombreTar ? nombreTar : "Detalle de Tarea";
+    }
+
     // 1. DEBUG VITAL: Asegurarnos de que no estén viajando como "null" o "undefined"
 
     if (!proyectoId || !idSub) {
