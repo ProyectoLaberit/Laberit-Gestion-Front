@@ -49,7 +49,7 @@
 
     <!-- Main -->
     <main class="container py-5">
- 
+
         <!-- Task header -->
 <div class="d-flex align-items-center gap-3 mb-4">
     <div class="task-name mb-0" id="tarea-nombre-display">Cargando Tarea...</div>
@@ -57,7 +57,7 @@
         Editar Tiempos
     </a>
 </div>
- 
+
         <!-- Board -->
         <div class="board">
             <!-- Header -->
@@ -65,6 +65,10 @@
                 <div class="bh-cell">
                     <span class="bh-dot" style="background:#888780;"></span>
                     Departamento
+                </div>
+                <div class="bh-cell">
+                    <span class="bh-dot" style="background:#3498db;"></span>
+                    Tiempo Real
                 </div>
                 <div class="bh-cell">
                     <span class="bh-dot" style="background:#1D9E75;"></span>
@@ -75,58 +79,44 @@
                     Tiempo Máximo
                 </div>
             </div>
- 
+
             <!-- Body -->
             <div class="board-body" id="tablaEspec">
                 <!-- Col: Departamento -->
                 <div class="b-col">
                     <div class="item">
-                        <div class="item-name">Desarrollo</div>
-                    </div>
-                    <div class="item">
-                        <div class="item-name">Diseño</div>
-                    </div>
-                    <div class="item">
-                        <div class="item-name">QA</div>
+                        <div class="item-name"></div>
                     </div>
                 </div>
- 
+
+                <!-- Col: Tiempo Real -->
+                <div class="b-col">
+                    <div class="time-item">
+                        <div class="time-val time-min"></div>
+                        <div class="time-lbl"></div>
+                    </div>
+                </div>
+
                 <!-- Col: Tiempo Mínimo -->
                 <div class="b-col">
                     <div class="time-item">
-                        <div class="time-val time-min">2h</div>
-                        <div class="time-lbl">Desarrollo</div>
-                    </div>
-                    <div class="time-item">
-                        <div class="time-val time-min">1h</div>
-                        <div class="time-lbl">Diseño</div>
-                    </div>
-                    <div class="time-item">
-                        <div class="time-val time-min">30m</div>
-                        <div class="time-lbl">QA</div>
+                        <div class="time-val time-min"></div>
+                        <div class="time-lbl"></div>
                     </div>
                 </div>
- 
+
                 <!-- Col: Tiempo Máximo -->
                 <div class="b-col">
                     <div class="time-item">
-                        <div class="time-val time-max">5h</div>
-                        <div class="time-lbl">Desarrollo</div>
-                    </div>
-                    <div class="time-item">
-                        <div class="time-val time-max">3h</div>
-                        <div class="time-lbl">Diseño</div>
-                    </div>
-                    <div class="time-item">
-                        <div class="time-val time-max">2h</div>
-                        <div class="time-lbl">QA</div>
+                        <div class="time-val time-max"></div>
+                        <div class="time-lbl"></div>
                     </div>
                 </div>
             </div>
         </div>
- 
+
     </main>
- 
+
 
 <footer class="custom-footer py-3">
     <div class="container text-center">
