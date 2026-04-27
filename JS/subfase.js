@@ -14,6 +14,12 @@ async function cargarDatosSubfase() {
     const proyectoId = localStorage.getItem("proyectoId");
     const idSub = localStorage.getItem("idSubfase");
 
+    const nombreSub = localStorage.getItem("subfaseSeleccionada");
+    const displayNombre = document.getElementById("subfase-nombre-display");
+    if (displayNombre) {
+        displayNombre.innerText = nombreSub ? nombreSub : "Subfase " + idSub;
+    }
+
     // 1. DEBUG VITAL: Asegurarnos de que no estén viajando como "null" o "undefined"
     console.log("Comprobando variables antes de enviar:");
     console.log("ID Proyecto:", proyectoId);
