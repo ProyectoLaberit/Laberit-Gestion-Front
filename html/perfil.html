@@ -86,12 +86,12 @@
         <div class="row g-5">
             <div class="col-md-4 text-center">
                 <div class="profile-pic-container">
-                    <img id="profile-img" src="../img/logo.png" alt="Foto de perfil">
+                    <img id="profile-img" src="../img/avatar_masculino.png" alt="Foto de perfil">
                 </div>
-                <button class="btn btn-outline-secondary btn-sm w-100 mb-3">Cambiar Foto</button>
+                <button class="btn btn-outline-secondary btn-sm w-100 mb-3" onclick="abrirModalFoto()">Cambiar
+                    Foto</button>
                 <div class="badge bg-dark p-2 w-100" id="user-role-display">Rol: Usuario</div>
             </div>
-
             <div class="col-md-8">
                 <div class="field-group d-flex justify-content-between align-items-center">
                     <div>
@@ -156,7 +156,51 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="modalEdicionFoto" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold">Elige tu Avatar</h6>
+                    <button type="button" class="btn-close text-xs" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center pb-2">
+                    <div class="d-flex gap-3 justify-content-center mb-2">
 
+                        <div class="avatar-option text-center"
+                            onclick="seleccionarAvatar('avatar_masculino.png', this)">
+                            <img src="../img/avatar_masculino.png" alt="Masc"
+                                class="rounded-circle img-thumbnail selector-avatar active" id="opt-masc"
+                                style="width: 70px; height: 70px; cursor: pointer; border: 3px solid transparent;">
+                            <div class="small mt-1">Él</div>
+                        </div>
+
+                        <div class="avatar-option text-center" onclick="seleccionarAvatar('avatar_femenino.png', this)">
+                            <img src="../img/avatar_femenino.png" alt="Fem"
+                                class="rounded-circle img-thumbnail selector-avatar" id="opt-fem"
+                                style="width: 70px; height: 70px; cursor: pointer; border: 3px solid transparent;">
+                            <div class="small mt-1">Ella</div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 flex-column align-items-center">
+                    <button type="button" class="btn btn-brand w-100 py-1" onclick="guardarFoto()">Guardar Foto</button>
+                    <div id="mensajeExitoFoto" class="text-success small fw-bold text-center mt-2 w-100"
+                        style="display: none;">
+                        Guardado correctamente
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Estilo para resaltar la foto seleccionada con un borde azul */
+        .selector-avatar.active {
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
+        }
+    </style>
     <footer class="custom-footer py-3">
         <div class="container text-center">
             <div class="footer-logo mb-2">L</div>
