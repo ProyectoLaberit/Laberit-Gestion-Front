@@ -46,25 +46,25 @@
 
     <main class="container py-5">
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3">
             <div>
             </div>
             <div class="d-flex align-items-center gap-2 bg-white p-2 rounded border shadow-sm">
                 <span class="text-muted small fw-medium ps-2 text-nowrap">Filtrar por:</span>
-                <select class="form-select form-select-sm border-0 bg-light">
-                    <option selected>Estado</option>
-                    <option>Activo</option>
-                    <option>En Pausa</option>
-                    <option>Completado</option>
+                
+                 <select id="filtro-estado" onchange="pintarProyectos()" class="form-select form-select-sm border-0 bg-light">
+                    <option value="">Todos los estados</option>
+                    <option value="true">Activos</option>
+                    <option value="false">Inactivos</option>
                 </select>
-                <select class="form-select form-select-sm border-0 bg-light">
-                    <option selected>Fecha</option>
-                    <option>Más recientes</option>
-                    <option>Más antiguos</option>
-                </select>
-            </div>
-        </div>
 
+               <span class="text-muted small border-start ps-2">Desde:</span>
+                    <input type="date" id="filtro-desde" onchange="pintarProyectos()" class="form-control form-control-sm border-0 bg-light">
+                    
+                    <span class="text-muted small">Hasta:</span>
+                    <input type="date" id="filtro-hasta" onchange="pintarProyectos()" class="form-control form-control-sm border-0 bg-light">
+                </div>
+        </div>
         <!-- Contenedor dinámico de proyectos -->
         <div class="row g-4" id="lista-proyectos">
             <h3 class="h5 fw-bold text-dark mb-3 mt-2 border-bottom pb-2 text-uppercase" style="letter-spacing: 0.5px;">
