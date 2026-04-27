@@ -98,17 +98,17 @@
                         <label class="small text-muted d-block">Nombre Completo</label>
                         <span class="fw-bold fs-5" id="user-fullname">Nombre del Usuario</span>
                     </div>
-                    <button class="btn btn-sm btn-link text-brand fw-bold">Modificar</button>
+                    <button class="btn btn-sm btn-link text-brand fw-bold"
+                        onclick="abrirModal('nombre')">Modificar</button>
                 </div>
-
-                <h3 class="section-title h5 mb-4">Seguridad</h3>
 
                 <div class="field-group d-flex justify-content-between align-items-center">
                     <div>
                         <label class="small text-muted d-block">Correo Electrónico</label>
                         <span id="user-email">usuario@laberit.com</span>
                     </div>
-                    <button class="btn btn-sm btn-link text-brand fw-bold">Modificar</button>
+                    <button class="btn btn-sm btn-link text-brand fw-bold"
+                        onclick="abrirModal('email')">Modificar</button>
                 </div>
 
                 <div class="field-group d-flex justify-content-between align-items-center">
@@ -116,24 +116,54 @@
                         <label class="small text-muted d-block">Contraseña</label>
                         <span>••••••••••••</span>
                     </div>
-                    <button class="btn btn-sm btn-link text-brand fw-bold">Modificar</button>
+                    <button class="btn btn-sm btn-link text-brand fw-bold"
+                        onclick="abrirModal('password')">Modificar</button>
                 </div>
 
-                <div class="d-flex gap-3 mt-5">
-                    <button class="btn btn-brand flex-grow-1 py-2 shadow-sm">Guardar Cambios</button>
-                    <button class="btn btn-outline-secondary px-4 py-2">Descartar Cambios</button>
-                </div>
+
             </div>
         </div>
     </main>
 
-<footer class="custom-footer py-3">
-    <div class="container text-center">
-        <div class="footer-logo mb-2">L</div>
-        <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
-        <p class="text-muted mb-0" style="font-size: 0.7rem;">Todos los derechos reservados.</p>
+    <div class="modal fade" id="modalEdicionMini" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold" id="tituloModal">Editar</h6>
+                    <button type="button" class="btn-close text-xs" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pb-2">
+                    <input type="hidden" id="campoAEditar">
+
+                    <div class="mb-2" id="divPasswordVieja" style="display: none;">
+                        <input type="password" id="inputPasswordVieja" class="form-control form-control-sm"
+                            placeholder="Contraseña actual...">
+                    </div>
+
+                    <div class="mb-1">
+                        <input type="text" id="inputNuevoValor" class="form-control form-control-sm"
+                            placeholder="Nuevo valor...">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 flex-column align-items-center">
+                    <button type="button" class="btn btn-brand w-100 py-1" onclick="guardarEdicion()">Guardar</button>
+
+                    <div id="mensajeExito" class="text-success small fw-bold text-center mt-2 w-100"
+                        style="display: none;">
+                        Guardado correctamente
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</footer>
+
+    <footer class="custom-footer py-3">
+        <div class="container text-center">
+            <div class="footer-logo mb-2">L</div>
+            <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
+            <p class="text-muted mb-0" style="font-size: 0.7rem;">Todos los derechos reservados.</p>
+        </div>
+    </footer>
 
     <script src="../js/api.js"></script>
     <script src="../js/perfil.js"></script>
