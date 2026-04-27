@@ -20,6 +20,8 @@ async function cargarDetallesTar(){
     const proyectoId = localStorage.getItem("proyectoId");
     const idSub = localStorage.getItem("idSubfase");
     const nombreTar = localStorage.getItem("nombreTarea");
+    // Recuperamos el nombre de la subfase porque vuestro endpoint de Clockify pide el String
+    const nombreSub = localStorage.getItem("subfaseSeleccionada") || idSub;
 
     const displayNombre = document.getElementById("tarea-nombre-display");
     if (displayNombre) {
@@ -59,33 +61,78 @@ async function cargarDetallesTar(){
         });
 
         if (result.success) {
-            // Aquí tu lógica para pintar la tabla
             const espec = result.data;
+            const tiemposReales = {};
+
+            //Llamada para ver los tiempos de clockify
+            const resultClockify = await peticionSegura(`/clockify/${proyectoId}/${nombreSub}`, {
+                method: 'GET'
+            });
+
+            if (resultClockify && resultClockify.success && resultClockify.data) {
+                const tareasClockify = resultClockify.data;
+                
+                tareasClockify.forEach(tc => {
+                    const nombreReloj = tc.nombre || tc.tarea || "";
+                    const equipo = tc.team || tc.departamento || "Desconocido";
+                    const horas = parseFloat(tc.duracion || tc.tiempo || 0);
+
+                    // Comparamos el texto del reloj con el nombre de la tarea
+                    if (nombreReloj.includes(nombreTar)) {
+                        if (!tiemposReales[equipo]) {
+                            tiemposReales[equipo] = 0;
+                        }
+                        tiemposReales[equipo] += horas;
+                    }
+                });
+            }
+
+
             const tabla = document.getElementById("tablaEspec");
 
-            tabla.innerHTML = espec.map(p =>`
-                <!-- Col: Departamento -->
-                <div class="b-col">
-                    <div class="item">
-                        <div class="item-name">${p.nombreDepartamento}</div>
-                    </div>
+            // 1. Columna de Departamentos
+            const colDeptos = espec.map(p => `
+                <div class="item">
+                    <div class="item-name">${p.nombreDepartamento}</div>
                 </div>
+            `).join('');
 
-                <!-- Col: Tiempo Mínimo -->
-                <div class="b-col">
-                    <div class="time-item">
-                        <div class="time-val time-min">${p.tiempoMin}</div>
-                        <div class="time-lbl">${p.nombreDepartamento}</div>
-                    </div>
+            // 2. Columna de Tiempo Real
+            const colReal = espec.map(p => {
+                let tiempoRealValor = tiemposReales[p.nombreDepartamento];
+                const tiempoRealDisplay = (tiempoRealValor !== undefined && tiempoRealValor > 0) 
+                                            ? tiempoRealValor + "h" 
+                                            : "-";
+                return `
+                <div class="time-item">
+                    <div class="time-val text-primary fw-bold" style="font-size: 1.1rem;">${tiempoRealDisplay}</div>
+                    <div class="time-lbl">${p.nombreDepartamento}</div>
+                </div>`;
+            }).join('');
+
+            // 3. Columna de Tiempo Mínimo
+            const colMin = espec.map(p => `
+                <div class="time-item">
+                    <div class="time-val time-min">${p.tiempoMin}h</div>
+                    <div class="time-lbl">${p.nombreDepartamento}</div>
                 </div>
+            `).join('');
 
-                <!-- Col: Tiempo Máximo -->
-                <div class="b-col">
-                    <div class="time-item">
-                        <div class="time-val time-max">${p.tiempoMax}</div>
-                        <div class="time-lbl">${p.nombreDepartamento}</div>
-                    </div>
-                </div>`).join('');
+            // 4. Columna de Tiempo Máximo
+            const colMax = espec.map(p => `
+                <div class="time-item">
+                    <div class="time-val time-max">${p.tiempoMax}h</div>
+                    <div class="time-lbl">${p.nombreDepartamento}</div>
+                </div>
+            `).join('');
+
+            // 5. Inyectamos las 4 columnas maestras en el HTML
+            tabla.innerHTML = `
+                <div class="b-col">${colDeptos}</div>
+                <div class="b-col">${colReal}</div>
+                <div class="b-col">${colMin}</div>
+                <div class="b-col">${colMax}</div>
+            `;
 
         } else {
             console.warn("Aviso del backend:", result.message);
@@ -96,4 +143,3 @@ async function cargarDetallesTar(){
     }
 
 }
-

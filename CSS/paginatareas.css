@@ -123,7 +123,7 @@
  
         .board-head {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             background: #fff;
             border-bottom: 1px solid #e0e0e0;
         }
@@ -152,7 +152,7 @@
  
         .board-body {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             padding: 16px;
             gap: 12px;
         }
