@@ -9,10 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/altausuarios.css">
     <link rel="stylesheet" href="../CSS/nav.css">
-
-    <style>
-
-    </style>
 </head>
 
 <body>
@@ -37,7 +33,9 @@
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
                     <li class="nav-item"><a class="nav-link" href="subirproyecto.html">Subir Proyecto</a></li>
                     <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="altausuarios.html">Alta Usuarios</a></li>
+                    <!-- Solo visible para ADMIN -->
+                    <li class="nav-item" data-rol-minimo="ADMIN"><a class="nav-link" href="altausuarios.html">Alta
+                            Usuarios</a></li>
                     <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
                     <li class="nav-item border-start border-secondary ps-3 ms-1 d-none d-lg-block"></li>
                     <li class="nav-item">
@@ -158,28 +156,28 @@
 
             <hr class="form-divider">
 
-            <!-- ── Sección: Rol ── -->
+            <!-- ── Sección: Rol (ADMIN puede asignar cualquier rol) ── -->
             <p class="section-label">Rol y permisos</p>
 
             <div class="mb-3">
                 <label class="form-label">Rol del usuario <span class="req">*</span></label>
                 <div class="rol-options" id="rol-options">
                     <div class="rol-option">
-                        <input type="radio" name="rol" id="rol-usuario" value="USUARIO" checked>
+                        <input type="radio" name="rol" id="rol-usuario" value="3" checked>
                         <label for="rol-usuario">
-                            <span class="rol-dot"></span> Usuario
+                            <span class="rol-dot"></span> Empleado
                         </label>
                     </div>
                     <div class="rol-option">
-                        <input type="radio" name="rol" id="rol-manager" value="MANAGER">
+                        <input type="radio" name="rol" id="rol-manager" value="2">
                         <label for="rol-manager">
-                            <span class="rol-dot"></span> Manager
+                            <span class="rol-dot"></span> Administrador
                         </label>
                     </div>
                     <div class="rol-option">
-                        <input type="radio" name="rol" id="rol-admin" value="ADMIN">
+                        <input type="radio" name="rol" id="rol-admin" value="1">
                         <label for="rol-admin">
-                            <span class="rol-dot"></span> Administrador
+                            <span class="rol-dot"></span> Super Administrador
                         </label>
                     </div>
                 </div>
@@ -224,9 +222,8 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/altausuarios.js ">
-    </script>
+    <script src="../JS/api.js"></script>
+    <script src="../JS/altausuarios.js"></script>
 </body>
 
 </html>
