@@ -55,13 +55,60 @@ async function cargarDatosSubfase() {
             body: parametros
         });
 
-        if (result.success) {
+        if (result && result.success) {
             console.log("¡Éxito! Tareas recuperadas:", result.data);
             // Aquí tu lógica para pintar la tabla
             const tar = result.data;
+
+            const tiemposTotalesClockify = {};
+
+            try {
+                const resultClockify = await peticionSegura(`/clockify/${proyectoId}/${nombreSub}`, {
+                    method: 'GET'
+                });
+
+                if (resultClockify && resultClockify.success && resultClockify.data) {
+                    const tareasClockify = resultClockify.data;
+                    
+                    tareasClockify.forEach(tc => {
+                        const nombreReloj = tc.titulo || "";
+                        const horas = parseFloat(tc.horasTrabajadas || 0);
+
+                        tar.forEach(t => {
+                            if (nombreReloj.toLowerCase().includes(t.nombreTarea.toLowerCase()) || 
+                                t.nombreTarea.toLowerCase().includes(nombreReloj.toLowerCase())) {
+
+                                if (!tiemposTotalesClockify[t.nombreTarea]) {
+                                    tiemposTotalesClockify[t.nombreTarea] = 0;
+                                }
+                                tiemposTotalesClockify[t.nombreTarea] += horas;
+                            }
+                        });
+                    });
+                }
+            } catch (err) {
+                console.warn("Aviso: No se pudo cargar Clockify", err);
+            }
+
             const tabla = document.getElementById("tablaTar");
 
-            tabla.innerHTML = tar.map(p =>`<div class="b-col" id="col-nombre" onclick="detalleTarea('${p.nombreTarea}')">
+            tabla.innerHTML = tar.map(p => {
+                const tiempoReal = tiemposTotalesClockify[p.nombreTarea];
+
+                let displayTiempo = "-"; // Por defecto, el guion
+
+                // 2. Si existe y no es nulo...
+                if (tiempoReal !== undefined && tiempoReal !== null) {
+                    // Lo forzamos a número (por si acaso llega como texto)
+                    let numeroHoras = parseFloat(tiempoReal);
+                    
+                    // 3. Si es un número válido y mayor que cero, lo redondeamos y le ponemos la 'h'
+                    if (!isNaN(numeroHoras) && numeroHoras > 0) {
+                        displayTiempo = (Math.round(numeroHoras * 10) / 10) + "h";
+                    }
+                }
+            
+                return `<div class="b-col" id="col-nombre" onclick="detalleTarea('${p.nombreTarea}')">
                     <div class="item">
                         <div class="item-name">${p.nombreTarea}</div>
                     </div>
@@ -69,8 +116,8 @@ async function cargarDatosSubfase() {
 
                 <!-- Col: Tarea Clockify -->
                 <div class="b-col" id="col-clockify">
-                    <div class="item">
-                        <div class="item-name">Tiempo Clockify</div>
+                    <div class="est-item">
+                        <div class="est-val">${displayTiempo}</div>
                     </div>
                 </div>
 
@@ -79,7 +126,7 @@ async function cargarDatosSubfase() {
                     <div class="est-item">
                         <div class="est-val">${p.tiempoTotalMin} - ${p.tiempoTotalMax}</div>
                     </div>
-                </div>`).join('');
+                </div>`}).join('');
 
         } else {
             console.warn("Aviso del backend:", result.message);

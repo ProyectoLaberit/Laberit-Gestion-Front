@@ -20,7 +20,7 @@ async function cargarDetallesTar(){
     const proyectoId = localStorage.getItem("proyectoId");
     const idSub = localStorage.getItem("idSubfase");
     const nombreTar = localStorage.getItem("nombreTarea");
-    // Recuperamos el nombre de la subfase porque vuestro endpoint de Clockify pide el String
+    // Recuperamos el nombre de la subfase porque nuestro endpoint de Clockify pide el String
     const nombreSub = localStorage.getItem("subfaseSeleccionada") || idSub;
 
     const displayNombre = document.getElementById("tarea-nombre-display");
@@ -73,16 +73,19 @@ async function cargarDetallesTar(){
                 const tareasClockify = resultClockify.data;
                 
                 tareasClockify.forEach(tc => {
-                    const nombreReloj = tc.nombre || tc.tarea || "";
-                    const equipo = tc.team || tc.departamento || "Desconocido";
-                    const horas = parseFloat(tc.duracion || tc.tiempo || 0);
+                    const nombreReloj = tc.titulo || "";
+                    const equipo = tc.departamento || "Desconocido";
+                    const horas = parseFloat(tc.horasTrabajadas|| 0);
 
                     // Comparamos el texto del reloj con el nombre de la tarea
-                    if (nombreReloj.includes(nombreTar)) {
-                        if (!tiemposReales[equipo]) {
-                            tiemposReales[equipo] = 0;
+                    if (nombreReloj.toLowerCase().includes(nombreTar.toLowerCase()) || nombreTar.toLowerCase().includes(nombreReloj.toLowerCase())) {
+                        
+                        const nombreTag = equipo.trim();
+
+                        if (!tiemposReales[nombreTag]) {
+                            tiemposReales[nombreTag] = 0;
                         }
-                        tiemposReales[equipo] += horas;
+                        tiemposReales[nombreTag] += horas;
                     }
                 });
             }
@@ -100,6 +103,12 @@ async function cargarDetallesTar(){
             // 2. Columna de Tiempo Real
             const colReal = espec.map(p => {
                 let tiempoRealValor = tiemposReales[p.nombreDepartamento];
+
+                //Redondeo de las horas
+                if (tiempoRealValor !== undefined && tiempoRealValor > 0) {
+                    tiempoRealValor = Math.round(tiempoRealValor * 10) / 10;
+                }
+
                 const tiempoRealDisplay = (tiempoRealValor !== undefined && tiempoRealValor > 0) 
                                             ? tiempoRealValor + "h" 
                                             : "-";
