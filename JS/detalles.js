@@ -1,106 +1,143 @@
-// Estructura de fases y subfases
-// const URL_BASE = "http://localhost:8080/api/fases/jerarquia";
-
-window.onload = function() {
-    // if (!localStorage.getItem("sesionActiva")) {
+window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
         return;
     }
-    cargarSubfases();
+    cargarPaginaDetalles();
 };
 
+// ── Estado global ─────────────────────────────────────────────────────────────
+let estructuraActual = {};
+let idsActuales = {};
 
-async function cargarSubfases() {
-
+// ── Carga inicial ─────────────────────────────────────────────────────────────
+async function cargarPaginaDetalles() {
     const proyectoId = localStorage.getItem("proyectoId");
 
-    cargarHistorialExcels(proyectoId);
+    // Nombre del proyecto
+    const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
+    const proyectoActual = proyectos.find(p => String(p.id) === String(proyectoId));
+    document.getElementById('proyecto-nombre-display').innerText =
+        proyectoActual ? proyectoActual.nombre : "Proyecto " + proyectoId;
 
-    // const response = await fetch(`${URL_BASE}`);
-    // const result = await response.json();
+    // Cargar historial de excels en el desplegable
+    await cargarHistorialExcels(proyectoId);
+
+    // Cargar fases del excel vigente (por defecto)
+    await cargarSubfases(proyectoId);
+
+    // Buscador
+    document.getElementById('input-busqueda').addEventListener('input', (e) => {
+        renderizarTodo(e.target.value, estructuraActual, idsActuales);
+    });
+}
+
+// ── Historial de excels ───────────────────────────────────────────────────────
+async function cargarHistorialExcels(proyectoId) {
+    const select = document.getElementById('select-historial-excel');
+    select.innerHTML = '<option value="">Cargando historial...</option>';
+
+    const result = await peticionSegura(`/fases/historial/${proyectoId}`);
+
+    if (!result || !result.success || !result.data || result.data.length === 0) {
+        select.innerHTML = '<option value="">Sin historial</option>';
+        return;
+    }
+
+    const excels = result.data;
+    select.innerHTML = '';
+
+    excels.forEach((excel, index) => {
+        const fecha = excel.fechaSubida
+            ? new Date(excel.fechaSubida).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            : 'Fecha desconocida';
+
+        const label = excel.vigente
+            ? ` ${fecha} — ${excel.usuarioNombre}`
+            : `${fecha} — ${excel.usuarioNombre}`;
+
+        const opt = document.createElement('option');
+        opt.value = excel.idExcel;
+        opt.textContent = label;
+        if (excel.vigente) {
+            opt.selected = true;
+            opt.style.fontWeight = 'bold';
+        }
+        select.appendChild(opt);
+    });
+}
+
+// ── Cambio de excel en el desplegable ─────────────────────────────────────────
+async function onCambioExcel(select) {
+    const idExcel = select.value;
+    if (!idExcel) return;
+
+    const contenedor = document.getElementById('contenedor-fases');
+    contenedor.innerHTML = `
+        <div class="text-center py-5 text-muted">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            Cargando fases...
+        </div>`;
+
+    const result = await peticionSegura(`/fases/por-excel/${idExcel}`);
+
+    if (!result || !result.success) {
+        contenedor.innerHTML = `<p class="text-danger text-center py-4">Error al cargar las fases de este excel.</p>`;
+        return;
+    }
+
+    const fases = result.data;
+    procesarYRenderizar(fases);
+}
+
+// ── Carga de subfases del excel vigente ───────────────────────────────────────
+async function cargarSubfases(proyectoId) {
     const result = await peticionSegura(`/fases/${proyectoId}`);
 
-    // Si la petición falla o el servidor nos rechaza, paramos
     if (!result || !result.success) {
         console.error("No se pudieron cargar las fases.");
         return;
     }
 
-    const fases = result.data;
-    const ESTRUCTURA_PROYECTO = {};
+    procesarYRenderizar(result.data);
+}
+
+// ── Convierte respuesta de la API en estructura y renderiza ───────────────────
+function procesarYRenderizar(fases) {
+    const estructura = {};
     const ids = {};
 
     fases.forEach(p => {
-        ESTRUCTURA_PROYECTO[p.nombre] = p.subfases.map(a => a.nombre);
-        p.subfases.map(s =>
-            ids[s.nombre] = s.id
-        );
+        estructura[p.nombre] = p.subfases.map(s => s.nombre);
+        p.subfases.forEach(s => { ids[s.nombre] = s.id; });
     });
 
-    // --- SEGUNDA LLAMADA: Fallos Clockify ---
-    let listaFallos = [];
-    
-    try {
-        const resultFallos = await peticionSegura(`/fallos/${proyectoId}`);
-        
-        if (resultFallos && resultFallos.success && resultFallos.data) {
-            // Nos aseguramos de sacar el texto, venga como string puro o como objeto
-            listaFallos = resultFallos.data.map(f => typeof f === 'string' ? f : (f.nombre || f.tarea || "Desconocida"));
-        }
-    } catch (error) {
-        console.warn("No se pudieron cargar los fallos o no hay fallos:", error);
-        // Capturamos el error de forma silenciosa para que no salte nada si simplemente no hay fallos.
-    }
+    estructuraActual = estructura;
+    idsActuales = ids;
 
-    cargarVistaDetalles(ESTRUCTURA_PROYECTO, ids, listaFallos);
+    // Limpiar buscador al cambiar de excel
+    document.getElementById('input-busqueda').value = '';
 
-
+    renderizarTodo("", estructura, ids);
 }
 
-function cargarVistaDetalles(estructura, ids, fallos) {
-    // Lógica para mostrar el nombre del proyecto
-    const proyectoId = localStorage.getItem("proyectoId");
-    const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
-    const proyectoActual = proyectos.find(p => String(p.id) === String(proyectoId));
-
-    document.getElementById('proyecto-nombre-display').innerText = proyectoActual ? proyectoActual.nombre : "Proyecto " + proyectoId;
-
-    // CONFIGURACIÓN DEL BUSCADOR
-    const inputBusqueda = document.getElementById('input-busqueda');
-    if (inputBusqueda) {
-        // El evento 'input' se dispara cada vez que el usuario escribe una letra
-        inputBusqueda.addEventListener('input', (e) => {
-            const textoBusqueda = e.target.value;
-            renderizarTodo(textoBusqueda, estructura, ids, fallos);
-        });
-    }
-
-    console.log(estructura);
-
-    renderizarTodo("", estructura, ids, fallos); // Carga inicial sin filtro
-}
-
-function renderizarTodo(filtro = "", estr, ids, fallos = []) {
-
-    let ESTRUCTURA_PROYECTO = estr;
+// ── Renderizado ───────────────────────────────────────────────────────────────
+function renderizarTodo(filtro = "", estr, ids) {
     const contenedor = document.getElementById('contenedor-fases');
     contenedor.innerHTML = "";
 
-    // Convertimos a minúsculas para que la búsqueda no distinga entre "A" y "a"
     const filtroNormalizado = filtro.toLowerCase().trim();
 
-    //Pintar fases
-    for (const fase in ESTRUCTURA_PROYECTO) {
-        const subfases = ESTRUCTURA_PROYECTO[fase];
+    let hayResultados = false;
 
-        // Filtramos las subfases que contienen el texto buscado
+    for (const fase in estr) {
+        const subfases = estr[fase];
         const subfasesFiltradas = subfases.filter(sub =>
             sub.toLowerCase().includes(filtroNormalizado)
         );
 
-        // Si después de filtrar no queda ninguna subfase en esta fase, no dibujamos la fase
         if (subfasesFiltradas.length === 0) continue;
+        hayResultados = true;
 
         const seccion = document.createElement('section');
         seccion.className = "phase-section";
@@ -124,41 +161,20 @@ function renderizarTodo(filtro = "", estr, ids, fallos = []) {
         contenedor.appendChild(seccion);
     }
 
-        // --- PINTAR LA SECCIÓN "SIN VINCULAR" ---
-    if (fallos && fallos.length > 0) {
-        // También aplicamos el buscador a las tareas con fallo
-        const fallosFiltrados = fallos.filter(f => f.toLowerCase().includes(filtroNormalizado));
-
-        if (fallosFiltrados.length > 0) {
-            const seccionFallos = document.createElement('section');
-            seccionFallos.className = "phase-section mt-5"; // mt-5 para separar un poco más del resto
-
-            // Cabecera en rojo para destacar
-            let htmlFallos = `<h3 class="phase-header h5 text-danger" style="border-bottom-color: #dc3545;">SIN VINCULAR (FALLOS CLOCKIFY)</h3><div class="row g-3">`;
-
-            fallosFiltrados.forEach(fallo => {
-                // Estas tarjetas no tienen onclick porque no hay tareas dentro, son solo aviso
-                htmlFallos += `
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <div class="card subfase-card p-3 shadow-sm h-100" style="border-left-color: #dc3545; cursor: default;">
-                            <div class="fw-bold text-dark">${fallo}</div>
-                            <div class="text-danger small mt-2">Revisar nomenclatura</div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            htmlFallos += `</div>`;
-            seccionFallos.innerHTML = htmlFallos;
-            contenedor.appendChild(seccionFallos);
-        }
+    if (!hayResultados) {
+        contenedor.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" class="mb-3 opacity-50">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <p class="mb-0">No se encontraron subfases${filtroNormalizado ? ` para "<strong>${filtroNormalizado}</strong>"` : ''}.</p>
+            </div>`;
     }
 }
 
+// ── Navegación ────────────────────────────────────────────────────────────────
 function irASubfase(nombreSubfase) {
-
     const partes = nombreSubfase.split(',');
-
     localStorage.setItem("idSubfase", partes[1]);
     localStorage.setItem("subfaseSeleccionada", partes[0]);
     window.location.href = "subfase.html";
@@ -167,45 +183,4 @@ function irASubfase(nombreSubfase) {
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
-}
-
-// NUEVA FUNCIÓN: Obtiene el historial de Excels del backend y rellena el desplegable
-async function cargarHistorialExcels(proyectoId) {
-    try {
-        const token = localStorage.getItem("token");
-        
-        // Hacemos la petición al endpoint de tu compañero
-        const response = await fetch(`http://localhost:8080/api/estimaciones/${proyectoId}/historial-excels`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        const result = await response.json();
-
-        if (result.success && result.data) {
-            const selectHistorial = document.getElementById('select-historial-excels');
-            
-            // Limpiamos el select por si tuviera datos viejos
-            selectHistorial.innerHTML = '<option selected disabled>Historial Excels...</option>';
-
-            // Recorremos el JSON y creamos una etiqueta <option> por cada Excel
-            result.data.forEach(excel => {
-                const option = document.createElement('option');
-                option.value = excel.idExcel; // Guardamos el ID del Excel por si lo necesitas usar luego
-                
-                // Si el Excel es el vigente, le ponemos una marca visual
-                const marcaVigente = excel.vigente ? ' (Vigente)' : '';
-                
-                // Texto que verá el usuario: "2026-04-27 - Juan Beato Nico (Vigente)"
-                option.textContent = `${excel.fechaSubida} - ${excel.usuarioNombre}${marcaVigente}`;
-                
-                selectHistorial.appendChild(option);
-            });
-        }
-    } catch (error) {
-        console.error("Error al cargar el historial de excels:", error);
-    }
 }
