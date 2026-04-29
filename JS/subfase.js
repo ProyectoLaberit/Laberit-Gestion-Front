@@ -148,36 +148,8 @@ function detalleTarea(nombreTarea){
 }
 
 function abrirAñadirManual() {
-    const proyectoId = localStorage.getItem("proyectoId");
-    
-    const idSub = localStorage.getItem("idSubfase"); 
-
-    if (!proyectoId) {
-        console.error("Error: No se encuentra el ID del proyecto.");
-        return;
-    }
-
-    try {
-        const result = await peticionSegura(`/estimaciones/proyecto/${proyectoId}/manual`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                idSubfase: idSub
-            })
-        });
-
-        if (result && result.success) {
-            alert("Acción manual ejecutada con éxito.");
-            // Si el back-end devuelve una URL en los datos, podríais abrirla aquí
-            if (result.data && result.data.url) {
-                window.open(result.data.url, '_blank');
-            }
-        }
-    } catch (error) {
-        console.error("Error en la petición manual:", error);
-    }
+    // Simplemente navegamos a la página del formulario
+    window.location.href = "creartarea.html";
 }
 
 function cerrarSesion() {
