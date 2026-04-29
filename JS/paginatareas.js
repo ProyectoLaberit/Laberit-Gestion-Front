@@ -63,6 +63,7 @@ async function cargarDetallesTar(){
         if (result.success) {
             const espec = result.data;
             const tiemposReales = {};
+            const gitIds = {};
 
             //Llamada para ver los tiempos de clockify
             const resultClockify = await peticionSegura(`/clockify/${proyectoId}/${nombreSub}`, {
@@ -76,6 +77,7 @@ async function cargarDetallesTar(){
                     const nombreReloj = tc.titulo || "";
                     const equipo = tc.departamento || "Desconocido";
                     const horas = parseFloat(tc.horasTrabajadas|| 0);
+                    const idGit = tc.idGit;
 
                     // Comparamos el texto del reloj con el nombre de la tarea
                     if (nombreReloj.toLowerCase().includes(nombreTar.toLowerCase()) || nombreTar.toLowerCase().includes(nombreReloj.toLowerCase())) {
@@ -86,6 +88,10 @@ async function cargarDetallesTar(){
                             tiemposReales[nombreTag] = 0;
                         }
                         tiemposReales[nombreTag] += horas;
+
+                        if(idGit){
+                            gitIds[nombreTag] = idGit;
+                        }
                     }
                 });
             }
@@ -112,28 +118,40 @@ async function cargarDetallesTar(){
                 const tiempoRealDisplay = (tiempoRealValor !== undefined && tiempoRealValor > 0) 
                                             ? tiempoRealValor + "h" 
                                             : "-";
+
+                const idGuardado = gitIds[p.nombreDepartamento];
+                const displayGit = idGuardado ? `#${idGuardado}` : "-";
+
                 return `
                 <div class="time-item">
                     <div class="time-val text-primary fw-bold" style="font-size: 1.1rem;">${tiempoRealDisplay}</div>
-                    <div class="time-lbl">${p.nombreDepartamento}</div>
+                    <div class="time-lbl">${displayGit}</div>
                 </div>`;
             }).join('');
 
             // 3. Columna de Tiempo Mínimo
-            const colMin = espec.map(p => `
+            const colMin = espec.map(p => {
+                const idGuardado = gitIds[p.nombreDepartamento];
+                const displayGit = idGuardado ? `#${idGuardado}` : "-";
+
+                return `
                 <div class="time-item">
                     <div class="time-val time-min">${p.tiempoMin}h</div>
-                    <div class="time-lbl">${p.nombreDepartamento}</div>
-                </div>
-            `).join('');
+                    <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit}</div>
+                </div>`;
+            }).join('');
 
             // 4. Columna de Tiempo Máximo
-            const colMax = espec.map(p => `
+            const colMax = espec.map(p => {
+                const idGuardado = gitIds[p.nombreDepartamento];
+                const displayGit = idGuardado ? `#${idGuardado}` : "-";
+
+                return `
                 <div class="time-item">
                     <div class="time-val time-max">${p.tiempoMax}h</div>
-                    <div class="time-lbl">${p.nombreDepartamento}</div>
-                </div>
-            `).join('');
+                    <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit}</div>
+                </div>`;
+            }).join('');
 
             // 5. Inyectamos las 4 columnas maestras en el HTML
             tabla.innerHTML = `
