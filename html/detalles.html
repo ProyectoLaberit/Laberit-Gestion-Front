@@ -39,35 +39,6 @@
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
             border-left-color: var(--brand-primary);
         }
-
-        /* Desplegable historial */
-        #select-historial-excel {
-            min-width: 220px;
-            max-width: 280px;
-            font-size: 0.85rem;
-            border-color: #dee2e6;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-        }
-
-        #select-historial-excel:focus {
-            border-color: var(--brand-primary, #C01717);
-            box-shadow: 0 0 0 0.2rem rgba(192, 23, 23, 0.15);
-        }
-
-        .historial-label {
-            font-size: 0.75rem;
-            color: #6c757d;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-
-        .historial-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
     </style>
 </head>
 
@@ -106,56 +77,40 @@
     <main class="container py-5 flex-grow-1">
 
         <div class="bg-white p-4 rounded border shadow-sm mb-5">
-            <div class="row align-items-center gy-3">
-                <!-- Título del proyecto -->
-                <div class="col-12 col-md-4">
+            <div class="row align-items-center">
+                <div class="col-md-4">
                     <h2 class="h4 mb-1 fw-bold" id="proyecto-nombre-display">Cargando proyecto...</h2>
-                    <p class="text-muted mb-0 small">Gestión de Fases y Estimaciones</p>
+                    <p class="text-muted mb-0">Gestión de Fases y Estimaciones</p>
                 </div>
-
-                <!-- Controles -->
-                <div class="col-12 col-md-8">
-                    <div class="d-flex flex-wrap gap-2 justify-content-md-end align-items-end">
-
-                        <!-- Estado -->
-                        <select class="form-select" style="width:auto;">
-                            <option selected>Estado</option>
-                            <option>En curso</option>
-                            <option>Finalizado</option>
-                            <option>Pendiente</option>
-                        </select>
-
-                        <!-- Historial de Excels -->
-                        <div class="historial-wrapper">
-
-                            <select class="form-select" id="select-historial-excel"
-                                onchange="onCambioExcel(this)"
-                                title="Selecciona una versión del Excel para ver sus fases y estimaciones">
-                                <option value="">Cargando...</option>
-                            </select>
-                        </div>
-
-                        <!-- Buscador -->
-                        <div class="input-group" style="max-width: 210px;">
-                            <span class="input-group-text bg-white border-end-0 text-muted">
-                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                                </svg>
-                            </span>
-                            <input type="text" id="input-busqueda" class="form-control border-start-0"
-                                placeholder="Buscar subfase...">
-                        </div>
-
-                        <!-- Editar -->
-                        <a href="editarproyecto.html" class="btn btn-brand py-2 px-3">Editar</a>
-
+                <div class="col-md-8 d-flex gap-2 justify-content-md-end mt-3 mt-md-0">
+                    <div class="input-group" style="max-width: 450px;">
+                        <span class="input-group-text bg-white border-end-0 text-muted">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                        </span>
+                        <input type="text" id="input-busqueda" class="form-control border-start-0"
+                            placeholder="Buscar subfase...">
                     </div>
+
+                    <select class="form-select w-auto" id="select-historial-excel" onchange="onCambioExcel(this)"
+                        title="Selecciona una versión del Excel para ver sus fases y estimaciones">
+                        <option value="">Historial Excels...</option>
+                    </select>
+
+                    <select class="form-select w-auto">
+                        <option selected>Estado</option>
+                    </select>
+
+                    <a href="editarproyecto.html" class="btn btn-brand py-2">Editar</a>
                 </div>
             </div>
         </div>
+        </div>
 
         <div id="contenedor-fases"></div>
-
     </main>
 
     <footer class="custom-footer py-3">
@@ -166,9 +121,9 @@
         </div>
     </footer>
 
+    <script src="../js/api.js"></script>
+    <script src="../js/detalles.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../JS/api.js"></script>
-    <script src="../JS/detalles.js"></script>
 
 </body>
 
