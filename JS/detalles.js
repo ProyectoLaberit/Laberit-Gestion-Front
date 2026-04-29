@@ -15,6 +15,8 @@ async function cargarSubfases() {
 
     const proyectoId = localStorage.getItem("proyectoId");
 
+    cargarHistorialExcels(proyectoId);
+
     // const response = await fetch(`${URL_BASE}`);
     // const result = await response.json();
     const result = await peticionSegura(`/fases/${proyectoId}`);
@@ -165,4 +167,45 @@ function irASubfase(nombreSubfase) {
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
+}
+
+// NUEVA FUNCIÓN: Obtiene el historial de Excels del backend y rellena el desplegable
+async function cargarHistorialExcels(proyectoId) {
+    try {
+        const token = localStorage.getItem("token");
+        
+        // Hacemos la petición al endpoint de tu compañero
+        const response = await fetch(`http://localhost:8080/api/estimaciones/${proyectoId}/historial-excels`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            const selectHistorial = document.getElementById('select-historial-excels');
+            
+            // Limpiamos el select por si tuviera datos viejos
+            selectHistorial.innerHTML = '<option selected disabled>Historial Excels...</option>';
+
+            // Recorremos el JSON y creamos una etiqueta <option> por cada Excel
+            result.data.forEach(excel => {
+                const option = document.createElement('option');
+                option.value = excel.idExcel; // Guardamos el ID del Excel por si lo necesitas usar luego
+                
+                // Si el Excel es el vigente, le ponemos una marca visual
+                const marcaVigente = excel.vigente ? ' (Vigente)' : '';
+                
+                // Texto que verá el usuario: "2026-04-27 - Juan Beato Nico (Vigente)"
+                option.textContent = `${excel.fechaSubida} - ${excel.usuarioNombre}${marcaVigente}`;
+                
+                selectHistorial.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error("Error al cargar el historial de excels:", error);
+    }
 }

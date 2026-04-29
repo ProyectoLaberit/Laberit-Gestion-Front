@@ -82,17 +82,23 @@
                     <h2 class="h4 mb-1 fw-bold" id="proyecto-nombre-display">Cargando proyecto...</h2>
                     <p class="text-muted mb-0">Gestión de Fases y Estimaciones</p>
                 </div>
-                <div class="col-md-6 d-flex gap-2 justify-content-md-end mt-3 mt-md-0">
-                    <div class="input-group" style="max-width: 250px;">
-                        <span class="input-group-text bg-white border-end-0 text-muted">Q</span>
-                        <input type="text" id="input-busqueda" class="form-control border-start-0"
-                            placeholder="Buscar subfase...">
-                    </div>
-                    <select class="form-select w-auto">
-                        <option selected>Estado</option>
-                    </select>
-                    <a href="editarproyecto.html" class="btn btn-brand flex-grow-1 py-2">Editar</a>
-                </div>
+<div class="col-md-6 d-flex gap-2 justify-content-md-end mt-3 mt-md-0">
+    <div class="input-group" style="max-width: 250px;">
+        <span class="input-group-text bg-white border-end-0 text-muted">Q</span>
+        <input type="text" id="input-busqueda" class="form-control border-start-0"
+            placeholder="Buscar subfase...">
+    </div>
+    
+    <select class="form-select w-auto" id="select-historial-excels" style="max-width: 250px;">
+        <option selected disabled>Historial Excels...</option>
+    </select>
+
+    <select class="form-select w-auto">
+        <option selected>Estado</option>
+    </select>
+    
+    <a href="editarproyecto.html" class="btn btn-brand flex-grow-1 py-2">Editar</a>
+</div>
             </div>
         </div>
         </div>
