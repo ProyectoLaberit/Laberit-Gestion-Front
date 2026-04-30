@@ -93,4 +93,16 @@ function aplicarPermisosDom() {
     document.querySelectorAll("[data-rol-minimo='MANAGER']").forEach(el => {
         if (rol !== "ADMIN" && rol !== "MANAGER") el.style.display = "none";
     });
+
+    // Ocultar opciones del nav para empleados
+    if (rol === "Empleado") {
+        document.querySelectorAll('a[href="altausuarios.html"], a[href="gestionusuarios.html"]').forEach(enlace => {
+            const itemNav = enlace.closest(".nav-item");
+            if (itemNav) {
+                itemNav.style.display = "none";
+            }
+        });
+    }
 }
+
+document.addEventListener("DOMContentLoaded", aplicarPermisosDom);

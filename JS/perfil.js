@@ -1,4 +1,4 @@
-// ── Verificación de sesión al cargar ─────────────────────────────────────────
+// ── Verificación de sesión al cargar ──────────────────────────────────────────
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -21,6 +21,38 @@ function esEdicionAjena() {
     return !!localStorage.getItem("usuarioEditando");
 }
 
+const AVATAR_POR_DEFECTO = "avatar_masculino.png";
+const AVATARES_VALIDOS = ["avatar_masculino.png", "avatar_femenino.png"];
+
+function normalizarAvatar(nombreArchivo) {
+    const limpio = String(nombreArchivo || "").trim().split("/").pop().split("\\").pop();
+    return AVATARES_VALIDOS.includes(limpio) ? limpio : AVATAR_POR_DEFECTO;
+}
+
+function getRutaAvatar(nombreArchivo) {
+    return `../img/${normalizarAvatar(nombreArchivo)}`;
+}
+
+function aplicarAvatarPerfil(nombreArchivo) {
+    const avatarFileName = normalizarAvatar(nombreArchivo);
+    const profileImg = document.getElementById('profile-img');
+
+    profileImg.onerror = function () {
+        this.onerror = null;
+        this.src = getRutaAvatar(AVATAR_POR_DEFECTO);
+    };
+    profileImg.src = getRutaAvatar(avatarFileName);
+
+    document.querySelectorAll('.selector-avatar').forEach(img => img.classList.remove('active'));
+    if (avatarFileName === "avatar_femenino.png") {
+        document.getElementById('opt-fem').classList.add('active');
+    } else {
+        document.getElementById('opt-masc').classList.add('active');
+    }
+
+    avatarSeleccionadoTemporal = avatarFileName;
+}
+
 function cargarDatosPerfil() {
     const userData = getDatosActuales();
     if (!userData) return;
@@ -28,17 +60,7 @@ function cargarDatosPerfil() {
     document.getElementById('user-email').innerText = userData.email || "Sin email";
     document.getElementById('user-fullname').innerText = userData.nombre || "Sin nombre";
 
-    const avatarFileName = userData.foto || "avatar_masculino.png";
-    document.getElementById('profile-img').src = `../img/${avatarFileName}`;
-
-    document.querySelectorAll('.selector-avatar').forEach(img => img.classList.remove('active'));
-    if (avatarFileName === "avatar_masculino.png") {
-        document.getElementById('opt-masc').classList.add('active');
-    } else {
-        document.getElementById('opt-fem').classList.add('active');
-    }
-
-    avatarSeleccionadoTemporal = avatarFileName;
+    aplicarAvatarPerfil(userData.foto);
 
     const rolTexto = userData.rol || "USUARIO";
     document.getElementById('user-role-display').innerText = "Rol: " + rolTexto;
@@ -163,7 +185,7 @@ let avatarSeleccionadoTemporal = "";
 
 function abrirModalFoto() {
     const userData = getDatosActuales();
-    const avatarFileName = userData.foto || "avatar_masculino.png";
+    const avatarFileName = normalizarAvatar(userData.foto);
     avatarSeleccionadoTemporal = avatarFileName;
 
     document.getElementById('mensajeExitoFoto').style.display = 'none';
@@ -182,7 +204,7 @@ function abrirModalFoto() {
 }
 
 function seleccionarAvatar(nombreArchivo, elementoContenedor) {
-    avatarSeleccionadoTemporal = nombreArchivo;
+    avatarSeleccionadoTemporal = normalizarAvatar(nombreArchivo);
     document.querySelectorAll('#modalEdicionFoto .selector-avatar').forEach(img => img.classList.remove('active'));
     elementoContenedor.querySelector('.selector-avatar').classList.add('active');
 }
@@ -206,14 +228,14 @@ async function guardarFoto() {
         const data = await response.json();
 
         if (data.success) {
-            userData.foto = avatarSeleccionadoTemporal;
+            userData.foto = normalizarAvatar(avatarSeleccionadoTemporal);
             if (esEdicionAjena()) {
                 localStorage.setItem("usuarioEditando", JSON.stringify(userData));
             } else {
                 localStorage.setItem("usuarioData", JSON.stringify(userData));
             }
 
-            document.getElementById('profile-img').src = `../img/${avatarSeleccionadoTemporal}`;
+            aplicarAvatarPerfil(userData.foto);
             document.getElementById('mensajeExitoFoto').style.display = 'block';
 
             setTimeout(() => {
