@@ -13,66 +13,6 @@
             margin: 0;
         }
  
-        /* ── Navbar ── */
-        .navbar {
-            background-color: var(--brand-primary);
-            box-shadow: 0 2px 8px rgba(0,0,0,.15);
-            padding: 14px 24px;
-        }
- 
-        .navbar-brand-custom {
-            font-weight: 700;
-            font-size: 1.05rem;
-            line-height: 1.2;
-            color: #fff !important;
-            letter-spacing: .4px;
-        }
- 
-        .navbar-brand-sub {
-            display: block;
-            font-size: .7rem;
-            font-weight: 400;
-            opacity: .75;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
- 
-        .navbar .nav-link {
-            color: rgba(255,255,255,.85) !important;
-            font-weight: 500;
-            font-size: .9rem;
-        }
-        .navbar .nav-link:hover { color: #fff !important; }
- 
-        .btn-outline-nav {
-            border: 0.5px solid rgba(255,255,255,.5);
-            color: #fff;
-            background: transparent;
-            font-size: .8rem;
-            padding: 5px 16px;
-            border-radius: 6px;
-            transition: background .2s;
-        }
-        .btn-outline-nav:hover {
-            background: rgba(255,255,255,.15);
-            color: #fff;
-        }
- 
-        .logo-box {
-            width: 36px;
-            height: 36px;
-            background: #fff;
-            color: var(--brand-primary);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
- 
         /* ── Main ── */
         main { flex: 1; }
  
