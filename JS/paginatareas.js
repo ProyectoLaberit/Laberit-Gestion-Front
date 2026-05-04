@@ -28,6 +28,15 @@ async function cargarDetallesTar(){
         displayNombre.innerText = nombreTar ? nombreTar : "Detalle de Tarea";
     }
 
+    // Breadcrumb
+    const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
+    const proyectoActual = proyectos.find(p => String(p.id) === String(proyectoId));
+    document.getElementById("bc-proyecto").innerText = proyectoActual ? proyectoActual.nombre : "Proyecto";
+    document.getElementById("bc-fase").innerText     = localStorage.getItem("faseSeleccionada") || "Fase";
+    document.getElementById("bc-subfase").innerText  = localStorage.getItem("subfaseSeleccionada") || "Subfase";
+    document.getElementById("bc-tarea").innerText    = nombreTar || "Tarea";
+
+
     // 1. DEBUG VITAL: Asegurarnos de que no estén viajando como "null" o "undefined"
 
     if (!proyectoId || !idSub) {

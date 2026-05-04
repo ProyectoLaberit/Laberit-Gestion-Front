@@ -1,7 +1,7 @@
 // const URL_BASE = "http://localhost:8080/api/estimaciones";
 
 // Verificación de sesión
-window.onload = function() {
+window.onload = function () {
     // if (!localStorage.getItem("sesionActiva")) {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -19,6 +19,14 @@ async function cargarDatosSubfase() {
     if (displayNombre) {
         displayNombre.innerText = nombreSub ? nombreSub : "Subfase " + idSub;
     }
+    // Breadcrumb
+    const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
+    const proyectoActual = proyectos.find(p => String(p.id) === String(proyectoId));
+    const nombreProyecto = proyectoActual ? proyectoActual.nombre : "Proyecto";
+    const nombreFase = localStorage.getItem("faseSeleccionada") || "Fase";
+
+    document.getElementById("bc-proyecto").innerText = nombreProyecto;
+    document.getElementById("bc-fase").innerText = nombreFase;
 
     // 1. DEBUG VITAL: Asegurarnos de que no estén viajando como "null" o "undefined"
     console.log("Comprobando variables antes de enviar:");
@@ -27,7 +35,7 @@ async function cargarDatosSubfase() {
 
     if (!proyectoId || !idSub) {
         console.error("Error: Falta el ID del proyecto o la subfase en el localStorage");
-        return; 
+        return;
     }
 
     // 2. Empaquetamos los datos como un formulario (Ideal para @RequestParam)
@@ -50,7 +58,7 @@ async function cargarDatosSubfase() {
         const result = await peticionSegura(`/estimaciones/subfase/tareas`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded' 
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: parametros
         });
@@ -69,13 +77,13 @@ async function cargarDatosSubfase() {
 
                 if (resultClockify && resultClockify.success && resultClockify.data) {
                     const tareasClockify = resultClockify.data;
-                    
+
                     tareasClockify.forEach(tc => {
                         const nombreReloj = tc.titulo || "";
                         const horas = parseFloat(tc.horasTrabajadas || 0);
 
                         tar.forEach(t => {
-                            if (nombreReloj.toLowerCase().includes(t.nombreTarea.toLowerCase()) || 
+                            if (nombreReloj.toLowerCase().includes(t.nombreTarea.toLowerCase()) ||
                                 t.nombreTarea.toLowerCase().includes(nombreReloj.toLowerCase())) {
 
                                 if (!tiemposTotalesClockify[t.nombreTarea]) {
@@ -101,13 +109,13 @@ async function cargarDatosSubfase() {
                 if (tiempoReal !== undefined && tiempoReal !== null) {
                     // Lo forzamos a número (por si acaso llega como texto)
                     let numeroHoras = parseFloat(tiempoReal);
-                    
+
                     // 3. Si es un número válido y mayor que cero, lo redondeamos y le ponemos la 'h'
                     if (!isNaN(numeroHoras) && numeroHoras > 0) {
                         displayTiempo = (Math.round(numeroHoras * 10) / 10) + "h";
                     }
                 }
-            
+
                 return `<div class="b-col" id="col-nombre" onclick="detalleTarea('${p.nombreTarea}')">
                     <div class="item">
                         <div class="item-name">${p.nombreTarea}</div>
@@ -137,7 +145,7 @@ async function cargarDatosSubfase() {
     }
 }
 
-function detalleTarea(nombreTarea){
+function detalleTarea(nombreTarea) {
 
     console.log(nombreTarea);
 
