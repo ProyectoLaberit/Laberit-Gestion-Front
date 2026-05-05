@@ -9,74 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/proyectos.css">
     <link rel="stylesheet" href="../CSS/nav.css">
-    <style>
-        .page-header {
-            background: #fff;
-            border-bottom: 1px solid #e9ecef;
-            padding: 1.5rem 0;
-            margin-bottom: 2rem;
-        }
-        .page-header h1 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin: 0;
-            color: #1f2937;
-        }
-        .page-header p {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin: 0;
-        }
-        .form-card {
-            background: #fff;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .section-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #9ca3af;
-            margin-bottom: 1rem;
-        }
-        .form-divider {
-            border-color: #f3f4f6;
-            margin: 1.5rem 0;
-        }
-        .req { color: var(--brand-primary, #C01717); }
-        .alert-feedback {
-            display: none;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-        .alert-feedback.show { display: flex; }
-        .alert-success-custom { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
-        .alert-danger-custom  { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-        .breadcrumb-nav {
-            font-size: 0.82rem;
-            color: #6c757d;
-            margin-bottom: 0.25rem;
-        }
-        .breadcrumb-nav a { color: inherit; text-decoration: none; }
-        .breadcrumb-nav a:hover { color: var(--brand-primary, #C01717); }
-        .tiempo-group { position: relative; }
-        .tiempo-suffix {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-            font-size: 0.8rem;
-            pointer-events: none;
-        }
-        .tiempo-group input { padding-right: 36px; }
-    </style>
+    <link rel="stylesheet" href="../CSS/creartarea.css">
 </head>
 
 <body class="bg-light d-flex flex-column min-vh-100">
@@ -117,7 +50,8 @@
                 <div class="d-flex align-items-center justify-content-center rounded"
                     style="width:44px;height:44px;background:rgba(192,23,23,0.08);">
                     <svg width="20" height="20" fill="none" stroke="#C01717" stroke-width="2" viewBox="0 0 24 24">
-                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
                 </div>
                 <div>
@@ -127,8 +61,8 @@
                         <a href="subfase.html">Subfase</a> ›
                         Nueva Tarea
                     </div>
-                    <h1>Nueva Tarea</h1>
-                    <p id="contexto-display">Cargando...</p>
+                    <h1 id="titulo-proyecto">Proyecto</h1>
+
                 </div>
             </div>
         </div>
@@ -140,20 +74,36 @@
         <!-- Mensajes feedback -->
         <div id="msg-success" class="alert-feedback alert-success-custom mb-4">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
             <span id="msg-success-text"></span>
         </div>
         <div id="msg-error" class="alert-feedback alert-danger-custom mb-4">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
             </svg>
             <span id="msg-error-text"></span>
         </div>
 
         <div class="form-card">
+            <div class="contexto-tarea-box">
+                <div class="contexto-tarea-title">Contexto actual</div>
+                <div class="contexto-tarea-grid">
+                    <div class="contexto-tarea-item">
+                        <span>Fase</span>
+                        <strong id="contexto-fase">Cargando...</strong>
+                    </div>
+                    <div class="contexto-tarea-item">
+                        <span>Subfase</span>
+                        <strong id="contexto-subfase">Cargando...</strong>
+                    </div>
+                </div>
+            </div>
+
+
 
             <!-- Nombre de la tarea -->
             <p class="section-label">Identificación</p>
@@ -169,7 +119,8 @@
             <!-- Departamento -->
             <p class="section-label">Departamento</p>
             <div class="mb-3">
-                <label for="select-departamento" class="form-label">Departamento responsable <span class="req">*</span></label>
+                <label for="select-departamento" class="form-label">Departamento responsable <span
+                        class="req">*</span></label>
                 <select class="form-select" id="select-departamento">
                     <option value="" disabled selected>Cargando departamentos...</option>
                 </select>
@@ -184,8 +135,8 @@
                 <div class="col-md-6">
                     <label for="input-tiempo-min" class="form-label">Tiempo mínimo <span class="req">*</span></label>
                     <div class="tiempo-group">
-                        <input type="number" class="form-control" id="input-tiempo-min"
-                            placeholder="0" min="0" step="0.5">
+                        <input type="number" class="form-control" id="input-tiempo-min" placeholder="0" min="0"
+                            step="0.5">
                         <span class="tiempo-suffix">h</span>
                     </div>
                     <div class="invalid-feedback">Introduce un tiempo mínimo válido.</div>
@@ -193,8 +144,8 @@
                 <div class="col-md-6">
                     <label for="input-tiempo-max" class="form-label">Tiempo máximo <span class="req">*</span></label>
                     <div class="tiempo-group">
-                        <input type="number" class="form-control" id="input-tiempo-max"
-                            placeholder="0" min="0" step="0.5">
+                        <input type="number" class="form-control" id="input-tiempo-max" placeholder="0" min="0"
+                            step="0.5">
                         <span class="tiempo-suffix">h</span>
                     </div>
                     <div class="invalid-feedback">Introduce un tiempo máximo válido.</div>

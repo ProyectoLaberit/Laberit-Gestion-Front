@@ -146,9 +146,15 @@ function renderizarTodo(filtro = "", estr, ids) {
         htmlContent += `<div class="row g-3">`;
 
         subfasesFiltradas.forEach(sub => {
+            const onclickArgs = [
+                JSON.stringify(fase),
+                JSON.stringify(sub),
+                JSON.stringify(String(ids[sub]))
+            ].join(", ");
+
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${ids[sub]}')">
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick='irASubfase(${onclickArgs})'>
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
@@ -173,10 +179,10 @@ function renderizarTodo(filtro = "", estr, ids) {
 }
 
 // ── Navegación ────────────────────────────────────────────────────────────────
-function irASubfase(nombreSubfase) {
-    const partes = nombreSubfase.split(',');
-    localStorage.setItem("idSubfase", partes[1]);
-    localStorage.setItem("subfaseSeleccionada", partes[0]);
+function irASubfase(nombreFase, nombreSubfase, idSubfase) {
+    localStorage.setItem("faseSeleccionada", nombreFase);
+    localStorage.setItem("idSubfase", idSubfase);
+    localStorage.setItem("subfaseSeleccionada", nombreSubfase);
     window.location.href = "subfase.html";
 }
 

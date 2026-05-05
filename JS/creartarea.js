@@ -7,17 +7,72 @@ window.onload = function () {
     mostrarContexto();
 };
 
-function mostrarContexto() {
+async function mostrarContexto() {
     const subfase = localStorage.getItem("subfaseSeleccionada") || "Subfase";
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoId = localStorage.getItem("proyectoId");
     const proyecto = proyectos.find(p => String(p.id) === String(proyectoId));
+    const nombreProyecto = proyecto ? proyecto.nombre : "Proyecto";
+    const fase = await obtenerFaseActual(proyectoId);
+
+    const tituloEl = document.getElementById("titulo-proyecto");
+    if (tituloEl) {
+        tituloEl.innerText = "Proyecto > " + nombreProyecto;
+    }
 
     const el = document.getElementById("contexto-display");
     if (el) {
-        el.innerText = (proyecto ? proyecto.nombre : "Proyecto") + " › " + subfase;
+        el.innerText = fase + " > " + subfase;
+    }
+
+    const faseEl = document.getElementById("contexto-fase");
+    const subfaseEl = document.getElementById("contexto-subfase");
+
+    if (faseEl) {
+        faseEl.innerText = fase;
+    }
+
+    if (subfaseEl) {
+        subfaseEl.innerText = subfase;
     }
 }
+
+async function obtenerFaseActual(proyectoId) {
+    const faseGuardada = localStorage.getItem("faseSeleccionada");
+    if (faseGuardada) {
+        return faseGuardada;
+    }
+
+    const idSubfase = localStorage.getItem("idSubfase");
+    if (!proyectoId || !idSubfase) {
+        return "Fase";
+    }
+
+    try {
+        const result = await peticionSegura(`/fases/${proyectoId}`);
+
+        if (!result || !result.success || !Array.isArray(result.data)) {
+            return "Fase";
+        }
+
+        const faseActual = result.data.find(fase =>
+            Array.isArray(fase.subfases) &&
+            fase.subfases.some(subfase => String(subfase.id) === String(idSubfase))
+        );
+
+        if (!faseActual || !faseActual.nombre) {
+            return "Fase";
+        }
+
+        localStorage.setItem("faseSeleccionada", faseActual.nombre);
+        return faseActual.nombre;
+    } catch (error) {
+        console.error("No se pudo resolver la fase actual:", error);
+        return "Fase";
+    }
+}
+
+
 
 async function cargarDepartamentos() {
     const select = document.getElementById("select-departamento");
