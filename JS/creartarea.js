@@ -1,8 +1,13 @@
+let departamentosDisponibles = [];
+let departamentosSeleccionados = [];
+
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
         return;
     }
+
+    document.addEventListener("click", manejarClickFueraDropdown);
     cargarDepartamentos();
     mostrarContexto();
 };
@@ -18,11 +23,6 @@ async function mostrarContexto() {
     const tituloEl = document.getElementById("titulo-proyecto");
     if (tituloEl) {
         tituloEl.innerText = "Proyecto > " + nombreProyecto;
-    }
-
-    const el = document.getElementById("contexto-display");
-    if (el) {
-        el.innerText = fase + " > " + subfase;
     }
 
     const faseEl = document.getElementById("contexto-fase");
@@ -72,26 +72,174 @@ async function obtenerFaseActual(proyectoId) {
     }
 }
 
-
-
 async function cargarDepartamentos() {
-    const select = document.getElementById("select-departamento");
-    select.innerHTML = '<option value="">Cargando departamentos...</option>';
+    const toggle = document.getElementById("select-departamento");
+    const placeholder = document.getElementById("departamento-placeholder");
+
+    toggle.disabled = true;
+    placeholder.textContent = "Cargando departamentos...";
 
     const result = await peticionSegura("/departamentos");
 
     if (!result || !result.success || !result.data || result.data.length === 0) {
-        select.innerHTML = '<option value="">No hay departamentos disponibles</option>';
+        departamentosDisponibles = [];
+        departamentosSeleccionados = [];
+        renderizarOpcionesDepartamentos();
+        actualizarResumenDepartamentos("No hay departamentos disponibles");
         return;
     }
 
-    select.innerHTML = '<option value="" disabled selected>Selecciona un departamento...</option>';
-    result.data.forEach(dep => {
-        const opt = document.createElement("option");
-        opt.value = dep.id;
-        opt.textContent = dep.nombre;
-        select.appendChild(opt);
-    });
+    departamentosDisponibles = result.data.map(dep => ({
+        id: Number(dep.id),
+        nombre: dep.nombre
+    }));
+    departamentosSeleccionados = [];
+
+    toggle.disabled = false;
+    renderizarOpcionesDepartamentos();
+    actualizarResumenDepartamentos();
+}
+
+function toggleDropdownDepartamentos(event) {
+    event.stopPropagation();
+
+    const toggle = document.getElementById("select-departamento");
+    const menu = document.getElementById("departamento-menu");
+
+    if (toggle.disabled) {
+        return;
+    }
+
+    const abierto = !menu.classList.contains("show");
+    menu.classList.toggle("show", abierto);
+    toggle.classList.toggle("open", abierto);
+}
+
+function manejarClickFueraDropdown(event) {
+    const wrapper = document.getElementById("departamento-wrapper");
+    if (!wrapper || wrapper.contains(event.target)) {
+        return;
+    }
+
+    cerrarDropdownDepartamentos();
+}
+
+function cerrarDropdownDepartamentos() {
+    const toggle = document.getElementById("select-departamento");
+    const menu = document.getElementById("departamento-menu");
+
+    if (toggle) {
+        toggle.classList.remove("open");
+    }
+
+    if (menu) {
+        menu.classList.remove("show");
+    }
+}
+
+function renderizarOpcionesDepartamentos() {
+    const menu = document.getElementById("departamento-menu");
+    if (!menu) {
+        return;
+    }
+
+    if (departamentosDisponibles.length === 0) {
+        menu.innerHTML = '<div class="multi-select-option empty">No hay departamentos disponibles</div>';
+        return;
+    }
+
+    menu.innerHTML = departamentosDisponibles.map(dep => `
+        <label class="multi-select-option" for="departamento-check-${dep.id}">
+            <input
+                type="checkbox"
+                id="departamento-check-${dep.id}"
+                ${departamentosSeleccionados.includes(dep.id) ? "checked" : ""}
+                onchange="toggleDepartamento(${dep.id})">
+            <span>${dep.nombre}</span>
+        </label>
+    `).join("");
+}
+
+function toggleDepartamento(idDepartamento) {
+    const id = Number(idDepartamento);
+
+    if (departamentosSeleccionados.includes(id)) {
+        departamentosSeleccionados = departamentosSeleccionados.filter(depId => depId !== id);
+    } else {
+        departamentosSeleccionados = [...departamentosSeleccionados, id];
+    }
+
+    renderizarOpcionesDepartamentos();
+    actualizarResumenDepartamentos();
+}
+
+function quitarDepartamento(idDepartamento, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+
+    departamentosSeleccionados = departamentosSeleccionados.filter(depId => depId !== Number(idDepartamento));
+    renderizarOpcionesDepartamentos();
+    actualizarResumenDepartamentos();
+}
+
+function actualizarResumenDepartamentos(textoManual) {
+    const placeholder = document.getElementById("departamento-placeholder");
+    const tags = document.getElementById("departamento-tags");
+    const seleccionados = departamentosDisponibles.filter(dep => departamentosSeleccionados.includes(dep.id));
+
+    if (textoManual) {
+        placeholder.textContent = textoManual;
+        placeholder.classList.add("multi-select-placeholder");
+        tags.innerHTML = "";
+        limpiarValidacionDepartamentos();
+        return;
+    }
+
+    if (seleccionados.length === 0) {
+        placeholder.textContent = "Selecciona uno o varios departamentos...";
+        placeholder.classList.add("multi-select-placeholder");
+        tags.innerHTML = "";
+        limpiarValidacionDepartamentos();
+        return;
+    }
+
+    placeholder.textContent = seleccionados.map(dep => dep.nombre).join(", ");
+    placeholder.classList.remove("multi-select-placeholder");
+    tags.innerHTML = seleccionados.map(dep => `
+        <span class="selected-tag">
+            <span>${dep.nombre}</span>
+            <button type="button" onclick="quitarDepartamento(${dep.id}, event)" aria-label="Quitar ${dep.nombre}">x</button>
+        </span>
+    `).join("");
+
+    marcarDepartamentosValidos();
+}
+
+function marcarDepartamentosInvalidos() {
+    const toggle = document.getElementById("select-departamento");
+    const feedback = document.getElementById("departamento-feedback");
+
+    toggle.classList.add("is-invalid");
+    toggle.classList.remove("is-valid");
+    feedback.classList.add("show");
+}
+
+function marcarDepartamentosValidos() {
+    const toggle = document.getElementById("select-departamento");
+    const feedback = document.getElementById("departamento-feedback");
+
+    toggle.classList.remove("is-invalid");
+    toggle.classList.add("is-valid");
+    feedback.classList.remove("show");
+}
+
+function limpiarValidacionDepartamentos() {
+    const toggle = document.getElementById("select-departamento");
+    const feedback = document.getElementById("departamento-feedback");
+
+    toggle.classList.remove("is-invalid", "is-valid");
+    feedback.classList.remove("show");
 }
 
 async function guardarTarea() {
@@ -100,9 +248,8 @@ async function guardarTarea() {
     const nombre = document.getElementById("input-nombre").value.trim();
     const tiempoMin = parseFloat(document.getElementById("input-tiempo-min").value);
     const tiempoMax = parseFloat(document.getElementById("input-tiempo-max").value);
-    const idDepartamento = parseInt(document.getElementById("select-departamento").value);
+    const idsDepartamentos = [...departamentosSeleccionados];
 
-    // Validación
     let valido = true;
 
     if (!nombre) {
@@ -137,43 +284,66 @@ async function guardarTarea() {
         document.getElementById("error-tiempos").style.display = "none";
     }
 
-    if (!idDepartamento) {
-        document.getElementById("select-departamento").classList.add("is-invalid");
+    if (idsDepartamentos.length === 0) {
+        marcarDepartamentosInvalidos();
         valido = false;
     } else {
-        document.getElementById("select-departamento").classList.remove("is-invalid");
-        document.getElementById("select-departamento").classList.add("is-valid");
+        marcarDepartamentosValidos();
     }
 
-    if (!valido) return;
+    if (!valido) {
+        return;
+    }
 
     const proyectoId = localStorage.getItem("proyectoId");
-    const idFase = parseInt(localStorage.getItem("idSubfase"));
-
-    const payload = {
-        idSubfaseFase: idFase,
-        idDepartamento: idDepartamento,
-        tarea: nombre,
-        tiempoMin: tiempoMin,
-        tiempoMax: tiempoMax
-    };
+    const idSubfase = parseInt(localStorage.getItem("idSubfase"), 10);
 
     setBusy(true);
     try {
-        const result = await peticionSegura(`/estimaciones/proyecto/${proyectoId}/manual`, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
+        const resultados = await Promise.allSettled(idsDepartamentos.map(idDepartamento => {
+            const payload = {
+                idSubFase: idSubfase,
+                idSubfaseFase: idSubfase,
+                idDepartamento,
+                tarea: nombre,
+                tiempoMin,
+                tiempoMax
+            };
 
-        if (result && result.success) {
-            mostrarExito("Tarea creada correctamente.");
+            return peticionSegura(`/estimaciones/proyecto/${proyectoId}/manual`, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+        }));
+
+        const creadasCorrectamente = resultados.filter(result =>
+            result.status === "fulfilled" && result.value && result.value.success
+        ).length;
+
+        if (creadasCorrectamente === idsDepartamentos.length) {
+            const sufijo = creadasCorrectamente === 1 ? "" : ` en ${creadasCorrectamente} departamentos`;
+            mostrarExito(`Tarea creada correctamente${sufijo}.`);
             setTimeout(() => {
                 window.location.href = "subfase.html";
             }, 1500);
-        } else {
-            mostrarError((result && result.mensaje) || "Error al crear la tarea.");
+            return;
         }
-    } catch (err) {
+
+        if (creadasCorrectamente > 0) {
+            mostrarError(`La tarea se creo en ${creadasCorrectamente} departamentos, pero hubo errores en el resto.`);
+            return;
+        }
+
+        const primerError = resultados.find(result =>
+            result.status === "rejected" || (result.status === "fulfilled" && (!result.value || !result.value.success))
+        );
+
+        if (primerError && primerError.status === "fulfilled" && primerError.value) {
+            mostrarError(primerError.value.mensaje || "Error al crear la tarea.");
+        } else {
+            mostrarError("No se pudo conectar con el servidor.");
+        }
+    } catch (error) {
         mostrarError("No se pudo conectar con el servidor.");
     } finally {
         setBusy(false);
