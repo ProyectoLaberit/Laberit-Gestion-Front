@@ -94,7 +94,7 @@ async function cargarDetallesTar(){
                 return `
                 <div class="time-item">
                     <div class="time-val text-primary fw-bold" style="font-size: 1.1rem;">${tiempoRealDisplay}</div>
-                    <div class="time-lbl">${displayGit}</div>
+                    <div class="time-lbl">${displayGit} - gitlab</div>
                 </div>`;
             }).join('');
 
@@ -105,7 +105,7 @@ async function cargarDetallesTar(){
                 return `
                 <div class="time-item">
                     <div class="time-val time-min">${p.tiempoMin}h</div>
-                    <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit}</div>
+                    <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit} - gitlab</div>
                 </div>`;
             }).join('');
 
@@ -116,7 +116,7 @@ async function cargarDetallesTar(){
                 return `
                 <div class="time-item">
                     <div class="time-val time-max">${p.tiempoMax}h</div>
-                    <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit}</div>
+                    <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit} - gitlab</div>
                 </div>`;
             }).join('');
 
