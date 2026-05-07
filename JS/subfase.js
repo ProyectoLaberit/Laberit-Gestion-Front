@@ -64,44 +64,12 @@ async function cargarDatosSubfase() {
         });
 
         if (result && result.success) {
-            console.log("¡Éxito! Tareas recuperadas:", result.data);
-            // Aquí tu lógica para pintar la tabla
             const tar = result.data;
-
-            const tiemposTotalesClockify = {};
-
-            try {
-                const resultClockify = await peticionSegura(`/clockify/${proyectoId}/${nombreSub}`, {
-                    method: 'GET'
-                });
-
-                if (resultClockify && resultClockify.success && resultClockify.data) {
-                    const tareasClockify = resultClockify.data;
-
-                    tareasClockify.forEach(tc => {
-                        const nombreReloj = tc.titulo || "";
-                        const horas = parseFloat(tc.horasTrabajadas || 0);
-
-                        tar.forEach(t => {
-                            if (nombreReloj.toLowerCase().includes(t.nombreTarea.toLowerCase()) ||
-                                t.nombreTarea.toLowerCase().includes(nombreReloj.toLowerCase())) {
-
-                                if (!tiemposTotalesClockify[t.nombreTarea]) {
-                                    tiemposTotalesClockify[t.nombreTarea] = 0;
-                                }
-                                tiemposTotalesClockify[t.nombreTarea] += horas;
-                            }
-                        });
-                    });
-                }
-            } catch (err) {
-                console.warn("Aviso: No se pudo cargar Clockify", err);
-            }
 
             const tabla = document.getElementById("tablaTar");
 
             tabla.innerHTML = tar.map(p => {
-                const tiempoReal = tiemposTotalesClockify[p.nombreTarea];
+                const tiempoReal = p.tiempoTotalReal;
 
                 let displayTiempo = "-"; // Por defecto, el guion
 

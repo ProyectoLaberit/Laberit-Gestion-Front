@@ -71,65 +71,25 @@ async function cargarDetallesTar(){
 
         if (result.success) {
             const espec = result.data;
-            const tiemposReales = {};
-            const gitIds = {};
-
-            //Llamada para ver los tiempos de clockify
-            const resultClockify = await peticionSegura(`/clockify/${proyectoId}/${nombreSub}`, {
-                method: 'GET'
-            });
-
-            if (resultClockify && resultClockify.success && resultClockify.data) {
-                const tareasClockify = resultClockify.data;
-                
-                tareasClockify.forEach(tc => {
-                    const nombreReloj = tc.titulo || "";
-                    const equipo = tc.departamento || "Desconocido";
-                    const horas = parseFloat(tc.horasTrabajadas|| 0);
-                    const idGit = tc.idGit;
-
-                    // Comparamos el texto del reloj con el nombre de la tarea
-                    if (nombreReloj.toLowerCase().includes(nombreTar.toLowerCase()) || nombreTar.toLowerCase().includes(nombreReloj.toLowerCase())) {
-                        
-                        const nombreTag = equipo.trim();
-
-                        if (!tiemposReales[nombreTag]) {
-                            tiemposReales[nombreTag] = 0;
-                        }
-                        tiemposReales[nombreTag] += horas;
-
-                        if(idGit){
-                            gitIds[nombreTag] = idGit;
-                        }
-                    }
-                });
-            }
-
-
             const tabla = document.getElementById("tablaEspec");
 
-            // 1. Columna de Departamentos
+            // Columna de Departamentos
             const colDeptos = espec.map(p => `
                 <div class="item">
                     <div class="item-name">${p.nombreDepartamento}</div>
                 </div>
             `).join('');
 
-            // 2. Columna de Tiempo Real
+            // Columna de Tiempo Real
             const colReal = espec.map(p => {
-                let tiempoRealValor = tiemposReales[p.nombreDepartamento];
+                let tiempoRealValor = p.tiempoReal;
 
-                //Redondeo de las horas
-                if (tiempoRealValor !== undefined && tiempoRealValor > 0) {
-                    tiempoRealValor = Math.round(tiempoRealValor * 10) / 10;
-                }
-
-                const tiempoRealDisplay = (tiempoRealValor !== undefined && tiempoRealValor > 0) 
+                const tiempoRealDisplay = (tiempoRealValor !== undefined && tiempoRealValor !== null && tiempoRealValor > 0) 
                                             ? tiempoRealValor + "h" 
                                             : "-";
 
-                const idGuardado = gitIds[p.nombreDepartamento];
-                const displayGit = idGuardado ? `#${idGuardado}` : "-";
+                // Leemos el id de GitLab del propio DTO
+                const displayGit = p.numeroGitlab ? `#${p.numeroGitlab}` : "-";
 
                 return `
                 <div class="time-item">
@@ -138,10 +98,9 @@ async function cargarDetallesTar(){
                 </div>`;
             }).join('');
 
-            // 3. Columna de Tiempo Mínimo
+            // Columna de Tiempo Mínimo
             const colMin = espec.map(p => {
-                const idGuardado = gitIds[p.nombreDepartamento];
-                const displayGit = idGuardado ? `#${idGuardado}` : "-";
+                const displayGit = p.numeroGitlab ? `#${p.numeroGitlab}` : "-";
 
                 return `
                 <div class="time-item">
@@ -150,10 +109,9 @@ async function cargarDetallesTar(){
                 </div>`;
             }).join('');
 
-            // 4. Columna de Tiempo Máximo
+            // Columna de Tiempo Máximo
             const colMax = espec.map(p => {
-                const idGuardado = gitIds[p.nombreDepartamento];
-                const displayGit = idGuardado ? `#${idGuardado}` : "-";
+                const displayGit = p.numeroGitlab ? `#${p.numeroGitlab}` : "-";
 
                 return `
                 <div class="time-item">
@@ -171,11 +129,10 @@ async function cargarDetallesTar(){
             `;
 
         } else {
-            console.warn("Aviso del backend:", result.message);
+            console.warn("Aviso:", result.message);
         }
 
     } catch (error) {
         console.error("Error en la llamada:", error);
     }
-
 }
