@@ -9,6 +9,7 @@ window.onload = function () {
 // ── Estado global ─────────────────────────────────────────────────────────────
 let estructuraActual = {};
 let idsActuales = {};
+let resumenSubfases = {};
 
 // ── Carga inicial ─────────────────────────────────────────────────────────────
 async function cargarPaginaDetalles() {
@@ -103,9 +104,10 @@ async function cargarSubfases(proyectoId) {
 }
 
 // ── Convierte respuesta de la API en estructura y renderiza ───────────────────
-function procesarYRenderizar(fases) {
+async function procesarYRenderizar(fases) {
     const estructura = {};
     const ids = {};
+    const proyectoId = localStorage.getItem("proyectoId");
 
     fases.forEach(p => {
         estructura[p.nombre] = p.subfases.map(s => s.nombre);
@@ -114,6 +116,20 @@ function procesarYRenderizar(fases) {
 
     estructuraActual = estructura;
     idsActuales = ids;
+
+    // Traernos todos los tiempos de golpe
+    try {
+        console.log("Llamando al backend para los tiempos masivos del proyecto:", proyectoId);
+        const resultTiempos = await peticionSegura(`/estimaciones/resumen/subfases/${proyectoId}`);
+        console.log("Respuesta de tiempos masivos:", resultTiempos);
+        if (resultTiempos && resultTiempos.success && resultTiempos.data) {
+            resumenSubfases = resultTiempos.data;
+        }else {
+            console.warn("La llamada no trajo datos válidos. Revisa el backend.", resultTiempos);
+        }
+    } catch (e) {
+        console.error("Error al cargar los tiempos masivos:", e);
+    }
 
     // Limpiar buscador al cambiar de excel
     document.getElementById('input-busqueda').value = '';
@@ -146,10 +162,20 @@ function renderizarTodo(filtro = "", estr, ids) {
         htmlContent += `<div class="row g-3">`;
 
         subfasesFiltradas.forEach(sub => {
+            const idSub = ids[sub];
+            
+            // Recuperamos los tiempos obtenidos
+            const tiempos = resumenSubfases[idSub] || { tiempoRealTotal: 0, tiempoEstimadoMedia: 0 };
+
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${ids[sub]}')">
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}')">
                         <div class="fw-bold text-dark">${sub}</div>
+                        
+                        <div class="text-primary mt-2 fw-bold" style="font-size: 0.95rem;">
+                            ${tiempos.tiempoRealTotal}h / ${tiempos.tiempoEstimadoMedia}h
+                        </div>
+                        
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
                 </div>

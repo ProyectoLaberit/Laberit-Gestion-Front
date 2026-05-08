@@ -67,6 +67,20 @@ async function pintarProyectos() {
         return;
     }
 
+    let resumenesProyectos = {};
+    try {
+        const ids = proyectos.map(p => p.id);
+        const resTiempos = await peticionSegura('/estimaciones/proyectos/resumen', {
+            method: 'POST',
+            body: JSON.stringify(ids)
+        });
+        if (resTiempos && resTiempos.success) {
+            resumenesProyectos = resTiempos.data;
+        }
+    } catch (e) {
+        console.error("Error al cargar tiempos de proyectos", e);
+    }
+
     // Separar los proyectos usando el campo "excels" que viene del backend
     const proyectosConExcel = proyectos.filter(p => p.excels === true || p.excels === "true");
     const proyectosSinExcel = proyectos.filter(p => p.excels === false || p.excels === "false" || !p.excels);
@@ -77,7 +91,11 @@ async function pintarProyectos() {
             return `<div class="col-12 text-center text-muted py-4">No hay proyectos en esta categoría.</div>`;
         }
 
-        return lista.map(p => `
+        return lista.map(p => {
+            // Buscamos los tiempos de este proyecto en nuestro diccionario
+            const t = resumenesProyectos[p.id] || { tiempoRealTotal: 0, tiempoEstimadoMedia: 0 };
+
+            return `
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card project-card p-3">
                     <div class="card-body">
@@ -87,6 +105,11 @@ async function pintarProyectos() {
                             </svg>
                         </div>
                         <h5 class="card-title fw-bold">${p.nombre}</h5>
+                        
+                        <div class="text-primary fw-bold mb-2" style="font-size: 1rem;">
+                            ${t.tiempoRealTotal}h / ${t.tiempoEstimadoMedia}h
+                        </div>
+
                         <p class="card-text text-muted small mb-4">${p.descripcion || ''}</p>
                         <button onclick="verDetalles('${p.id}')" 
                             class="btn btn-outline-dark btn-sm w-100 fw-medium">
@@ -95,7 +118,8 @@ async function pintarProyectos() {
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join(''); // Cerramos la función del map
     };
 
     // Inyectar el HTML generado en cada contenedor
