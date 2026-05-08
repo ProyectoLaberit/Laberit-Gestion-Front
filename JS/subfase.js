@@ -64,8 +64,6 @@ async function cargarDatosSubfase() {
         });
 
         if (result && result.success) {
-            console.log("¡Éxito! Tareas recuperadas:", result.data);
-            // Aquí tu lógica para pintar la tabla
             const tar = result.data;
 
             const tabla = document.getElementById("tablaTar");
