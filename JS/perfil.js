@@ -4,21 +4,33 @@ window.onload = function () {
         window.location.href = "login.html";
         return;
     }
+    prepararContextoPerfil();
     aplicarPermisosDom();
     cargarDatosPerfil();
 };
+
+function esModoEdicionAjena() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("edit") === "1";
+}
+
+function prepararContextoPerfil() {
+    if (!esModoEdicionAjena()) {
+        localStorage.removeItem("usuarioEditando");
+    }
+}
 
 // Devuelve los datos del usuario a mostrar/editar.
 // Si hay un "usuarioEditando" en localStorage (viene desde gestionusuarios),
 // usa ese. Si no, usa el propio usuario autenticado.
 function getDatosActuales() {
     const editando = localStorage.getItem("usuarioEditando");
-    if (editando) return JSON.parse(editando);
+    if (esModoEdicionAjena() && editando) return JSON.parse(editando);
     return JSON.parse(localStorage.getItem("usuarioData"));
 }
 
 function esEdicionAjena() {
-    return !!localStorage.getItem("usuarioEditando");
+    return esModoEdicionAjena() && !!localStorage.getItem("usuarioEditando");
 }
 
 const AVATAR_POR_DEFECTO = "avatar_masculino.png";

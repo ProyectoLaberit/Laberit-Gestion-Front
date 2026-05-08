@@ -151,7 +151,7 @@ function filtrarUsuarios() {
 // ── Editar: guarda los datos del usuario en localStorage y va a perfil.html ──
 function irAEditar(id, nombre, email, rol, foto) {
     localStorage.setItem("usuarioEditando", JSON.stringify({ id, nombre, email, rol, foto }));
-    window.location.href = "perfil.html";
+    window.location.href = "perfil.html?edit=1";
 }
 
 // ── Eliminar ──────────────────────────────────────────────────────────────────
