@@ -20,6 +20,18 @@ async function cargarPaginaDetalles() {
     document.getElementById('proyecto-nombre-display').innerText =
         proyectoActual ? proyectoActual.nombre : "Proyecto " + proyectoId;
 
+    // Mostrar última sincronización si existe
+    const keySync = `ultima-sync-${proyectoId}`;
+    const ultimaSync = localStorage.getItem(keySync);
+    if (ultimaSync) {
+        mostrarUltimaSync(ultimaSync);
+    }
+
+    // Mostrar botones solo para SuperAdministrador
+    if (esSuperAdmin()) {
+        document.getElementById("botones-admin").style.display = "flex";
+    }
+
     // Cargar historial de excels en el desplegable
     await cargarHistorialExcels(proyectoId);
 
@@ -31,6 +43,81 @@ async function cargarPaginaDetalles() {
         renderizarTodo(e.target.value, estructuraActual, idsActuales);
     });
 }
+
+// ── Sincronización ────────────────────────────────────────────────────────────
+async function sincronizar() {
+    const proyectoId = localStorage.getItem("proyectoId");
+    const btn  = document.getElementById("btn-sincronizar");
+    const icon = document.getElementById("icon-sync");
+    const texto = document.getElementById("texto-sincronizar");
+
+    // Estado cargando
+    btn.disabled = true;
+    texto.textContent = "Sincronizando...";
+    icon.style.animation = "spin 1s linear infinite";
+    icon.style.transformOrigin = "center";
+
+    const result = await peticionSegura(`/clockify/sincronizar/${proyectoId}`, {
+        method: "POST"
+    });
+
+    // Restaurar botón
+    btn.disabled = false;
+    texto.textContent = "Sincronizar";
+    icon.style.animation = "";
+
+    if (result && result.success) {
+        const ahora = new Date().toISOString();
+        localStorage.setItem(`ultima-sync-${proyectoId}`, ahora);
+        mostrarUltimaSync(ahora);
+        mostrarToast("Sincronización completada correctamente.", "success");
+
+        // Registrar en auditoría
+        auditService && auditService.registrar &&
+            auditService.registrar("SINCRONIZACION", `Proyecto ${proyectoId} sincronizado.`, parseInt(proyectoId));
+    } else {
+        mostrarToast((result && result.mensaje) || "Error al sincronizar.", "error");
+    }
+}
+
+function mostrarUltimaSync(isoString) {
+    const fecha = new Date(isoString);
+    const formateada = fecha.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })
+        + " " + fecha.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    document.getElementById("fecha-ultima-sync").textContent = formateada;
+    document.getElementById("ultima-sincronizacion").style.display = "inline";
+}
+
+function mostrarToast(mensaje, tipo) {
+    // Eliminar toast anterior si existe
+    const anterior = document.getElementById("toast-sync");
+    if (anterior) anterior.remove();
+
+    const color   = tipo === "success" ? "#166534" : "#991b1b";
+    const bg      = tipo === "success" ? "#f0fdf4" : "#fef2f2";
+    const borde   = tipo === "success" ? "#bbf7d0" : "#fecaca";
+    const icono   = tipo === "success"
+        ? `<polyline points="20 6 9 17 4 12"/>`
+        : `<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>`;
+
+    const toast = document.createElement("div");
+    toast.id = "toast-sync";
+    toast.style.cssText = `
+        position:fixed; bottom:24px; right:24px; z-index:9999;
+        background:${bg}; border:1px solid ${borde}; color:${color};
+        padding:12px 18px; border-radius:10px; font-size:0.875rem;
+        display:flex; align-items:center; gap:10px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        animation: slideIn .25s ease;
+    `;
+    toast.innerHTML = `
+        <svg width="16" height="16" fill="none" stroke="${color}" stroke-width="2" viewBox="0 0 24 24">${icono}</svg>
+        <span>${mensaje}</span>`;
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
 
 // ── Historial de excels ───────────────────────────────────────────────────────
 async function cargarHistorialExcels(proyectoId) {
@@ -146,15 +233,9 @@ function renderizarTodo(filtro = "", estr, ids) {
         htmlContent += `<div class="row g-3">`;
 
         subfasesFiltradas.forEach(sub => {
-            const onclickArgs = [
-                JSON.stringify(fase),
-                JSON.stringify(sub),
-                JSON.stringify(String(ids[sub]))
-            ].join(", ");
-
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card p-3 shadow-sm h-100" onclick='irASubfase(${onclickArgs})'>
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${ids[sub]}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
@@ -179,10 +260,10 @@ function renderizarTodo(filtro = "", estr, ids) {
 }
 
 // ── Navegación ────────────────────────────────────────────────────────────────
-function irASubfase(nombreFase, nombreSubfase, idSubfase) {
-    localStorage.setItem("faseSeleccionada", nombreFase);
-    localStorage.setItem("idSubfase", idSubfase);
-    localStorage.setItem("subfaseSeleccionada", nombreSubfase);
+function irASubfase(nombreSubfase) {
+    const partes = nombreSubfase.split(',');
+    localStorage.setItem("idSubfase", partes[1]);
+    localStorage.setItem("subfaseSeleccionada", partes[0]);
     window.location.href = "subfase.html";
 }
 

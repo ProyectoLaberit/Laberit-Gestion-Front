@@ -39,6 +39,15 @@
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
             border-left-color: var(--brand-primary);
         }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes slideIn {
+            from { opacity:0; transform:translateY(12px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
     </style>
 </head>
 
@@ -80,7 +89,32 @@
             <div class="row align-items-center">
                 <div class="col-md-4">
                     <h2 class="h4 mb-1 fw-bold" id="proyecto-nombre-display">Cargando proyecto...</h2>
-                    <p class="text-muted mb-0">Gestión de Fases y Estimaciones</p>
+                    <p class="text-muted mb-0" style="font-size:0.78rem;">
+                        Gestión de Fases y Estimaciones
+                        <span id="ultima-sincronizacion" class="ms-2" style="display:none;">
+                            · Última sync: <span id="fecha-ultima-sync" class="fw-semibold"></span>
+                        </span>
+                    </p>
+                    <!-- Botones solo visibles para SuperAdministrador -->
+                    <div id="botones-admin" class="d-flex gap-2 mt-2 flex-wrap" style="display:none!important;">
+                        <a href="editarproyecto.html" class="btn btn-sm btn-brand">Editar</a>
+                        <a href="crearfases.html" class="btn btn-sm btn-outline-secondary">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"
+                                viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
+                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Nueva Estructura
+                        </a>
+                        <button class="btn btn-sm btn-outline-secondary" id="btn-sincronizar" onclick="sincronizar()">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24" class="me-1" id="icon-sync" style="vertical-align:-1px;">
+                                <polyline points="23 4 23 10 17 10"/>
+                                <polyline points="1 20 1 14 7 14"/>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                            </svg>
+                            <span id="texto-sincronizar">Sincronizar</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="col-md-8 d-flex gap-2 justify-content-md-end mt-3 mt-md-0">
                     <div class="input-group" style="max-width: 450px;">
@@ -103,14 +137,6 @@
                     <select class="form-select w-auto">
                         <option selected>Estado</option>
                     </select>
-
-                    <a href="editarproyecto.html" class="btn btn-brand py-2">Editar</a>
-                    <a href="crearfases.html" class="btn btn-outline-secondary py-2">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
-                            viewBox="0 0 24 24" class="me-1" style="vertical-align:-2px;">
-                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                    </a>
                 </div>
             </div>
         </div>
