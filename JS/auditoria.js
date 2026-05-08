@@ -17,7 +17,7 @@ window.onload = function () {
                     </svg>
                 </div>
                 <h2 style="color:#1f2937;font-weight:800;margin:0 0 0.5rem;">Acceso no permitido</h2>
-                <p style="color:#6c757d;margin:0 0 1.5rem;">Solo el SuperAdministrador puede ver la auditoría.</p>
+                <p style="color:#6c757d;margin:0 0 1.5rem;">Solo el SuperAdministrador puede ver la auditoria.</p>
                 <a href="proyectos.html" style="background:#C01717;color:white;padding:10px 24px;
                     border-radius:6px;text-decoration:none;font-weight:600;">Volver a Proyectos</a>
             </div>`;
@@ -28,13 +28,13 @@ window.onload = function () {
 
 async function cargarLogs() {
     const tbody = document.getElementById("tabla-logs");
-    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
         <div class="spinner-border spinner-border-sm me-2"></div>Cargando...</td></tr>`;
 
     const result = await peticionSegura("/audit");
 
     if (!result || !result.success) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state text-danger">
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state text-danger">
             Error al cargar los logs.</td></tr>`;
         return;
     }
@@ -44,8 +44,8 @@ async function cargarLogs() {
 }
 
 function aplicarFiltros() {
-    const accion  = document.getElementById("filtro-accion").value;
-    const texto   = document.getElementById("filtro-texto").value.toLowerCase().trim();
+    const accion = document.getElementById("filtro-accion").value;
+    const texto = document.getElementById("filtro-texto").value.toLowerCase().trim();
 
     let filtrados = todosLosLogs;
 
@@ -54,9 +54,11 @@ function aplicarFiltros() {
     }
     if (texto) {
         filtrados = filtrados.filter(l =>
-            (l.usuarioEmail  || "").toLowerCase().includes(texto) ||
+            (l.usuarioEmail || "").toLowerCase().includes(texto) ||
             (l.usuarioNombre || "").toLowerCase().includes(texto) ||
-            (l.descripcion   || "").toLowerCase().includes(texto)
+            String(l.idUsuarioActor ?? l.idUsuario ?? "").includes(texto) ||
+            String(l.idUsuarioObjetivo ?? "").includes(texto) ||
+            (l.descripcion || "").toLowerCase().includes(texto)
         );
     }
 
@@ -64,13 +66,13 @@ function aplicarFiltros() {
 }
 
 function renderizarTabla(logs) {
-    const tbody    = document.getElementById("tabla-logs");
+    const tbody = document.getElementById("tabla-logs");
     const contador = document.getElementById("contador-logs");
 
     contador.textContent = `${logs.length} registro${logs.length !== 1 ? "s" : ""}`;
 
     if (logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No hay registros que coincidan.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No hay registros que coincidan.</td></tr>`;
         return;
     }
 
@@ -81,34 +83,55 @@ function renderizarTabla(logs) {
             </td>
             <td>${badgeAccion(l.accion)}</td>
             <td>
-                <div class="fw-semibold" style="font-size:0.85rem;">${l.usuarioNombre || l.usuarioEmail || "—"}</div>
+                <div class="fw-semibold" style="font-size:0.85rem;">${l.usuarioNombre || l.usuarioEmail || "-"}</div>
                 <div class="text-muted" style="font-size:0.75rem;">${l.usuarioEmail || ""}</div>
+                <div class="text-muted" style="font-size:0.75rem;">ID actor: ${formatearIdUsuario(l.idUsuarioActor ?? l.idUsuario)}</div>
             </td>
-            <td style="max-width:320px;">${l.descripcion || "—"}</td>
-            <td class="text-muted">${l.idProyecto ? "#" + l.idProyecto : "—"}</td>
+            <td>${renderUsuarioObjetivo(l)}</td>
+            <td style="max-width:320px;">${l.descripcion || "-"}</td>
+            <td class="text-muted">${l.idProyecto ? "#" + l.idProyecto : "-"}</td>
         </tr>
     `).join("");
 }
 
+function formatearIdUsuario(idUsuario) {
+    return idUsuario !== undefined && idUsuario !== null ? `#${idUsuario}` : "-";
+}
+
+function renderUsuarioObjetivo(log) {
+    if (log.idUsuarioObjetivo === undefined || log.idUsuarioObjetivo === null) {
+        return `<span class="text-muted">-</span>`;
+    }
+
+    const nombreObjetivo = log.usuarioObjetivoNombre || log.usuarioObjetivoEmail || "Usuario afectado";
+    const emailObjetivo = log.usuarioObjetivoEmail || "";
+
+    return `
+        <div class="fw-semibold" style="font-size:0.85rem;">${nombreObjetivo}</div>
+        <div class="text-muted" style="font-size:0.75rem;">${emailObjetivo}</div>
+        <div class="text-muted" style="font-size:0.75rem;">ID objetivo: ${formatearIdUsuario(log.idUsuarioObjetivo)}</div>
+    `;
+}
+
 function formatearFecha(fechaHora) {
-    if (!fechaHora) return "—";
+    if (!fechaHora) return "-";
     const d = new Date(fechaHora);
-    return d.toLocaleDateString("es-ES", { day:"2-digit", month:"2-digit", year:"numeric" })
-        + " " + d.toLocaleTimeString("es-ES", { hour:"2-digit", minute:"2-digit" });
+    return d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })
+        + " " + d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 }
 
 function badgeAccion(accion) {
     const mapa = {
-        "IMPORTACION_EXCEL":  ["badge-importacion",  "Importación Excel"],
-        "CAMBIO_ESTIMACION":  ["badge-estimacion",   "Cambio Estimación"],
-        "CREACION_ESTIMACION":["badge-creacion",     "Creación Estimación"],
-        "BORRADO_ESTIMACION": ["badge-borrado",      "Borrado Estimación"],
-        "SINCRONIZACION":     ["badge-sync",         "Sincronización"],
-        "CREACION_USUARIO":   ["badge-creacion",     "Creación Usuario"],
-        "BORRADO_USUARIO":    ["badge-borrado",      "Borrado Usuario"],
-        "CAMBIO_ROL":         ["badge-rol",          "Cambio Rol"],
+        "IMPORTACION_EXCEL": ["badge-importacion", "Importacion Excel"],
+        "CAMBIO_ESTIMACION": ["badge-estimacion", "Cambio Estimacion"],
+        "CREACION_ESTIMACION": ["badge-creacion", "Creacion Estimacion"],
+        "BORRADO_ESTIMACION": ["badge-borrado", "Borrado Estimacion"],
+        "SINCRONIZACION": ["badge-sync", "Sincronizacion"],
+        "CREACION_USUARIO": ["badge-creacion", "Creacion Usuario"],
+        "BORRADO_USUARIO": ["badge-borrado", "Borrado Usuario"],
+        "CAMBIO_ROL": ["badge-rol", "Cambio Rol"],
     };
-    const [cls, label] = mapa[accion] || ["badge-otro", accion || "—"];
+    const [cls, label] = mapa[accion] || ["badge-otro", accion || "-"];
     return `<span class="badge-accion ${cls}">${label}</span>`;
 }
 

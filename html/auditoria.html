@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LABERIT – Auditoría</title>
+    <title>LABERIT - Auditoria</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/proyectos.css">
@@ -47,7 +47,6 @@
 
 <body class="bg-light d-flex flex-column min-vh-100">
 
-    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm laberit-navbar">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-3" href="proyectos.html">
@@ -64,7 +63,7 @@
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
                     <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="gestionusuarios.html">Gestión Usuarios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestionusuarios.html">Gestion Usuarios</a></li>
                     <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
                     <li class="nav-item border-start border-secondary ps-3 ms-1 d-none d-lg-block"></li>
                     <li class="nav-item">
@@ -75,7 +74,6 @@
         </div>
     </nav>
 
-    <!-- PAGE HEADER -->
     <div class="page-header">
         <div class="container">
             <div class="d-flex align-items-center gap-3">
@@ -90,26 +88,23 @@
                     </svg>
                 </div>
                 <div>
-                    <h1>Registro de Auditoría</h1>
-                    <p>Historial de acciones relevantes del sistema</p>
+                    <h1>Registro de Auditoria</h1>
+                    <p>Historial de acciones relevantes del sistema, con actor y usuario afectado cuando aplique</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN -->
     <main class="container pb-5 flex-grow-1">
-
-        <!-- Filtros -->
         <div class="filtros-bar">
             <select class="form-select w-auto" id="filtro-accion" onchange="aplicarFiltros()">
                 <option value="">Todas las acciones</option>
-                <option value="IMPORTACION_EXCEL">Importación Excel</option>
-                <option value="CAMBIO_ESTIMACION">Cambio Estimación</option>
-                <option value="CREACION_ESTIMACION">Creación Estimación</option>
-                <option value="BORRADO_ESTIMACION">Borrado Estimación</option>
-                <option value="SINCRONIZACION">Sincronización</option>
-                <option value="CREACION_USUARIO">Creación Usuario</option>
+                <option value="IMPORTACION_EXCEL">Importacion Excel</option>
+                <option value="CAMBIO_ESTIMACION">Cambio Estimacion</option>
+                <option value="CREACION_ESTIMACION">Creacion Estimacion</option>
+                <option value="BORRADO_ESTIMACION">Borrado Estimacion</option>
+                <option value="SINCRONIZACION">Sincronizacion</option>
+                <option value="CREACION_USUARIO">Creacion Usuario</option>
                 <option value="BORRADO_USUARIO">Borrado Usuario</option>
                 <option value="CAMBIO_ROL">Cambio Rol</option>
             </select>
@@ -121,7 +116,7 @@
                     </svg>
                 </span>
                 <input type="text" class="form-control border-start-0" id="filtro-texto"
-                    placeholder="Buscar usuario o descripción..." oninput="aplicarFiltros()">
+                    placeholder="Buscar usuario, IDs o descripcion..." oninput="aplicarFiltros()">
             </div>
 
             <span class="text-muted small align-self-center" id="contador-logs"></span>
@@ -135,29 +130,27 @@
             </button>
         </div>
 
-        <!-- Tabla -->
         <div class="log-table shadow-sm">
             <table class="table table-borderless">
                 <thead>
                     <tr>
                         <th>Fecha y Hora</th>
-                        <th>Acción</th>
-                        <th>Usuario</th>
-                        <th>Descripción</th>
+                        <th>Accion</th>
+                        <th>Actor</th>
+                        <th>Afectado</th>
+                        <th>Descripcion</th>
                         <th>Proyecto</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-logs">
-                    <tr><td colspan="5" class="empty-state">
+                    <tr><td colspan="6" class="empty-state">
                         <div class="spinner-border spinner-border-sm me-2"></div>Cargando logs...
                     </td></tr>
                 </tbody>
             </table>
         </div>
-
     </main>
 
-    <!-- FOOTER -->
     <footer class="custom-footer py-3">
         <div class="container text-center">
             <div class="footer-logo mb-2">L</div>
