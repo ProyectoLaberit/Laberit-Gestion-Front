@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LABERIT – Visualizar Tareas</title>
+    <link rel="icon" type="image/png" href="../img/logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/proyectos.css">
+    <link rel="stylesheet" href="../CSS/nav.css">
+    <style>
+        /* ── Header card ── */
+        .header-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .dept-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1f2937;
+        }
+
+        .dept-sub {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .breadcrumb-item a {
+            color: #C01717;
+        }
+
+        .breadcrumb-item.active {
+            color: #1f2937;
+        }
+
+        /* ── Stat cards ── */
+        .stat-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1.1rem 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        .stat-pct {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Círculo de progreso */
+        .progress-ring {
+            position: relative;
+            width: 72px;
+            height: 72px;
+            flex-shrink: 0;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring .ring-bg {
+            fill: none;
+            stroke: #e9ecef;
+            stroke-width: 6;
+        }
+
+        .progress-ring .ring-fill {
+            fill: none;
+            stroke: #18bc9c;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset .5s ease;
+        }
+
+        .progress-ring .ring-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .progress-ring .ring-sub {
+            font-size: 0.6rem;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        /* ── Filtros ── */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid #e9ecef;
+            background: #fff;
+            color: #6c757d;
+            transition: all .15s;
+        }
+
+        .filter-tab.active {
+            background: #1f2937;
+            color: #fff;
+            border-color: #1f2937;
+        }
+
+        .filter-tab.active-correctas {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #86efac;
+        }
+
+        .filter-tab.active-incorrectas {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+
+        /* ── Tabla ── */
+        .vis-table {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+        }
+
+        .vis-table table {
+            margin: 0;
+        }
+
+        .vis-table thead th {
+            background: #f8f9fa;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: #6c757d;
+            border-bottom: 2px solid #e9ecef;
+            padding: 12px 16px;
+        }
+
+        .vis-table tbody td {
+            padding: 12px 16px;
+            vertical-align: middle;
+            border-color: #f3f4f6;
+            font-size: 0.875rem;
+        }
+
+        .vis-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .estado-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .estado-ok {
+            background: #dcfce7;
+        }
+
+        .estado-err {
+            background: #fee2e2;
+        }
+
+        /* ── Paginación ── */
+        .pag-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pag-info {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .pag-btns {
+            display: flex;
+            gap: 4px;
+        }
+
+        .pag-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1.5px solid #e9ecef;
+            background: #fff;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .pag-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .pag-btn.active {
+            background: #1f2937;
+            color: #fff;
+            border-color: #1f2937;
+        }
+
+        .pag-btn:disabled {
+            opacity: .4;
+            cursor: default;
+        }
+
+        .per-page-select {
+            font-size: 0.82rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1.5px solid #e9ecef;
+        }
+
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body class="bg-light d-flex flex-column min-vh-100">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm laberit-navbar">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center gap-3" href="proyectos.html">
+                <div class="bg-white text-dark rounded d-flex align-items-center justify-content-center fw-bold"
+                    style="width:38px;height:38px;font-size:1.1rem;">L</div>
+                <div class="navbar-brand-custom">
+                    SISTEMA DE SEGUIMIENTO
+                    <span class="navbar-brand-sub">PROYECTOS</span>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
+                    <li class="nav-item"><a class="nav-link" href="subirproyecto.html">Subir Proyecto</a></li>
+                    <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="altausuarios.html">Alta Usuarios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
+                    <li class="nav-item border-start border-secondary ps-3 ms-1 d-none d-lg-block"></li>
+                    <li class="nav-item">
+                        <button onclick="cerrarSesion()" class="btn-outline-nav">Salir</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-4 flex-grow-1">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="proyectos.html">Proyectos</a></li>
+                <li class="breadcrumb-item"><a href="detalles.html" id="bc-proyecto"></a></li>
+                <li class="breadcrumb-item"><a href="subfase.html" id="bc-fase"></a></li>
+                <li class="breadcrumb-item"><a href="subfase.html" id="bc-subfase"></a></li>
+                <li class="breadcrumb-item"><a href="paginatareas.html" id="bc-tarea"></a></li>
+                <li class="breadcrumb-item active" id="bc-dept"></li>
+            </ol>
+        </nav>
+
+        <!-- Header card -->
+        <div class="header-card">
+            <div class="row align-items-center g-3">
+                <!-- Círculo + título -->
+                <div class="col-auto d-flex align-items-center gap-3">
+                    <div class="progress-ring">
+                        <svg width="72" height="72" viewBox="0 0 72 72">
+                            <circle class="ring-bg" cx="36" cy="36" r="30" />
+                            <circle class="ring-fill" cx="36" cy="36" r="30" id="ring-fill" stroke-dasharray="188.5"
+                                stroke-dashoffset="188.5" />
+                        </svg>
+                        <div class="ring-text">
+                            <span id="pct-text">0%</span>
+                            <span class="ring-sub">correctas</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="dept-title">Departamento: <span id="dept-nombre">—</span></div>
+                        <div class="dept-sub" id="resumen-tareas">— / — tareas correctas</div>
+                        <div class="dept-sub" id="resumen-sin-asociar">—h tiempo sin asociar</div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="col">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:#dcfce7;">
+                                    <svg width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2.5"
+                                        viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="9 12 11 14 15 10" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="stat-val text-success" id="stat-correctas">—</div>
+                                    <div class="stat-lbl">Correctas</div>
+                                    <div class="stat-pct text-success" id="stat-pct-ok">—</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:#fee2e2;">
+                                    <svg width="18" height="18" fill="none" stroke="#dc2626" stroke-width="2.5"
+                                        viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="15" y1="9" x2="9" y2="15" />
+                                        <line x1="9" y1="9" x2="15" y2="15" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="stat-val text-danger" id="stat-incorrectas">—</div>
+                                    <div class="stat-lbl">Incorrectas</div>
+                                    <div class="stat-pct text-danger" id="stat-pct-err">—</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:#e0f2fe;">
+                                    <svg width="18" height="18" fill="none" stroke="#0369a1" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="stat-val" id="stat-tiempo-total">—</div>
+                                    <div class="stat-lbl">Tiempo total</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:#fef9c3;">
+                                    <svg width="18" height="18" fill="none" stroke="#ca8a04" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                        <line x1="12" y1="9" x2="12" y2="13" />
+                                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="stat-val" id="stat-sin-asociar">—</div>
+                                    <div class="stat-lbl">Sin asociar</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros + buscador -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <div class="filter-tabs">
+                <button class="filter-tab active" id="tab-todas" onclick="setFiltro('todas')">Todas (<span
+                        id="cnt-todas">0</span>)</button>
+                <button class="filter-tab" id="tab-incorrectas" onclick="setFiltro('incorrectas')">Incorrectas (<span
+                        id="cnt-incorrectas">0</span>)</button>
+                <button class="filter-tab" id="tab-correctas" onclick="setFiltro('correctas')">Correctas (<span
+                        id="cnt-correctas">0</span>)</button>
+            </div>
+            <div class="input-group" style="max-width:260px;">
+                <span class="input-group-text bg-white border-end-0 text-muted">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                </span>
+                <input type="text" class="form-control border-start-0" id="input-busqueda" placeholder="Buscar tarea..."
+                    oninput="renderPagina()">
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="vis-table shadow-sm mb-3">
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th style="width:44px;">Estado</th>
+                        <th>Tarea</th>
+                        <th>Subfase</th>
+                        <th>Fecha</th>
+                        <th>Hora inicio</th>
+                        <th>Hora fin</th>
+                        <th>Tiempo total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-tareas">
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="spinner-border spinner-border-sm me-2"></div>Cargando...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pag-bar">
+            <span class="pag-info" id="pag-info">—</span>
+            <div class="d-flex align-items-center gap-3">
+                <div class="pag-btns" id="pag-btns"></div>
+                <select class="per-page-select" id="per-page" onchange="perPageChange()">
+                    <option value="8">8 por página</option>
+                    <option value="10" selected>10 por página</option>
+                    <option value="20">20 por página</option>
+                    <option value="50">50 por página</option>
+                </select>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="custom-footer py-3">
+        <div class="container text-center">
+            <div class="footer-logo mb-2">L</div>
+            <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
+            <p class="text-muted mb-0" style="font-size:0.7rem;">Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../JS/api.js"></script>
+    <script src="../JS/visualizartareas.js"></script>
+</body>
+
+</html>

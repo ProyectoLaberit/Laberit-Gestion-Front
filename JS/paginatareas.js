@@ -36,31 +36,16 @@ async function cargarDetallesTar(){
     document.getElementById("bc-subfase").innerText  = localStorage.getItem("subfaseSeleccionada") || "Subfase";
     document.getElementById("bc-tarea").innerText    = nombreTar || "Tarea";
 
-
-    // 1. DEBUG VITAL: Asegurarnos de que no estén viajando como "null" o "undefined"
-
     if (!proyectoId || !idSub) {
         console.error("Error: Falta el ID del proyecto o la subfase en el localStorage");
         return; 
     }
 
-    // 2. Empaquetamos los datos como un formulario (Ideal para @RequestParam)
     const parametros = new URLSearchParams();
     parametros.append('idSubfase', idSub);
     parametros.append('tarea', nombreTar);
 
     try {
-        // const response = await fetch(`${URL_BASE}/proyecto/${proyectoId}/especifica`, {
-        //     method: 'POST',
-        //     headers: {
-        //         // Le decimos a Spring Boot que le mandamos un formulario, no un JSON
-        //         'Content-Type': 'application/x-www-form-urlencoded' 
-        //     },
-        //     body: parametros // Metemos los parámetros en el vagón de carga
-        // });
-
-        // const result = await response.json();
-
         const result = await peticionSegura(`/estimaciones/proyecto/${proyectoId}/especifica`, {
             method: 'POST',
             headers: {
@@ -73,10 +58,14 @@ async function cargarDetallesTar(){
             const espec = result.data;
             const tabla = document.getElementById("tablaEspec");
 
-            // Columna de Departamentos
+            // Columna de Departamentos — con botón Visualizar tareas
             const colDeptos = espec.map(p => `
-                <div class="item">
+                <div class="item d-flex align-items-center justify-content-between gap-2">
                     <div class="item-name">${p.nombreDepartamento}</div>
+                    <button class="btn btn-sm btn-outline-secondary" style="font-size:0.72rem;white-space:nowrap;"
+                        onclick="irAVisualizarTareas(${p.id}, ${p.idDepartamento}, '${(p.nombreDepartamento||'').replace(/'/g,"\\'")}')">
+                        Visualizar tareas
+                    </button>
                 </div>
             `).join('');
 
@@ -88,7 +77,6 @@ async function cargarDetallesTar(){
                                             ? tiempoRealValor + "h" 
                                             : "-";
 
-                // Leemos el id de GitLab del propio DTO
                 const displayGit = p.numeroGitlab ? `#${p.numeroGitlab}` : "-";
 
                 return `
@@ -120,7 +108,6 @@ async function cargarDetallesTar(){
                 </div>`;
             }).join('');
 
-            // 5. Inyectamos las 4 columnas maestras en el HTML
             tabla.innerHTML = `
                 <div class="b-col">${colDeptos}</div>
                 <div class="b-col">${colReal}</div>
@@ -135,4 +122,12 @@ async function cargarDetallesTar(){
     } catch (error) {
         console.error("Error en la llamada:", error);
     }
+}
+
+// ─── Navegar a visualizar tareas ───────────────────────────────────────────
+function irAVisualizarTareas(idDetalleEstimacion, idDepartamento, nombreDepartamento) {
+    localStorage.setItem("idDetalleEstimacionVis", idDetalleEstimacion);
+    localStorage.setItem("idDepartamentoVis", idDepartamento);
+    localStorage.setItem("nombreDepartamentoVis", nombreDepartamento);
+    window.location.href = "visualizartareas.html";
 }
