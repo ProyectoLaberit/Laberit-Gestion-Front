@@ -73,22 +73,14 @@ async function cargarImputaciones() {
 
     setEstadoCargaTabla("Cargando tareas...");
 
-    const [result, huerfanasResult] = await Promise.all([
-        peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}`),
-        peticionSegura(`/imputaciones/huerfanas/${proyectoId}`)
-    ]);
+    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}`);
 
     if (!result || !result.success) {
         mostrarErrorTabla("Error al cargar las tareas.");
         return;
     }
 
-    const imputaciones = combinarImputacionesVista(
-        result.data || [],
-        extraerHuerfanasRelacionadas(huerfanasResult, idDepartamento)
-    );
-
-    aplicarDatosImputaciones(imputaciones);
+    aplicarDatosImputaciones(result.data || []);
     actualizarEstadoFiltro("Mostrando todas las imputaciones del departamento.");
 }
 
@@ -109,22 +101,14 @@ async function filtrarPorFechas() {
 
     setEstadoCargaTabla("Filtrando tareas...");
 
-    const [result, huerfanasResult] = await Promise.all([
-        peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}/fechas?desde=${desde}&hasta=${hasta}`),
-        peticionSegura(`/imputaciones/huerfanas/${proyectoId}`)
-    ]);
+    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}/fechas?desde=${desde}&hasta=${hasta}`);
 
     if (!result || !result.success) {
         mostrarErrorTabla((result && result.mensaje) || "Error al filtrar por fechas.");
         return;
     }
 
-    const imputaciones = combinarImputacionesVista(
-        result.data || [],
-        extraerHuerfanasRelacionadas(huerfanasResult, idDepartamento, desde, hasta)
-    );
-
-    aplicarDatosImputaciones(imputaciones);
+    aplicarDatosImputaciones(result.data || []);
     actualizarEstadoFiltro(`Filtrando del ${formatearFechaTexto(desde)} al ${formatearFechaTexto(hasta)}.`);
 }
 
