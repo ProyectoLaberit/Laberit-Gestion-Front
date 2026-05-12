@@ -71,11 +71,16 @@ async function cargarDetallesTar(){
 
             // Columna de Tiempo Real
             const colReal = espec.map(p => {
-                let tiempoRealValor = p.tiempoReal;
+                const tiempoRealValor = p.tiempoReal;
+                let tiempoRealDisplay = "-";
 
-                const tiempoRealDisplay = (tiempoRealValor !== undefined && tiempoRealValor !== null && tiempoRealValor > 0) 
-                                            ? tiempoRealValor + "h" 
-                                            : "-";
+                if (tiempoRealValor !== undefined && tiempoRealValor !== null) {
+                    const numeroHoras = parseFloat(tiempoRealValor);
+
+                    if (!isNaN(numeroHoras)) {
+                        tiempoRealDisplay = (Math.round(numeroHoras * 10) / 10) + "h";
+                    }
+                }
 
                 const displayGit = p.numeroGitlab ? `#${p.numeroGitlab}` : "-";
 

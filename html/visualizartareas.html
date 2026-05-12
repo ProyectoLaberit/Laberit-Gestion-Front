@@ -66,6 +66,13 @@
             line-height: 1;
         }
 
+        #stat-tiempo-total,
+        #stat-sin-asociar {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
         .stat-lbl {
             font-size: 0.75rem;
             color: #6c757d;
@@ -79,13 +86,15 @@
         /* Círculo de progreso */
         .progress-ring {
             position: relative;
-            width: 72px;
-            height: 72px;
+            width: 92px;
+            height: 92px;
             flex-shrink: 0;
         }
 
         .progress-ring svg {
             transform: rotate(-90deg);
+            width: 92px;
+            height: 92px;
         }
 
         .progress-ring .ring-bg {
@@ -109,13 +118,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
+            font-size: 1rem;
             font-weight: 700;
             color: #1f2937;
+            line-height: 1.05;
         }
 
         .progress-ring .ring-sub {
-            font-size: 0.6rem;
+            font-size: 0.68rem;
             color: #6c757d;
             font-weight: 400;
         }
@@ -270,6 +280,97 @@
             text-align: center;
             color: #9ca3af;
         }
+
+        .edit-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            z-index: 1050;
+        }
+
+        .edit-modal-overlay.show {
+            display: flex;
+        }
+
+        .edit-modal-box {
+            width: min(100%, 520px);
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .edit-modal-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 0.35rem;
+        }
+
+        .edit-modal-text {
+            font-size: 0.92rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .edit-modal-input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            font-size: 0.95rem;
+            color: #111827;
+            outline: none;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .edit-modal-input:focus {
+            border-color: #C01717;
+            box-shadow: 0 0 0 4px rgba(192, 23, 23, 0.12);
+        }
+
+        .edit-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        .edit-modal-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .15s ease, opacity .15s ease;
+        }
+
+        .edit-modal-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .edit-modal-btn:disabled {
+            opacity: 0.7;
+            cursor: default;
+            transform: none;
+        }
+
+        .edit-modal-btn-secondary {
+            background: #fff1f2;
+            color: #C01717;
+            border: 1px solid #fecdd3;
+        }
+
+        .edit-modal-btn-primary {
+            background: #C01717;
+            color: #ffffff;
+        }
     </style>
 </head>
 
@@ -416,6 +517,26 @@
             </div>
         </div>
 
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button class="btn btn-dark btn-sm px-3" id="btn-sincronizar" onclick="sincronizarImputaciones()">
+                    Sincronizar
+                </button>
+                <span class="text-muted small" id="estado-filtro">Preparado para cargar imputaciones.</span>
+            </div>
+            <div class="d-flex flex-wrap align-items-end gap-2">
+                <div>
+                    <label for="fecha-desde" class="form-label small text-muted mb-1">Desde</label>
+                    <input type="date" class="form-control form-control-sm" id="fecha-desde">
+                </div>
+                <div>
+                    <label for="fecha-hasta" class="form-label small text-muted mb-1">Hasta</label>
+                    <input type="date" class="form-control form-control-sm" id="fecha-hasta">
+                </div>
+
+            </div>
+        </div>
+
         <!-- Filtros + buscador -->
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
             <div class="filter-tabs">
@@ -478,6 +599,23 @@
         </div>
 
     </main>
+
+    <div class="edit-modal-overlay" id="edit-modal-overlay" onclick="cerrarModalEdicion(event)">
+        <div class="edit-modal-box" onclick="event.stopPropagation()">
+            <div class="edit-modal-title">Editar nombre de la tarea</div>
+            <div class="edit-modal-text">Actualiza el nombre y guarda los cambios.</div>
+            <input type="text" id="edit-modal-input" class="edit-modal-input" maxlength="255">
+            <div class="edit-modal-actions">
+                <button type="button" class="edit-modal-btn edit-modal-btn-secondary" onclick="cerrarModalEdicion()">
+                    Cancelar
+                </button>
+                <button type="button" class="edit-modal-btn edit-modal-btn-primary" id="edit-modal-save-btn"
+                    onclick="guardarEdicionImputacion()">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer class="custom-footer py-3">
         <div class="container text-center">
