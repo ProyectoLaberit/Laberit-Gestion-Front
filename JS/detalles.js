@@ -254,13 +254,16 @@ function renderizarTodo(filtro = "", estr, ids) {
             // Recuperamos los tiempos obtenidos
             const tiempos = resumenSubfases[idSub] || { tiempoRealTotal: 0, tiempoEstimadoMedia: 0 };
 
+            const displayReal = formatoHoras(parseFloat(tiempos.tiempoRealTotal));
+            const displayMedia = formatoHoras(parseFloat(tiempos.tiempoEstimadoMedia));
+
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         
                         <div class="text-primary mt-2 fw-bold" style="font-size: 0.95rem;">
-                            ${tiempos.tiempoRealTotal}h / ${tiempos.tiempoEstimadoMedia}h
+                            ${displayReal}h / ${displayMedia}h
                         </div>
                         
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
@@ -296,4 +299,21 @@ function irASubfase(nombreSubfase) {
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
+}
+
+// ─── Cambio de formato de decimales a horas ───────────────────────────────────────────
+function formatoHoras(decimal) {
+    if (!decimal || isNaN(decimal)) return "0";
+    
+    const horas = Math.floor(decimal);
+    // Multiplicamos los decimales por 60 para sacar los minutos reales
+    const minutos = Math.round((decimal - horas) * 60); 
+
+    // Si no hay minutos, devolvemos solo las horas limpias
+    if (minutos === 0) {
+        return horas.toString();
+    }
+    
+    // padStart asegura que si son 5 minutos ponga "05" y no "5"
+    return `${horas}:${minutos.toString().padStart(2, '0')}`;
 }

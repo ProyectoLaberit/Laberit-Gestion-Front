@@ -95,6 +95,9 @@ const generarTarjetas = (lista, tieneExcel) => {
             // Buscamos los tiempos de este proyecto en nuestro diccionario
             const t = resumenesProyectos[p.id] || { tiempoRealTotal: 0, tiempoEstimadoMedia: 0 };
 
+            const displayReal = formatoHoras(parseFloat(t.tiempoRealTotal));
+            const displayMedia = formatoHoras(parseFloat(t.tiempoEstimadoMedia));
+
             return `
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card project-card p-3">
@@ -107,7 +110,7 @@ const generarTarjetas = (lista, tieneExcel) => {
                         <h5 class="card-title fw-bold">${p.nombre}</h5>
                         
                         <div class="text-primary fw-bold mb-2" style="font-size: 1rem;">
-                            ${t.tiempoRealTotal}h / ${t.tiempoEstimadoMedia}h
+                            ${displayReal}h / ${displayMedia}h
                         </div>
 
                         <p class="card-text text-muted small mb-4">${p.descripcion || ''}</p>
@@ -144,3 +147,20 @@ function anadirExcel(proyectoId) {
 // ─── Cargar proyectos desde localStorage ───────────────────────────────────
 const usuarioData = localStorage.getItem("usuarioData");
 pintarProyectos();
+
+// ─── Cambio de formato de decimales a horas ───────────────────────────────────────────
+function formatoHoras(decimal) {
+    if (!decimal || isNaN(decimal)) return "0";
+    
+    const horas = Math.floor(decimal);
+    // Multiplicamos los decimales por 60 para sacar los minutos reales
+    const minutos = Math.round((decimal - horas) * 60); 
+
+    // Si no hay minutos, devolvemos solo las horas limpias
+    if (minutos === 0) {
+        return horas.toString();
+    }
+    
+    // padStart asegura que si son 5 minutos ponga "05" y no "5"
+    return `${horas}:${minutos.toString().padStart(2, '0')}`;
+}

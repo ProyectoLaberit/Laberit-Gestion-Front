@@ -78,7 +78,7 @@ async function cargarDetallesTar(){
                     const numeroHoras = parseFloat(tiempoRealValor);
 
                     if (!isNaN(numeroHoras)) {
-                        tiempoRealDisplay = (Math.round(numeroHoras * 10) / 10) + "h";
+                        tiempoRealDisplay = formatoHoras(numeroHoras) + "h";
                     }
                 }
 
@@ -135,4 +135,21 @@ function irAVisualizarTareas(idDetalleEstimacion, idDepartamento, nombreDepartam
     localStorage.setItem("idDepartamentoVis", idDepartamento);
     localStorage.setItem("nombreDepartamentoVis", nombreDepartamento);
     window.location.href = "visualizartareas.html";
+}
+
+// ─── Cambio de formato de decimales a horas ───────────────────────────────────────────
+function formatoHoras(decimal) {
+    if (!decimal || isNaN(decimal)) return "0";
+    
+    const horas = Math.floor(decimal);
+    // Multiplicamos los decimales por 60 para sacar los minutos reales
+    const minutos = Math.round((decimal - horas) * 60); 
+
+    // Si no hay minutos, devolvemos solo las horas limpias
+    if (minutos === 0) {
+        return horas.toString();
+    }
+    
+    // padStart asegura que si son 5 minutos ponga "05" y no "5"
+    return `${horas}:${minutos.toString().padStart(2, '0')}`;
 }
