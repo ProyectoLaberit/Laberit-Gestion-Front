@@ -96,7 +96,17 @@ function aplicarPermisosDom() {
 
     // Ocultar opciones del nav para empleados
     if (rol === "Empleado") {
-        document.querySelectorAll('a[href="altausuarios.html"], a[href="gestionusuarios.html"]').forEach(enlace => {
+        document.querySelectorAll('a[href="altausuarios.html"], a[href="gestionusuarios.html"], a[href="auditoria.html"], a[href="subirproyecto.html"]').forEach(enlace => {
+            const itemNav = enlace.closest(".nav-item");
+            if (itemNav) {
+                itemNav.style.display = "none";
+            }
+        });
+    }
+
+    // Ocultar opciones del nav para admins
+    if (rol === "Administrador") {
+        document.querySelectorAll('a[href="auditoria.html"]').forEach(enlace => {
             const itemNav = enlace.closest(".nav-item");
             if (itemNav) {
                 itemNav.style.display = "none";
