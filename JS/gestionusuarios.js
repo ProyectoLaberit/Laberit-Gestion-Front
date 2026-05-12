@@ -109,7 +109,7 @@ function renderizarTabla(usuarios) {
                         </svg>
                         Editar
                     </button>
-                    ${!esPropioUsuario && !esAdmin() ? `
+                    ${!esPropioUsuario && esSuperAdmin() ? `
                     <button class="btn btn-sm btn-outline-danger"
                         onclick="confirmarEliminar(${u.id}, '${(u.nombre||'').replace(/'/g,"\\'")}')">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
