@@ -132,6 +132,17 @@
             color: #1a1a1a;
             margin-bottom: 3px;
         }
+
+        .item-solo-texto {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .item-solo-texto .item-name {
+            margin-bottom: 0;
+        }
+
         .item-meta {
             font-size: .75rem;
             color: #6c757d;
