@@ -377,12 +377,13 @@ function renderTabla(filas, inicio, total) {
                 <td>${horaInicio}</td>
                 <td>${horaFin}</td>
                 <td class="fw-semibold">${horasTotales}</td>
-                <td>
+                <td> 
+                ${esAdmin() `
                     <div class="d-flex gap-1 flex-wrap">
                         <button class="btn btn-sm btn-outline-secondary" onclick="editarImputacion(${imputacion.idImputacionClockify})">Editar</button>
                         ${botonValidacion}
                         <button class="btn btn-sm btn-outline-danger" onclick="eliminarImputacion(${imputacion.idImputacionClockify}, this)">Borrar</button>
-                    </div>
+                    </div>`}
                 </td>
             </tr>
         `;
