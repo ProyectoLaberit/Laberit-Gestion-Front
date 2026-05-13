@@ -48,6 +48,8 @@
             display: flex;
             align-items: center;
             gap: 1rem;
+            min-height: 98px;
+            height: 100%;
         }
 
         .stat-icon {
@@ -81,6 +83,10 @@
         .stat-pct {
             font-size: 0.8rem;
             font-weight: 600;
+        }
+
+        .stat-pct-placeholder {
+            visibility: hidden;
         }
 
         /* Círculo de progreso */
@@ -483,6 +489,7 @@
                                 <div>
                                     <div class="stat-val" id="stat-tiempo-total">—</div>
                                     <div class="stat-lbl">Tiempo total</div>
+                                    <div class="stat-pct stat-pct-placeholder">—</div>
                                 </div>
                             </div>
                         </div>
@@ -500,6 +507,7 @@
                                 <div>
                                     <div class="stat-val" id="stat-sin-asociar">—</div>
                                     <div class="stat-lbl">Sin asociar</div>
+                                    <div class="stat-pct stat-pct-placeholder">—</div>
                                 </div>
                             </div>
                         </div>
