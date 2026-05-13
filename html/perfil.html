@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -72,17 +72,7 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
-                    <li class="nav-item"><a class="nav-link" href="subirproyecto.html">Subir Proyecto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="gestionusuarios.html">Gestion Usuairos</a></li>
-                    <!-- Solo visible para ADMIN -->
-                    <li class="nav-item" data-rol-minimo="ADMIN"><a class="nav-link" href="altausuarios.html">Alta Usuarios</a></li>
-                    <li class="nav-item border-start border-secondary ps-3 ms-1 d-none d-lg-block"></li>
-                    <li class="nav-item">
-                        <button onclick="cerrarSesion()" class="btn-outline-nav">Salir</button>
-                    </li>
-                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3"></ul>
             </div>
         </div>
     </nav>
@@ -111,7 +101,7 @@
 
                 <div class="field-group d-flex justify-content-between align-items-center">
                     <div>
-                        <label class="small text-muted d-block">Correo Electrónico</label>
+                        <label class="small text-muted d-block">Correo Electronico</label>
                         <span id="user-email">usuario@laberit.com</span>
                     </div>
                     <button class="btn btn-sm btn-link text-brand fw-bold"
@@ -121,7 +111,7 @@
                 <div class="field-group d-flex justify-content-between align-items-center">
                     <div>
                         <label class="small text-muted d-block">Contraseña</label>
-                        <span>••••••••••••</span>
+                        <span>•••••••••••••</span>
                     </div>
                     <button class="btn btn-sm btn-link text-brand fw-bold"
                         onclick="abrirModal('password')">Modificar</button>
@@ -130,7 +120,7 @@
         </div>
     </main>
 
-    <!-- Modal Edición campos -->
+    <!-- Modal EdiciÃ³n campos -->
     <div class="modal fade" id="modalEdicionMini" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content shadow">
@@ -143,7 +133,7 @@
 
                     <div class="mb-2" id="divPasswordVieja" style="display: none;">
                         <input type="password" id="inputPasswordVieja" class="form-control form-control-sm"
-                            placeholder="Contraseña actual...">
+                            placeholder="ContraseÃ±a actual...">
                     </div>
 
                     <div class="mb-1">
@@ -179,7 +169,7 @@
                             <img src="../img/avatar_masculino.png" alt="Masc"
                                 class="rounded-circle img-thumbnail selector-avatar active" id="opt-masc"
                                 style="width: 70px; height: 70px; cursor: pointer; border: 3px solid transparent;">
-                            <div class="small mt-1">Él</div>
+                            <div class="small mt-1">El</div>
                         </div>
 
                         <div class="avatar-option text-center" onclick="seleccionarAvatar('avatar_femenino.png', this)">
@@ -205,7 +195,7 @@
     <footer class="custom-footer py-3">
         <div class="container text-center">
             <div class="footer-logo mb-2">L</div>
-            <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
+            <p class="mb-0 small">Â© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
             <p class="text-muted mb-0" style="font-size: 0.7rem;">Todos los derechos reservados.</p>
         </div>
     </footer>
@@ -216,3 +206,4 @@
 </body>
 
 </html>
+

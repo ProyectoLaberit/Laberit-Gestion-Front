@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LABERIT – Nueva Estructura</title>
+    <title>LABERIT â€“ Nueva Estructura</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/proyectos.css">
@@ -85,7 +85,7 @@
 
 <body class="bg-light d-flex flex-column min-vh-100">
 
-    <!-- ── NAVBAR ── -->
+    <!-- â”€â”€ NAVBAR â”€â”€ -->
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm laberit-navbar">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-3" href="proyectos.html">
@@ -100,21 +100,12 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
-                    <li class="nav-item"><a class="nav-link" href="subirproyecto.html">Subir Proyecto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="altausuarios.html">Alta Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
-                    <li class="nav-item border-start border-secondary ps-3 ms-1 d-none d-lg-block"></li>
-                    <li class="nav-item">
-                        <button onclick="cerrarSesion()" class="btn-outline-nav">Salir</button>
-                    </li>
-                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3"></ul>
             </div>
         </div>
     </nav>
 
-    <!-- ── PAGE HEADER ── -->
+    <!-- â”€â”€ PAGE HEADER â”€â”€ -->
     <div class="page-header">
         <div class="container">
             <div class="d-flex align-items-center gap-3">
@@ -126,8 +117,8 @@
                 </div>
                 <div>
                     <div class="breadcrumb-nav">
-                        <a href="proyectos.html">Proyectos</a> ›
-                        <a href="detalles.html" id="bc-proyecto">Proyecto</a> ›
+                        <a href="proyectos.html">Proyectos</a> â€º
+                        <a href="detalles.html" id="bc-proyecto">Proyecto</a> â€º
                         Nueva Estructura
                     </div>
                     <h1>Nueva Estructura</h1>
@@ -137,7 +128,7 @@
         </div>
     </div>
 
-    <!-- ── MAIN ── -->
+    <!-- â”€â”€ MAIN â”€â”€ -->
     <main class="container pb-5 flex-grow-1" style="max-width: 780px;">
 
         <!-- Feedback global -->
@@ -155,7 +146,7 @@
             <span id="msg-error-text"></span>
         </div>
 
-        <!-- ── PASO 1: FASE ── -->
+        <!-- â”€â”€ PASO 1: FASE â”€â”€ -->
         <div class="step-card">
             <div class="d-flex align-items-center gap-3 mb-4">
                 <div class="step-number">1</div>
@@ -173,13 +164,13 @@
             </div>
         </div>
 
-        <!-- ── PASO 2: SUBFASE ── -->
+        <!-- â”€â”€ PASO 2: SUBFASE â”€â”€ -->
         <div class="step-card">
             <div class="d-flex align-items-center gap-3 mb-4">
                 <div class="step-number">2</div>
                 <div>
                     <div class="step-title">Crear Subfase</div>
-                    <div class="step-subtitle">Asígnala a una fase existente</div>
+                    <div class="step-subtitle">AsÃ­gnala a una fase existente</div>
                 </div>
             </div>
 
@@ -193,13 +184,13 @@
             </div>
         </div>
 
-        <!-- ── PASO 3: ESTIMACIÓN ── -->
+        <!-- â”€â”€ PASO 3: ESTIMACIÃ“N â”€â”€ -->
         <div class="step-card">
             <div class="d-flex align-items-center gap-3 mb-4">
                 <div class="step-number">3</div>
                 <div>
-                    <div class="step-title">Crear Estimación</div>
-                    <div class="step-subtitle">Añade tiempos por departamento a una subfase</div>
+                    <div class="step-title">Crear EstimaciÃ³n</div>
+                    <div class="step-subtitle">AÃ±ade tiempos por departamento a una subfase</div>
                 </div>
             </div>
 
@@ -207,7 +198,7 @@
                 <div class="col-md-6">
                     <p class="section-label">Subfase seleccionada</p>
                     <div class="form-control bg-light text-muted" id="display-subfase-est" style="cursor:default;">
-                        — Selecciona una subfase en el paso 2 —
+                        â€” Selecciona una subfase en el paso 2 â€”
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -222,13 +213,13 @@
                 <div class="col-12">
                     <p class="section-label">Nombre de la tarea <span class="req">*</span></p>
                     <input type="text" class="form-control" id="input-tarea-est"
-                        placeholder="Ej: Creación de endpoints CRUD...">
+                        placeholder="Ej: CreaciÃ³n de endpoints CRUD...">
                 </div>
             </div>
 
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <p class="section-label">Tiempo mínimo <span class="req">*</span></p>
+                    <p class="section-label">Tiempo mÃ­nimo <span class="req">*</span></p>
                     <div class="tiempo-group">
                         <input type="number" class="form-control" id="input-tmin"
                             placeholder="0" min="0" step="0.5">
@@ -236,7 +227,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <p class="section-label">Tiempo máximo <span class="req">*</span></p>
+                    <p class="section-label">Tiempo mÃ¡ximo <span class="req">*</span></p>
                     <div class="tiempo-group">
                         <input type="number" class="form-control" id="input-tmax"
                             placeholder="0" min="0" step="0.5">
@@ -245,34 +236,34 @@
                 </div>
             </div>
             <div class="text-danger small mb-2" id="error-tiempos" style="display:none;">
-                El tiempo mínimo no puede ser mayor que el máximo.
+                El tiempo mÃ­nimo no puede ser mayor que el mÃ¡ximo.
             </div>
 
             <div class="d-flex justify-content-end">
                 <button class="btn btn-brand px-4" onclick="crearEstimacion()">
-                    <span id="btn-est-text">Crear Estimación</span>
+                    <span id="btn-est-text">Crear EstimaciÃ³n</span>
                     <span id="btn-est-spin" class="spinner-border spinner-border-sm ms-1 d-none"></span>
                 </button>
             </div>
 
             <div id="contenedor-estimaciones-creadas" class="mt-3" style="display:none;">
-                <p class="section-label mt-3">Estimaciones creadas en esta sesión</p>
+                <p class="section-label mt-3">Estimaciones creadas en esta sesiÃ³n</p>
                 <ul class="created-list" id="lista-estimaciones"></ul>
             </div>
         </div>
 
         <!-- Volver -->
         <div class="text-center mt-2">
-            <a href="detalles.html" class="btn btn-outline-secondary px-5">← Volver a Fases</a>
+            <a href="detalles.html" class="btn btn-outline-secondary px-5">â† Volver a Fases</a>
         </div>
 
     </main>
 
-    <!-- ── FOOTER ── -->
+    <!-- â”€â”€ FOOTER â”€â”€ -->
     <footer class="custom-footer py-3">
         <div class="container text-center">
             <div class="footer-logo mb-2">L</div>
-            <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
+            <p class="mb-0 small">Â© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
             <p class="text-muted mb-0" style="font-size: 0.7rem;">Todos los derechos reservados.</p>
         </div>
     </footer>
@@ -282,3 +273,4 @@
     <script src="../JS/crearfases.js"></script>
 </body>
 </html>
+

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laberit – Alta de Usuario</title>
+    <title>Laberit â€“ Alta de Usuario</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/altausuarios.css">
@@ -13,7 +13,7 @@
 
 <body>
 
-    <!-- ───────── NAVBAR ───────── -->
+    <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€ NAVBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm laberit-navbar">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-3" href="proyectos.html">
@@ -30,23 +30,12 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
-                    <li class="nav-item"><a class="nav-link" href="subirproyecto.html">Subir Proyecto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
-                    <!-- Solo visible para ADMIN -->
-                    <li class="nav-item" data-rol-minimo="ADMIN"><a class="nav-link" href="altausuarios.html">Alta
-                            Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
-                    <li class="nav-item border-start border-secondary ps-3 ms-1 d-none d-lg-block"></li>
-                    <li class="nav-item">
-                        <button onclick="cerrarSesion()" class="btn-outline-nav">Salir</button>
-                    </li>
-                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3"></ul>
             </div>
         </div>
     </nav>
 
-    <!-- ───────── PAGE HEADER ───────── -->
+    <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€ PAGE HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="page-header">
         <div class="container">
             <div class="d-flex align-items-center gap-3">
@@ -67,7 +56,7 @@
         </div>
     </div>
 
-    <!-- ───────── MAIN ───────── -->
+    <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <main class="container py-4" style="max-width:760px;">
 
         <!-- Feedback global -->
@@ -89,38 +78,38 @@
 
         <div class="form-card">
 
-            <!-- ── Sección: Datos personales ── -->
+            <!-- â”€â”€ SecciÃ³n: Datos personales â”€â”€ -->
             <p class="section-label">Datos personales</p>
 
             <div class="row g-3 mb-2">
                 <div class="col-12">
                     <label for="nombre" class="form-label">Nombre completo <span class="req">*</span></label>
-                    <input type="text" class="form-control" id="nombre" placeholder="Ej: Ana García López"
+                    <input type="text" class="form-control" id="nombre" placeholder="Ej: Ana GarcÃ­a LÃ³pez"
                         autocomplete="name">
                     <div class="invalid-feedback">El nombre es obligatorio.</div>
                 </div>
 
                 <div class="col-12">
-                    <label for="email" class="form-label">Correo electrónico <span class="req">*</span></label>
+                    <label for="email" class="form-label">Correo electrÃ³nico <span class="req">*</span></label>
                     <input type="email" class="form-control" id="email" placeholder="usuario@laberit.com"
                         autocomplete="email">
-                    <div class="invalid-feedback">Introduce un email válido.</div>
+                    <div class="invalid-feedback">Introduce un email vÃ¡lido.</div>
                 </div>
             </div>
 
             <hr class="form-divider">
 
-            <!-- ── Sección: Seguridad ── -->
+            <!-- â”€â”€ SecciÃ³n: Seguridad â”€â”€ -->
             <p class="section-label">Seguridad</p>
 
             <div class="row g-3 mb-2">
                 <div class="col-md-6">
-                    <label for="password" class="form-label">Contraseña <span class="req">*</span></label>
+                    <label for="password" class="form-label">ContraseÃ±a <span class="req">*</span></label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="password" placeholder="Mín. 8 caracteres"
+                        <input type="password" class="form-control" id="password" placeholder="MÃ­n. 8 caracteres"
                             autocomplete="new-password" oninput="evaluarContrasena()">
                         <button type="button" class="btn-toggle-pass" onclick="togglePass('password', this)"
-                            title="Ver contraseña">
+                            title="Ver contraseÃ±a">
                             <svg id="eye-pass" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -132,17 +121,17 @@
                         <div class="strength-bar" id="strength-bar"></div>
                     </div>
                     <div class="strength-label text-muted" id="strength-label"></div>
-                    <div class="invalid-feedback" id="pass-feedback">La contraseña debe tener al menos 8 caracteres.
+                    <div class="invalid-feedback" id="pass-feedback">La contraseÃ±a debe tener al menos 8 caracteres.
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <label for="password2" class="form-label">Confirmar contraseña <span class="req">*</span></label>
+                    <label for="password2" class="form-label">Confirmar contraseÃ±a <span class="req">*</span></label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="password2" placeholder="Repite la contraseña"
+                        <input type="password" class="form-control" id="password2" placeholder="Repite la contraseÃ±a"
                             autocomplete="new-password">
                         <button type="button" class="btn-toggle-pass" onclick="togglePass('password2', this)"
-                            title="Ver contraseña">
+                            title="Ver contraseÃ±a">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -150,13 +139,13 @@
                             </svg>
                         </button>
                     </div>
-                    <div class="invalid-feedback" id="pass2-feedback">Las contraseñas no coinciden.</div>
+                    <div class="invalid-feedback" id="pass2-feedback">Las contraseÃ±as no coinciden.</div>
                 </div>
             </div>
 
             <hr class="form-divider">
 
-            <!-- ── Sección: Rol (ADMIN puede asignar cualquier rol) ── -->
+            <!-- â”€â”€ SecciÃ³n: Rol (ADMIN puede asignar cualquier rol) â”€â”€ -->
             <p class="section-label">Rol y permisos</p>
 
             <div class="mb-3">
@@ -197,7 +186,7 @@
 
             <hr class="form-divider">
 
-            <!-- ── Acciones ── -->
+            <!-- â”€â”€ Acciones â”€â”€ -->
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-end">
                 <button type="button" class="btn-secondary-outline" onclick="resetForm()">
                     Limpiar formulario
@@ -212,11 +201,11 @@
 
     </main>
 
-    <!-- ───────── FOOTER ───────── -->
+    <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <footer class="custom-footer mt-4">
         <div class="container text-center">
             <div class="footer-logo mb-2">L</div>
-            <p class="mb-0 small text-muted">© 2026 SISTEMA DE SEGUIMIENTO – LABERIT</p>
+            <p class="mb-0 small text-muted">Â© 2026 SISTEMA DE SEGUIMIENTO â€“ LABERIT</p>
             <p class="text-muted mb-0" style="font-size:0.7rem;">Todos los derechos reservados.</p>
         </div>
     </footer>
