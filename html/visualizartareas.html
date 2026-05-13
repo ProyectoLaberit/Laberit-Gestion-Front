@@ -89,6 +89,18 @@
             visibility: hidden;
         }
 
+        .stat-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            min-height: 40px;
+        }
+
+        .stat-body-time {
+            padding-top: 20px;
+        }
+
         /* Círculo de progreso */
         .progress-ring {
             position: relative;
@@ -453,7 +465,7 @@
                                         <polyline points="9 12 11 14 15 10" />
                                     </svg>
                                 </div>
-                                <div>
+                                <div class="stat-body">
                                     <div class="stat-val text-success" id="stat-correctas">—</div>
                                     <div class="stat-lbl">Correctas</div>
                                     <div class="stat-pct text-success" id="stat-pct-ok">—</div>
@@ -470,7 +482,7 @@
                                         <line x1="9" y1="9" x2="15" y2="15" />
                                     </svg>
                                 </div>
-                                <div>
+                                <div class="stat-body">
                                     <div class="stat-val text-danger" id="stat-incorrectas">—</div>
                                     <div class="stat-lbl">Incorrectas</div>
                                     <div class="stat-pct text-danger" id="stat-pct-err">—</div>
@@ -486,7 +498,7 @@
                                         <polyline points="12 6 12 12 16 14" />
                                     </svg>
                                 </div>
-                                <div>
+                                <div class="stat-body stat-body-time">
                                     <div class="stat-val" id="stat-tiempo-total">—</div>
                                     <div class="stat-lbl">Tiempo total</div>
                                     <div class="stat-pct stat-pct-placeholder">—</div>
@@ -504,7 +516,7 @@
                                         <line x1="12" y1="17" x2="12.01" y2="17" />
                                     </svg>
                                 </div>
-                                <div>
+                                <div class="stat-body stat-body-time">
                                     <div class="stat-val" id="stat-sin-asociar">—</div>
                                     <div class="stat-lbl">Sin asociar</div>
                                     <div class="stat-pct stat-pct-placeholder">—</div>
