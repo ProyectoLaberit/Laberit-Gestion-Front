@@ -154,21 +154,10 @@
                 </button>
                 <span class="text-muted small" id="estado-filtro">Preparado para cargar imputaciones.</span>
             </div>
-            <div class="d-flex flex-wrap align-items-end gap-2">
-                <div>
-                    <label for="fecha-desde" class="form-label small text-muted mb-1">Desde</label>
-                    <input type="date" class="form-control form-control-sm" id="fecha-desde">
-                </div>
-                <div>
-                    <label for="fecha-hasta" class="form-label small text-muted mb-1">Hasta</label>
-                    <input type="date" class="form-control form-control-sm" id="fecha-hasta">
-                </div>
-
-            </div>
         </div>
 
-        <!-- Filtros + buscador -->
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+        <!-- Filtros -->
+        <div class="filters-toolbar mb-3">
             <div class="filter-tabs">
                 <button class="filter-tab active" id="tab-todas" onclick="setFiltro('todas')">Todas (<span
                         id="cnt-todas">0</span>)</button>
@@ -177,15 +166,25 @@
                 <button class="filter-tab" id="tab-correctas" onclick="setFiltro('correctas')">Correctas (<span
                         id="cnt-correctas">0</span>)</button>
             </div>
-            <div class="input-group" style="max-width:260px;">
-                <span class="input-group-text bg-white border-end-0 text-muted">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8" />
-                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    </svg>
-                </span>
-                <input type="text" class="form-control border-start-0" id="input-busqueda" placeholder="Buscar tarea..."
-                    oninput="renderPagina()">
+            <div class="toolbar-right">
+                <div class="input-group toolbar-search">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="input-busqueda" placeholder="Buscar tarea..."
+                        oninput="renderPagina()">
+                </div>
+                <div class="toolbar-date">
+                    <label for="fecha-desde" class="form-label small text-muted mb-1">Desde</label>
+                    <input type="date" class="form-control form-control-sm" id="fecha-desde">
+                </div>
+                <div class="toolbar-date">
+                    <label for="fecha-hasta" class="form-label small text-muted mb-1">Hasta</label>
+                    <input type="date" class="form-control form-control-sm" id="fecha-hasta">
+                </div>
             </div>
         </div>
 
@@ -219,12 +218,7 @@
             <span class="pag-info" id="pag-info">—</span>
             <div class="d-flex align-items-center gap-3">
                 <div class="pag-btns" id="pag-btns"></div>
-                <select class="per-page-select" id="per-page" onchange="perPageChange()">
-                    <option value="8">8 por página</option>
-                    <option value="10" selected>10 por página</option>
-                    <option value="20">20 por página</option>
-                    <option value="50">50 por página</option>
-                </select>
+
             </div>
         </div>
 

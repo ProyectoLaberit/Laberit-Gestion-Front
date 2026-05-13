@@ -31,6 +31,7 @@ window.onload = async function () {
 
     cargarBreadcrumb();
     inicializarRangoFechas();
+    configurarFiltrosAutomaticos();
     await cargarImputaciones();
 
     document.addEventListener("keydown", manejarTeclasModalEdicion);
@@ -73,6 +74,35 @@ function inicializarRangoFechas() {
 
     inputDesde.value = formatearFechaInput(hace30Dias);
     inputHasta.value = formatearFechaInput(hoy);
+}
+
+function configurarFiltrosAutomaticos() {
+    const inputDesde = document.getElementById("fecha-desde");
+    const inputHasta = document.getElementById("fecha-hasta");
+
+    if (!inputDesde || !inputHasta) {
+        return;
+    }
+
+    const aplicarFiltroAutomatico = async () => {
+        inputDesde.max = inputHasta.value || "";
+        inputHasta.min = inputDesde.value || "";
+
+        if (!inputDesde.value || !inputHasta.value) {
+            await cargarImputaciones();
+            return;
+        }
+
+        if (inputDesde.value > inputHasta.value) {
+            actualizarEstadoFiltro("La fecha desde no puede ser mayor que la fecha hasta.");
+            return;
+        }
+
+        await filtrarPorFechas();
+    };
+
+    inputDesde.addEventListener("change", aplicarFiltroAutomatico);
+    inputHasta.addEventListener("change", aplicarFiltroAutomatico);
 }
 
 function formatearFechaInput(fecha) {
@@ -120,7 +150,7 @@ async function filtrarPorFechas() {
     }
 
     if (!desde || !hasta) {
-        alert("Selecciona una fecha desde y hasta.");
+        await cargarImputaciones();
         return;
     }
 
