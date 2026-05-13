@@ -57,21 +57,15 @@ async function cargarDetallesTar(){
         if (result.success) {
             const espec = result.data;
             const tabla = document.getElementById("tablaEspec");
-            const puedeVisualizarTareas = typeof esEmpleado === "function" ? !esEmpleado() : true;
-            const claseItemDepto = puedeVisualizarTareas
-                ? "item d-flex align-items-center justify-content-between gap-2"
-                : "item item-solo-texto";
 
             // Columna de Departamentos — con botón Visualizar tareas
             const colDeptos = espec.map(p => `
-                <div class="${claseItemDepto}">
+                <div class="item d-flex align-items-center justify-content-between gap-2">
                     <div class="item-name">${p.nombreDepartamento}</div>
-                    ${puedeVisualizarTareas ? `
                     <button class="btn btn-sm btn-outline-secondary" style="font-size:0.72rem;white-space:nowrap;"
                         onclick="irAVisualizarTareas(${p.id}, ${p.idDepartamento}, '${(p.nombreDepartamento||'').replace(/'/g,"\\'")}')">
                         Visualizar tareas
                     </button>
-                    ` : ""}
                 </div>
             `).join('');
 
@@ -137,11 +131,6 @@ async function cargarDetallesTar(){
 
 // ─── Navegar a visualizar tareas ───────────────────────────────────────────
 function irAVisualizarTareas(idDetalleEstimacion, idDepartamento, nombreDepartamento) {
-    if (typeof esEmpleado === "function" && esEmpleado()) {
-        alert("No tienes permisos para acceder a esta seccion.");
-        return;
-    }
-
     localStorage.setItem("idDetalleEstimacionVis", idDetalleEstimacion);
     localStorage.setItem("idDepartamentoVis", idDepartamento);
     localStorage.setItem("nombreDepartamentoVis", nombreDepartamento);
