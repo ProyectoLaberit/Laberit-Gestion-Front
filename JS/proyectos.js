@@ -72,7 +72,7 @@ async function pintarProyectos() {
         (p) => p.excels === false || p.excels === "false" || !p.excels
     );
 
-    const generarTarjetas = (lista) => {
+    const generarTarjetas = (lista, tieneExcel) => {
         if (lista.length === 0) {
             return '<div class="col-12 text-center text-muted py-4">No hay proyectos en esta categoria.</div>';
         }
@@ -86,6 +86,20 @@ async function pintarProyectos() {
 
                 const displayReal = formatoHoras(parseFloat(tiempos.tiempoRealTotal));
                 const displayMedia = formatoHoras(parseFloat(tiempos.tiempoEstimadoMedia));
+                const accionPrincipal = tieneExcel
+                    ? `
+                        <button onclick="verDetalles('${p.id}')" class="btn btn-outline-dark btn-sm w-100 fw-medium">
+                            Ver Detalles
+                        </button>
+                    `
+                    : `
+                        <button onclick="anadirExcel('${p.id}')" class="btn btn-outline-dark btn-sm w-100 fw-medium">
+                            Añadir Excel
+                        </button>
+                    `;
+                const textoSecundario = tieneExcel
+                    ? ""
+                    : `<p class="text-muted small mb-3">Este proyecto ya existe, solo falta adjuntarle el Excel.</p>`;
 
                 return `
                     <div class="col-12 col-md-6 col-lg-4">
@@ -105,10 +119,8 @@ async function pintarProyectos() {
 
                                 <h5 class="card-title fw-bold">${p.nombre}</h5>
                                 <p class="card-text text-muted small mb-4">${p.descripcion || ""}</p>
-
-                                <button onclick="verDetalles('${p.id}')" class="btn btn-outline-dark btn-sm w-100 fw-medium">
-                                    Ver Detalles
-                                </button>
+                                ${textoSecundario}
+                                ${accionPrincipal}
                             </div>
                         </div>
                     </div>
@@ -117,8 +129,8 @@ async function pintarProyectos() {
             .join("");
     };
 
-    contenedorExcel.innerHTML = generarTarjetas(proyectosConExcel);
-    contenedorSinExcel.innerHTML = generarTarjetas(proyectosSinExcel);
+    contenedorExcel.innerHTML = generarTarjetas(proyectosConExcel, true);
+    contenedorSinExcel.innerHTML = generarTarjetas(proyectosSinExcel, false);
 }
 
 function verDetalles(proyectoId) {
