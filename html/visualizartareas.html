@@ -1,16 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LABERIT â€“ Visualizar Tareas</title>
+    <title>LABERIT - Visualizar Tareas</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/proyectos.css">
     <link rel="stylesheet" href="../CSS/nav.css">
     <style>
-        /* â”€â”€ Header card â”€â”€ */
+        /* Header card */
         .header-card {
             background: #fff;
             border: 1px solid #e9ecef;
@@ -39,7 +39,7 @@
             color: #1f2937;
         }
 
-        /* â”€â”€ Stat cards â”€â”€ */
+        /* Stat cards */
         .stat-card {
             background: #fff;
             border: 1px solid #e9ecef;
@@ -83,7 +83,7 @@
             font-weight: 600;
         }
 
-        /* CÃ­rculo de progreso */
+        /* Círculo de progreso */
         .progress-ring {
             position: relative;
             width: 92px;
@@ -130,7 +130,7 @@
             font-weight: 400;
         }
 
-        /* â”€â”€ Filtros â”€â”€ */
+        /* Filtros */
         .filter-tabs {
             display: flex;
             gap: 8px;
@@ -167,7 +167,7 @@
             border-color: #fca5a5;
         }
 
-        /* â”€â”€ Tabla â”€â”€ */
+        /* Tabla */
         .vis-table {
             background: #fff;
             border-radius: 10px;
@@ -218,7 +218,7 @@
             background: #fee2e2;
         }
 
-        /* â”€â”€ PaginaciÃ³n â”€â”€ */
+        /* Paginación */
         .pag-bar {
             display: flex;
             align-items: center;
@@ -415,7 +415,7 @@
         <!-- Header card -->
         <div class="header-card">
             <div class="row align-items-center g-3">
-                <!-- CÃ­rculo + tÃ­tulo -->
+                <!-- Círculo + título -->
                 <div class="col-auto d-flex align-items-center gap-3">
                     <div class="progress-ring">
                         <svg width="72" height="72" viewBox="0 0 72 72">
@@ -429,9 +429,9 @@
                         </div>
                     </div>
                     <div>
-                        <div class="dept-title">Departamento: <span id="dept-nombre">â€”</span></div>
-                        <div class="dept-sub" id="resumen-tareas">â€” / â€” tareas correctas</div>
-                        <div class="dept-sub" id="resumen-sin-asociar">â€”h tiempo sin asociar</div>
+                        <div class="dept-title">Departamento: <span id="dept-nombre">—</span></div>
+                        <div class="dept-sub" id="resumen-tareas">— / — tareas correctas</div>
+                        <div class="dept-sub" id="resumen-sin-asociar">—h tiempo sin asociar</div>
                     </div>
                 </div>
 
@@ -448,9 +448,9 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="stat-val text-success" id="stat-correctas">â€”</div>
+                                    <div class="stat-val text-success" id="stat-correctas">—</div>
                                     <div class="stat-lbl">Correctas</div>
-                                    <div class="stat-pct text-success" id="stat-pct-ok">â€”</div>
+                                    <div class="stat-pct text-success" id="stat-pct-ok">—</div>
                                 </div>
                             </div>
                         </div>
@@ -465,9 +465,9 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="stat-val text-danger" id="stat-incorrectas">â€”</div>
+                                    <div class="stat-val text-danger" id="stat-incorrectas">—</div>
                                     <div class="stat-lbl">Incorrectas</div>
-                                    <div class="stat-pct text-danger" id="stat-pct-err">â€”</div>
+                                    <div class="stat-pct text-danger" id="stat-pct-err">—</div>
                                 </div>
                             </div>
                         </div>
@@ -481,7 +481,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="stat-val" id="stat-tiempo-total">â€”</div>
+                                    <div class="stat-val" id="stat-tiempo-total">—</div>
                                     <div class="stat-lbl">Tiempo total</div>
                                 </div>
                             </div>
@@ -498,7 +498,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="stat-val" id="stat-sin-asociar">â€”</div>
+                                    <div class="stat-val" id="stat-sin-asociar">—</div>
                                     <div class="stat-lbl">Sin asociar</div>
                                 </div>
                             </div>
@@ -575,16 +575,16 @@
             </table>
         </div>
 
-        <!-- PaginaciÃ³n -->
+        <!-- Paginación -->
         <div class="pag-bar">
-            <span class="pag-info" id="pag-info">â€”</span>
+            <span class="pag-info" id="pag-info">—</span>
             <div class="d-flex align-items-center gap-3">
                 <div class="pag-btns" id="pag-btns"></div>
                 <select class="per-page-select" id="per-page" onchange="perPageChange()">
-                    <option value="8">8 por pÃ¡gina</option>
-                    <option value="10" selected>10 por pÃ¡gina</option>
-                    <option value="20">20 por pÃ¡gina</option>
-                    <option value="50">50 por pÃ¡gina</option>
+                    <option value="8">8 por página</option>
+                    <option value="10" selected>10 por página</option>
+                    <option value="20">20 por página</option>
+                    <option value="50">50 por página</option>
                 </select>
             </div>
         </div>
@@ -611,7 +611,7 @@
     <footer class="custom-footer py-3">
         <div class="container text-center">
             <div class="footer-logo mb-2">L</div>
-            <p class="mb-0 small">Â© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
+            <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
             <p class="text-muted mb-0" style="font-size:0.7rem;">Todos los derechos reservados.</p>
         </div>
     </footer>
