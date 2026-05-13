@@ -90,6 +90,12 @@ async function cargarImputaciones() {
         return;
     }
 
+    // solo mostramos el botón a los admins
+    const btnSincronizar = document.getElementById("btn-sincronizar");
+    if (btnSincronizar && !esAdmin()) {
+        btnSincronizar.style.display = "none";
+    }
+
     setEstadoCargaTabla("Cargando tareas...");
 
     const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}`);
@@ -387,6 +393,15 @@ function renderTabla(filas, inicio, total) {
             ? `<button class="btn btn-sm btn-outline-warning" onclick="desvincularImputacion(${imputacion.idImputacionClockify}, this)">Desvincular</button>`
             : `<button class="btn btn-sm btn-outline-success" onclick="marcarValida(${imputacion.idImputacionClockify}, this)">Vincular</button>`;
 
+        // Comprobación de seguridad individual para cada botón
+        const botonEditar = esAdmin() 
+            ? `<button class="btn btn-sm btn-outline-secondary" onclick="editarImputacion(${imputacion.idImputacionClockify})">Editar</button>` 
+            : '';
+
+        const botonBorrar = esSuperAdmin() 
+            ? `<button class="btn btn-sm btn-outline-danger" onclick="eliminarImputacion(${imputacion.idImputacionClockify}, this)">Borrar</button>` 
+            : '';
+
         return `
             <tr id="row-${imputacion.idImputacionClockify}">
                 <td>${estadoDot}</td>
@@ -397,13 +412,11 @@ function renderTabla(filas, inicio, total) {
                 <td>${horaFin}</td>
                 <td class="fw-semibold">${horasTotales}</td>
                 <td> 
-                ${esAdmin() ? `
                     <div class="d-flex gap-1 flex-wrap">
-                        <button class="btn btn-sm btn-outline-secondary" onclick="editarImputacion(${imputacion.idImputacionClockify})">Editar</button>
+                        ${botonEditar}
                         ${botonValidacion}
-                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarImputacion(${imputacion.idImputacionClockify}, this)">Borrar</button>
+                        ${botonBorrar}
                     </div>
-                ` : ''}
                 </td>
             </tr>
         `;
