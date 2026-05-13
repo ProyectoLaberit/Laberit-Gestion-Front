@@ -57,27 +57,6 @@ body {
     margin-bottom: 15px;
 }
 
-.project-card-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.project-card-top .card-icon {
-    margin-bottom: 0;
-}
-
-.project-time-summary {
-    color: #6c757d;
-    font-size: 1rem;
-    font-weight: 700;
-    text-align: right;
-    line-height: 1.1;
-    white-space: nowrap;
-}
-
 .btn {
     background-color: var(--brand-primary);
     color: var(--bg-light);

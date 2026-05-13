@@ -102,18 +102,16 @@ const generarTarjetas = (lista, tieneExcel) => {
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card project-card p-3">
                     <div class="card-body">
-                        <div class="project-card-top">
-                            <div class="card-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
-                                </svg>
-                            </div>
-
-                            <div class="project-time-summary">
-                                ${displayReal} / ${displayMedia}
-                            </div>
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
+                            </svg>
                         </div>
                         <h5 class="card-title fw-bold">${p.nombre}</h5>
+                        
+                        <div class="text-primary fw-bold mb-2" style="font-size: 1rem;">
+                            ${displayReal}h / ${displayMedia}h
+                        </div>
 
                         <p class="card-text text-muted small mb-4">${p.descripcion || ''}</p>
                         <button onclick="verDetalles('${p.id}')" 
@@ -152,19 +150,17 @@ pintarProyectos();
 
 // ─── Cambio de formato de decimales a horas ───────────────────────────────────────────
 function formatoHoras(decimal) {
-    if (!decimal || isNaN(decimal)) return "0h";
+    if (!decimal || isNaN(decimal)) return "0";
     
-    let horas = Math.floor(decimal);
-    let minutos = Math.round((decimal - horas) * 60); 
+    const horas = Math.floor(decimal);
+    // Multiplicamos los decimales por 60 para sacar los minutos reales
+    const minutos = Math.round((decimal - horas) * 60); 
 
-    if (minutos === 60) {
-        horas += 1;
-        minutos = 0;
-    }
-
+    // Si no hay minutos, devolvemos solo las horas limpias
     if (minutos === 0) {
-        return `${horas}h`;
+        return horas.toString();
     }
     
-    return `${horas}h ${minutos}min`;
+    // padStart asegura que si son 5 minutos ponga "05" y no "5"
+    return `${horas}:${minutos.toString().padStart(2, '0')}`;
 }
