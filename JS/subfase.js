@@ -7,6 +7,12 @@ window.onload = function () {
         window.location.href = "login.html";
         return;
     }
+
+    // Bloqueo del botón "Añadir Tarea Manual"
+    const btnAnadir = document.querySelector('button[onclick="abrirAñadirManual()"]');
+    if (btnAnadir && !esAdmin()) {
+        btnAnadir.style.display = "none";
+    }
     cargarDatosSubfase();
 };
 

@@ -4,6 +4,12 @@ window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
     } else {
+        // Bloqueo del botón "Editar Tiempos"
+        const btnEditarTiempos = document.querySelector('a[href="editarestimaciones.html"]');
+        if (btnEditarTiempos && !esAdmin()) {
+            btnEditarTiempos.style.display = "none";
+        }
+
         cargarDetallesTar();
     }
 };
