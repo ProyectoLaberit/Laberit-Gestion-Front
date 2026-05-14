@@ -10,38 +10,118 @@
     <link rel="stylesheet" href="../CSS/nav.css">
     <style>
         .page-header {
-            background:#fff; border-bottom:1px solid #e9ecef;
-            padding:1.5rem 0; margin-bottom:2rem;
+            background: #fff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
         }
-        .page-header h1 { font-size:1.4rem; font-weight:800; margin:0; color:#1f2937; }
-        .page-header p  { font-size:0.85rem; color:#6c757d; margin:0; }
 
-        .log-table { background:#fff; border-radius:10px; border:1px solid #e9ecef; overflow:hidden; }
-        .log-table table { margin:0; }
-        .log-table thead th {
-            background:#f8f9fa; font-size:0.72rem; font-weight:700;
-            text-transform:uppercase; letter-spacing:0.8px; color:#6c757d;
-            border-bottom:2px solid #e9ecef; padding:14px 16px;
+        .page-header h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin: 0;
+            color: #1f2937;
         }
-        .log-table tbody td { padding:12px 16px; vertical-align:middle; border-color:#f3f4f6; font-size:0.875rem; }
-        .log-table tbody tr:hover { background:#fafafa; }
+
+        .page-header p {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .log-table {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+        }
+
+        .log-table table {
+            margin: 0;
+        }
+
+        .log-table thead th {
+            background: #f8f9fa;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6c757d;
+            border-bottom: 2px solid #e9ecef;
+            padding: 14px 16px;
+        }
+
+        .log-table tbody td {
+            padding: 12px 16px;
+            vertical-align: middle;
+            border-color: #f3f4f6;
+            font-size: 0.875rem;
+        }
+
+        .log-table tbody tr:hover {
+            background: #fafafa;
+        }
 
         .badge-accion {
-            font-size:0.68rem; font-weight:700; padding:3px 9px;
-            border-radius:20px; white-space:nowrap;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 20px;
+            white-space: nowrap;
         }
-        .badge-importacion  { background:#dbeafe; color:#1e40af; }
-        .badge-estimacion   { background:#fef9c3; color:#854d0e; }
-        .badge-creacion     { background:#dcfce7; color:#166534; }
-        .badge-borrado      { background:#fee2e2; color:#991b1b; }
-        .badge-rol          { background:#f3e8ff; color:#6b21a8; }
-        .badge-sync         { background:#e0f2fe; color:#0369a1; }
-        .badge-otro         { background:#f3f4f6; color:#4b5563; }
 
-        .filtros-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1.25rem; }
-        .filtros-bar select, .filtros-bar input { font-size:0.85rem; }
+        .badge-importacion {
+            background: #dbeafe;
+            color: #1e40af;
+        }
 
-        .empty-state { padding:3rem; text-align:center; color:#9ca3af; }
+        .badge-estimacion {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .badge-creacion {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-borrado {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-rol {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .badge-sync {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge-otro {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .filtros-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+
+        .filtros-bar select,
+        .filtros-bar input {
+            font-size: 0.85rem;
+        }
+
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: #9ca3af;
+        }
 
         .sort-btn {
             display: inline-flex;
@@ -68,7 +148,6 @@
 </head>
 
 <body class="bg-light d-flex flex-column min-vh-100">
-
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm laberit-navbar">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-3" href="proyectos.html">
@@ -113,14 +192,14 @@
         <div class="filtros-bar">
             <select class="form-select w-auto" id="filtro-accion" onchange="aplicarFiltros()">
                 <option value="">Todas las acciones</option>
-                <option value="IMPORTACION_EXCEL">Importacion Excel</option>
-                <option value="CAMBIO_ESTIMACION">Cambio Estimacion</option>
-                <option value="CREACION_ESTIMACION">Creacion Estimacion</option>
-                <option value="BORRADO_ESTIMACION">Borrado Estimacion</option>
-                <option value="SINCRONIZACION">Sincronizacion</option>
-                <option value="CREACION_USUARIO">Creacion Usuario</option>
-                <option value="BORRADO_USUARIO">Borrado Usuario</option>
-                <option value="CAMBIO_ROL">Cambio Rol</option>
+                <option value="IMPORTAR_EXCEL">Importacion Excel</option>
+                <option value="ACTUALIZAR_ESTIMACION">Cambio Estimacion</option>
+                <option value="CREAR_ESTIMACION">Creacion Estimacion</option>
+                <option value="BORRAR_ESTIMACION">Borrado Estimacion</option>
+                <option value="SINCRONIZAR_CLOCKIFY">Sincronizacion</option>
+                <option value="CREAR_USUARIO">Creacion Usuario</option>
+                <option value="BORRAR_USUARIO">Borrado Usuario</option>
+                <option value="CAMBIAR_ROL">Cambio Rol</option>
             </select>
 
             <div class="input-group" style="max-width:260px;">
@@ -151,18 +230,17 @@
                         <th>
                             <button type="button" class="sort-btn" onclick="toggleOrdenFecha()">
                                 <span>Fecha y Hora</span>
-                                <span class="sort-arrow" id="sort-fecha-arrow">↓</span>
+                                <span class="sort-arrow" id="sort-fecha-arrow">&#8595;</span>
                             </button>
                         </th>
                         <th>Accion</th>
                         <th>Actor</th>
                         <th>Afectado</th>
                         <th>Descripcion</th>
-                        <th>Proyecto</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-logs">
-                    <tr><td colspan="6" class="empty-state">
+                    <tr><td colspan="5" class="empty-state">
                         <div class="spinner-border spinner-border-sm me-2"></div>Cargando logs...
                     </td></tr>
                 </tbody>
@@ -173,7 +251,7 @@
     <footer class="custom-footer py-3">
         <div class="container text-center">
             <div class="footer-logo mb-2">L</div>
-            <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
+            <p class="mb-0 small">&copy; 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
             <p class="text-muted mb-0" style="font-size:0.7rem;">Todos los derechos reservados.</p>
         </div>
     </footer>
@@ -183,4 +261,3 @@
     <script src="../JS/auditoria.js"></script>
 </body>
 </html>
-

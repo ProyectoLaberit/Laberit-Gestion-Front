@@ -6,6 +6,7 @@ window.onload = function () {
         window.location.href = "login.html";
         return;
     }
+
     if (!esSuperAdmin()) {
         document.body.innerHTML = `
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -24,19 +25,20 @@ window.onload = function () {
             </div>`;
         return;
     }
+
     cargarLogs();
     actualizarIndicadorOrdenFecha();
 };
 
 async function cargarLogs() {
     const tbody = document.getElementById("tabla-logs");
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">
         <div class="spinner-border spinner-border-sm me-2"></div>Cargando...</td></tr>`;
 
     const result = await peticionSegura("/audit");
 
     if (!result || !result.success) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state text-danger">
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state text-danger">
             Error al cargar los logs.</td></tr>`;
         return;
     }
@@ -52,20 +54,22 @@ function aplicarFiltros() {
     let filtrados = todosLosLogs;
 
     if (accion) {
-        filtrados = filtrados.filter(l => l.accion === accion);
+        filtrados = filtrados.filter((log) => log.accion === accion);
     }
+
     if (texto) {
-        filtrados = filtrados.filter(l =>
-            (l.usuarioEmail || "").toLowerCase().includes(texto) ||
-            (l.usuarioNombre || "").toLowerCase().includes(texto) ||
-            String(l.idUsuarioActor ?? l.idUsuario ?? "").includes(texto) ||
-            String(l.idUsuarioObjetivo ?? "").includes(texto) ||
-            (l.descripcion || "").toLowerCase().includes(texto)
+        filtrados = filtrados.filter((log) =>
+            (log.usuarioEmail || "").toLowerCase().includes(texto) ||
+            (log.usuarioNombre || "").toLowerCase().includes(texto) ||
+            (log.usuarioObjetivoEmail || "").toLowerCase().includes(texto) ||
+            (log.usuarioObjetivoNombre || "").toLowerCase().includes(texto) ||
+            String(log.idUsuarioActor ?? log.idUsuario ?? "").includes(texto) ||
+            String(log.idUsuarioObjetivo ?? "").includes(texto) ||
+            (log.descripcion || "").toLowerCase().includes(texto)
         );
     }
 
-    filtrados = ordenarLogsPorFecha(filtrados);
-    renderizarTabla(filtrados);
+    renderizarTabla(ordenarLogsPorFecha(filtrados));
 }
 
 function toggleOrdenFecha() {
@@ -80,10 +84,10 @@ function actualizarIndicadorOrdenFecha() {
         return;
     }
 
-    arrow.textContent = ordenFechaDesc ? "↓" : "↑";
+    arrow.textContent = ordenFechaDesc ? "\u2193" : "\u2191";
     arrow.title = ordenFechaDesc
-        ? "Mostrando primero las fechas más recientes"
-        : "Mostrando primero las fechas más antiguas";
+        ? "Mostrando primero las fechas mas recientes"
+        : "Mostrando primero las fechas mas antiguas";
 }
 
 function ordenarLogsPorFecha(logs) {
@@ -101,24 +105,23 @@ function renderizarTabla(logs) {
     contador.textContent = `${logs.length} registro${logs.length !== 1 ? "s" : ""}`;
 
     if (logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No hay registros que coincidan.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No hay registros que coincidan.</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = logs.map(l => `
+    tbody.innerHTML = logs.map((log) => `
         <tr>
             <td class="text-muted" style="white-space:nowrap;font-size:0.8rem;">
-                ${formatearFecha(l.fechaHora)}
+                ${formatearFecha(log.fechaHora)}
             </td>
-            <td>${badgeAccion(l.accion)}</td>
+            <td>${badgeAccion(log.accion)}</td>
             <td>
-                <div class="fw-semibold" style="font-size:0.85rem;">${l.usuarioNombre || l.usuarioEmail || "-"}</div>
-                <div class="text-muted" style="font-size:0.75rem;">${l.usuarioEmail || ""}</div>
-                <div class="text-muted" style="font-size:0.75rem;">ID actor: ${formatearIdUsuario(l.idUsuarioActor ?? l.idUsuario)}</div>
+                <div class="fw-semibold" style="font-size:0.85rem;">${log.usuarioNombre || log.usuarioEmail || "-"}</div>
+                <div class="text-muted" style="font-size:0.75rem;">${log.usuarioEmail || ""}</div>
+                <div class="text-muted" style="font-size:0.75rem;">ID actor: ${formatearIdUsuario(log.idUsuarioActor ?? log.idUsuario)}</div>
             </td>
-            <td>${renderUsuarioObjetivo(l)}</td>
-            <td style="max-width:320px;">${l.descripcion || "-"}</td>
-            <td class="text-muted">${l.idProyecto ? "#" + l.idProyecto : "-"}</td>
+            <td>${renderUsuarioObjetivo(log)}</td>
+            <td style="max-width:320px;">${log.descripcion || "-"}</td>
         </tr>
     `).join("");
 }
@@ -143,23 +146,31 @@ function renderUsuarioObjetivo(log) {
 }
 
 function formatearFecha(fechaHora) {
-    if (!fechaHora) return "-";
-    const d = new Date(fechaHora);
-    return d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })
-        + " " + d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    if (!fechaHora) {
+        return "-";
+    }
+
+    const fecha = new Date(fechaHora);
+    return fecha.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })
+        + " "
+        + fecha.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 }
 
 function badgeAccion(accion) {
     const mapa = {
-        "IMPORTACION_EXCEL": ["badge-importacion", "Importacion Excel"],
-        "CAMBIO_ESTIMACION": ["badge-estimacion", "Cambio Estimacion"],
-        "CREACION_ESTIMACION": ["badge-creacion", "Creacion Estimacion"],
-        "BORRADO_ESTIMACION": ["badge-borrado", "Borrado Estimacion"],
-        "SINCRONIZACION": ["badge-sync", "Sincronizacion"],
-        "CREACION_USUARIO": ["badge-creacion", "Creacion Usuario"],
-        "BORRADO_USUARIO": ["badge-borrado", "Borrado Usuario"],
-        "CAMBIO_ROL": ["badge-rol", "Cambio Rol"],
+        IMPORTAR_EXCEL: ["badge-importacion", "Importacion Excel"],
+        ACTUALIZAR_ESTIMACION: ["badge-estimacion", "Cambio Estimacion"],
+        CREAR_ESTIMACION: ["badge-creacion", "Creacion Estimacion"],
+        BORRAR_ESTIMACION: ["badge-borrado", "Borrado Estimacion"],
+        SINCRONIZAR_CLOCKIFY: ["badge-sync", "Sincronizacion"],
+        CREAR_USUARIO: ["badge-creacion", "Creacion Usuario"],
+        BORRAR_USUARIO: ["badge-borrado", "Borrado Usuario"],
+        CAMBIAR_ROL: ["badge-rol", "Cambio Rol"],
+        ACTUALIZAR_USUARIO: ["badge-rol", "Actualizar Usuario"],
+        CAMBIAR_CONTRASENA: ["badge-rol", "Cambiar Contrasena"],
+        CAMBIAR_FOTO: ["badge-rol", "Cambiar Foto"]
     };
+
     const [cls, label] = mapa[accion] || ["badge-otro", accion || "-"];
     return `<span class="badge-accion ${cls}">${label}</span>`;
 }
