@@ -1,4 +1,5 @@
 let todosLosLogs = [];
+let ordenFechaDesc = true;
 
 window.onload = function () {
     if (!localStorage.getItem("token")) {
@@ -24,6 +25,7 @@ window.onload = function () {
         return;
     }
     cargarLogs();
+    actualizarIndicadorOrdenFecha();
 };
 
 async function cargarLogs() {
@@ -62,7 +64,34 @@ function aplicarFiltros() {
         );
     }
 
+    filtrados = ordenarLogsPorFecha(filtrados);
     renderizarTabla(filtrados);
+}
+
+function toggleOrdenFecha() {
+    ordenFechaDesc = !ordenFechaDesc;
+    actualizarIndicadorOrdenFecha();
+    aplicarFiltros();
+}
+
+function actualizarIndicadorOrdenFecha() {
+    const arrow = document.getElementById("sort-fecha-arrow");
+    if (!arrow) {
+        return;
+    }
+
+    arrow.textContent = ordenFechaDesc ? "↓" : "↑";
+    arrow.title = ordenFechaDesc
+        ? "Mostrando primero las fechas más recientes"
+        : "Mostrando primero las fechas más antiguas";
+}
+
+function ordenarLogsPorFecha(logs) {
+    return [...logs].sort((a, b) => {
+        const fechaA = a.fechaHora ? new Date(a.fechaHora).getTime() : 0;
+        const fechaB = b.fechaHora ? new Date(b.fechaHora).getTime() : 0;
+        return ordenFechaDesc ? fechaB - fechaA : fechaA - fechaB;
+    });
 }
 
 function renderizarTabla(logs) {
