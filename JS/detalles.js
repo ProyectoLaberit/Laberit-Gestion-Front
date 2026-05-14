@@ -263,7 +263,7 @@ function renderizarTodo(filtro = "", estr, ids) {
                         <div class="fw-bold text-dark">${sub}</div>
                         
                         <div class="text-primary mt-2 fw-bold" style="font-size: 0.95rem;">
-                            ${displayReal}h / ${displayMedia}h
+                            ${displayReal} / ${displayMedia}
                         </div>
                         
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
@@ -303,7 +303,14 @@ function cerrarSesion() {
 
 // ─── Cambio de formato de decimales a horas ───────────────────────────────────────────
 function formatoHoras(decimal) {
-    if (!decimal || isNaN(decimal)) return "0";
+    if (!decimal || isNaN(decimal)) return "0h";
 
-    return `${Math.floor(decimal)}`;
+    const horas = Math.floor(decimal);
+    const minutos = Math.floor((decimal - horas) * 60);
+
+    if (minutos <= 0) {
+        return `${horas}h`;
+    }
+
+    return `${horas}h ${minutos}min`;
 }
