@@ -559,7 +559,7 @@ async function marcarValida(id, btn) {
 
     const { idDetalleEstimacion } = obtenerContextoVista();
 
-    const result = await peticionSegura(`/imputaciones/vincular/${id}/${idDetalleEstimacion}`, {
+    const result = await peticionSegura(`/imputaciones/alternar-validacion/${id}/${idDetalleEstimacion}`, {
         method: "PUT"
     });
 
