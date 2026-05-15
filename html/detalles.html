@@ -40,6 +40,29 @@
             border-left-color: var(--brand-primary);
         }
 
+        .btn-excel-download {
+            background: #1d6f42;
+            border-color: #1d6f42;
+            color: #fff;
+        }
+
+        .btn-excel-download:hover,
+        .btn-excel-download:focus {
+            background: #185c37;
+            border-color: #185c37;
+            color: #fff;
+        }
+
+        .detalle-header-actions {
+            align-items: center;
+        }
+
+        @media (min-width: 992px) {
+            .detalle-header-actions {
+                flex-wrap: nowrap !important;
+            }
+        }
+
         @keyframes spin {
             from { transform: rotate(0deg); }
             to   { transform: rotate(360deg); }
@@ -78,7 +101,7 @@
 
         <div class="bg-white p-4 rounded border shadow-sm mb-5">
             <div class="row align-items-center">
-                <div class="col-md-4">
+                <div class="col-lg-5">
                     <h2 class="h4 mb-1 fw-bold" id="proyecto-nombre-display">Cargando proyecto...</h2>
                     <p class="text-muted mb-0" style="font-size:0.78rem;">
                         Gestión de Fases y Estimaciones
@@ -88,7 +111,7 @@
                         </span>
                     </p>
                     <!-- Botones solo visibles para SuperAdministrador -->
-                    <div id="botones-admin" class="d-flex gap-2 mt-2 flex-wrap" style="display:none!important;">
+                    <div id="botones-admin" class="d-flex gap-2 mt-2 flex-wrap detalle-header-actions" style="display:none!important;">
                         <a href="editarproyecto.html" class="btn btn-sm btn-brand">Editar</a>
                         <a href="crearfases.html" class="btn btn-sm btn-outline-secondary">
                             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -106,9 +129,19 @@
                             </svg>
                             <span id="texto-sincronizar">Sincronizar</span>
                         </button>
+                        <button class="btn btn-sm btn-excel-download" id="btn-descargar-excel" type="button">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
+                                <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/>
+                                <polyline points="14 2 14 7 19 7"/>
+                                <path d="M9 11l6 6"/>
+                                <path d="M15 11l-6 6"/>
+                            </svg>
+                            Descargar Excel
+                        </button>
                     </div>
                 </div>
-                <div class="col-md-8 d-flex gap-2 justify-content-md-end mt-3 mt-md-0">
+                <div class="col-lg-7 d-flex gap-2 justify-content-lg-end mt-3 mt-lg-0">
                     <div class="input-group" style="max-width: 450px;">
                         <span class="input-group-text bg-white border-end-0 text-muted">
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
