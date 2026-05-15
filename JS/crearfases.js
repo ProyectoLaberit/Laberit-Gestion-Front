@@ -8,6 +8,29 @@ window.onload = async function () {
         return;
     }
 
+    if (esEmpleado()) {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                        height:100vh;background:#f8f9fa;font-family:sans-serif;">
+                <div style="width:80px;height:80px;background:#fee2e2;border-radius:50%;
+                            display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
+                    <svg width="40" height="40" fill="none" stroke="#dc2626" stroke-width="2.5" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                </div>
+                <h2 style="color:#1f2937;font-weight:800;margin:0 0 0.5rem;">Acceso no permitido</h2>
+                <p style="color:#6c757d;margin:0 0 1.5rem;">Solo Administrador y SuperAdministrador pueden crear estructuras.</p>
+                <a href="proyectos.html" style="background:#C01717;color:white;padding:10px 24px;
+                    border-radius:6px;text-decoration:none;font-weight:600;">Volver a Proyectos</a>
+            </div>`;
+        return;
+    }
+
+    if (!verificarAcceso(["SuperAdministrador", "Administrador"])) {
+        return;
+    }
+
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoId = localStorage.getItem("proyectoId");
     const proyectoActual = proyectos.find(p => String(p.id) === String(proyectoId));
@@ -218,7 +241,6 @@ async function crearEstimacion() {
     const payload = {
         idFasePadre: subfaseSeleccionadaEst.idFase,
         idSubFase: subfaseSeleccionadaEst.id,
-        idSubfaseFase: subfaseSeleccionadaEst.id,
         idDepartamento: idDepto,
         tarea,
         tiempoMin,
