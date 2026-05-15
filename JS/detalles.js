@@ -28,8 +28,8 @@ async function cargarPaginaDetalles() {
         mostrarUltimaSync(ultimaSync);
     }
 
-    // Mostrar botones solo para SuperAdministrador
-    if (esSuperAdmin()) {
+    // Mostrar acciones de estructura para Administrador y SuperAdministrador
+    if (esAdmin()) {
         document.getElementById("botones-admin").style.display = "flex";
     }
 
