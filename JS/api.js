@@ -56,12 +56,34 @@ async function peticionSegura(endpoint, opciones = {}) {
             return;
         }
 
-        if (response.status === 403) {
-            console.error("Sin permisos para esta accion");
-            return { success: false, mensaje: "No tienes permisos para realizar esta accion." };
+        const contentType = response.headers.get("content-type") || "";
+        let payload = null;
+
+        if (contentType.includes("application/json")) {
+            payload = await response.json();
+        } else {
+            const texto = await response.text();
+            payload = texto ? { mensaje: texto } : null;
         }
 
-        return await response.json();
+        if (response.status === 403) {
+            console.error("Sin permisos para esta accion");
+            return {
+                success: false,
+                mensaje: (payload && payload.mensaje) || "No tienes permisos para realizar esta accion."
+            };
+        }
+
+        if (!response.ok) {
+            return {
+                success: false,
+                mensaje: (payload && (payload.mensaje || payload.message))
+                    || `Error ${response.status} al procesar la peticion.`,
+                status: response.status
+            };
+        }
+
+        return payload;
     } catch (error) {
         console.error("Error en la peticion:", error);
         throw error;

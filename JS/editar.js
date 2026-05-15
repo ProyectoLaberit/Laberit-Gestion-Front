@@ -147,7 +147,7 @@ async function guardarProyecto() {
         feedback.innerText = "Guardando proyecto...";
 
         const result = await peticionSegura(`/proyectos/${id}`, {
-            method: "POST",
+            method: "PUT",
             body: JSON.stringify(proyectoData)
         });
 
