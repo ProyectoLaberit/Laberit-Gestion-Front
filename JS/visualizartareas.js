@@ -33,6 +33,7 @@ window.onload = async function () {
     inicializarRangoFechas();
     configurarFiltrosAutomaticos();
     await cargarImputaciones();
+    setFiltro('correctas');
 
     document.addEventListener("keydown", manejarTeclasModalEdicion);
 };

@@ -159,23 +159,26 @@
         <!-- Filtros -->
         <div class="filters-toolbar mb-3">
             <div class="filter-tabs">
-                <button class="filter-tab active" id="tab-todas" onclick="setFiltro('todas')">Todas (<span
-                        id="cnt-todas">0</span>)</button>
+                <button class="filter-tab active" id="tab-correctas" onclick="setFiltro('correctas')">Correctas (<span
+                        id="cnt-correctas">0</span>)</button>
                 <button class="filter-tab" id="tab-incorrectas" onclick="setFiltro('incorrectas')">Incorrectas (<span
                         id="cnt-incorrectas">0</span>)</button>
-                <button class="filter-tab" id="tab-correctas" onclick="setFiltro('correctas')">Correctas (<span
-                        id="cnt-correctas">0</span>)</button>
+                <button class="filter-tab" id="tab-todas" onclick="setFiltro('todas')">Todas (<span
+                        id="cnt-todas">0</span>)</button>
+
+
             </div>
             <div class="toolbar-right">
                 <div class="input-group toolbar-search">
                     <span class="input-group-text bg-white border-end-0 text-muted">
-                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
                             <circle cx="11" cy="11" r="8" />
                             <line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg>
                     </span>
-                    <input type="text" class="form-control border-start-0" id="input-busqueda" placeholder="Buscar tarea..."
-                        oninput="renderPagina()">
+                    <input type="text" class="form-control border-start-0" id="input-busqueda"
+                        placeholder="Buscar tarea..." oninput="renderPagina()">
                 </div>
                 <div class="toolbar-date">
                     <label for="fecha-desde" class="form-label small text-muted mb-1">Desde</label>
@@ -255,4 +258,3 @@
 </body>
 
 </html>
-
