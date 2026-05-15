@@ -116,6 +116,9 @@ function formatearFechaInput(fecha) {
 async function cargarImputaciones() {
     const { proyectoId, idDetalleEstimacion, idDepartamento } = obtenerContextoVista();
 
+    // 1. Capturamos la subfase real directamente
+    const subfaseReal = localStorage.getItem("subfaseSeleccionada") || "";
+
     if (!proyectoId || !idDetalleEstimacion || !idDepartamento) {
         mostrarErrorTabla("Faltan datos de navegacion. Vuelve atras.");
         return;
@@ -129,7 +132,7 @@ async function cargarImputaciones() {
 
     setEstadoCargaTabla("Cargando tareas...");
 
-    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}`);
+    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}?subfase=${encodeURIComponent(subfaseReal)}`);
 
     if (!result || !result.success) {
         mostrarErrorTabla("Error al cargar las tareas.");
@@ -144,6 +147,8 @@ async function filtrarPorFechas() {
     const { proyectoId, idDetalleEstimacion, idDepartamento } = obtenerContextoVista();
     const desde = document.getElementById("fecha-desde")?.value;
     const hasta = document.getElementById("fecha-hasta")?.value;
+    // 1. Capturamos la subfase real
+    const subfaseReal = localStorage.getItem("subfaseSeleccionada") || "";
 
     if (!proyectoId || !idDetalleEstimacion || !idDepartamento) {
         mostrarErrorTabla("Faltan datos de navegacion. Vuelve atras.");
@@ -157,7 +162,7 @@ async function filtrarPorFechas() {
 
     setEstadoCargaTabla("Filtrando tareas...");
 
-    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}/fechas?desde=${desde}&hasta=${hasta}`);
+    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}/fechas?desde=${desde}&hasta=${hasta}&subfase=${encodeURIComponent(subfaseReal)}`);
 
     if (!result || !result.success) {
         mostrarErrorTabla((result && result.mensaje) || "Error al filtrar por fechas.");
