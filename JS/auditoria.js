@@ -134,6 +134,9 @@ function renderUsuarioObjetivo(log) {
     if (log.idUsuarioObjetivo === undefined || log.idUsuarioObjetivo === null) {
         return `<span class="text-muted">-</span>`;
     }
+    if(log.usuarioObjetivoEmail == null){
+        return `<span class="text-muted">${log.idUsuarioObjetivo}</span>`;
+    }
 
     const nombreObjetivo = log.usuarioObjetivoNombre || log.usuarioObjetivoEmail || "Usuario afectado";
     const emailObjetivo = log.usuarioObjetivoEmail || "";
