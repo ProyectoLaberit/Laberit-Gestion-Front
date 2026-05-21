@@ -3,6 +3,8 @@ let filtroActual = "todas";
 let paginaActual = 1;
 let porPagina = 10;
 let idImputacionEditando = null;
+let subfasesPorFaseEdit = {};
+let nombresFaseEdit = {};
 
 window.onload = async function () {
     if (!localStorage.getItem("token")) {
@@ -32,6 +34,7 @@ window.onload = async function () {
     cargarBreadcrumb();
     inicializarRangoFechas();
     configurarFiltrosAutomaticos();
+    await cargarFasesYSubfasesEdit();
     await cargarImputaciones();
     setFiltro('correctas');
 
@@ -703,6 +706,7 @@ async function guardarEdicionImputacion() {
 
     const imputacion = todasLasImputaciones.find(i => i.idImputacionClockify === idImputacionEditando);
     const input = document.getElementById("edit-modal-input");
+    const selectSub = document.getElementById("edit-select-subfase");
     const botonGuardar = document.getElementById("edit-modal-save-btn");
 
     if (!imputacion || !input || !botonGuardar) {
@@ -711,6 +715,16 @@ async function guardarEdicionImputacion() {
     }
 
     const tareaLimpia = input.value.trim();
+
+    let subfaseLimpia = "";
+    let idSubfaseLimpia = null;
+
+    // Verificamos que haya seleccionado algo válido (que no sea el placeholder "Selecciona...")
+    if (selectSub && selectSub.selectedIndex > 0) { 
+        subfaseLimpia = selectSub.options[selectSub.selectedIndex].text; // El texto para visualización
+        idSubfaseLimpia = selectSub.options[selectSub.selectedIndex].value; // El ID para la base de datos
+    }
+
     if (!tareaLimpia) {
         alert("El nombre de la tarea no puede estar vacio.");
         input.focus();
@@ -720,13 +734,25 @@ async function guardarEdicionImputacion() {
     botonGuardar.disabled = true;
     botonGuardar.textContent = "Guardando...";
 
+    // Preparamos el paquete con los 3 datos
+    const payload = { 
+        tareaExtraida: tareaLimpia,
+        subfaseExtraida: subfaseLimpia,
+        idFase: idSubfaseLimpia 
+    };
+
     const result = await peticionSegura(`/imputaciones/editar-tarea/${idImputacionEditando}`, {
         method: "PUT",
-        body: JSON.stringify({ tareaExtraida: tareaLimpia })
+        body: JSON.stringify(payload)
     });
 
     if (result && result.success) {
         imputacion.tareaExtraida = tareaLimpia;
+
+        if (subfaseLimpia) {
+            imputacion.subfaseExtraida = subfaseLimpia;
+        }
+
         renderPagina();
         cerrarModalEdicion();
         return;
@@ -755,6 +781,59 @@ function manejarTeclasModalEdicion(event) {
 function formatearFechaTexto(valor) {
     const fecha = new Date(valor);
     return fecha.toLocaleDateString("es-ES");
+}
+
+async function cargarFasesYSubfasesEdit() {
+    const proyectoId = localStorage.getItem("proyectoId");
+    const selectFase = document.getElementById("edit-select-fase");
+    const selectSub = document.getElementById("edit-select-subfase");
+
+    if (!proyectoId || !selectFase) return;
+
+    try {
+        const result = await peticionSegura(`/fases/${proyectoId}`);
+        if (!result || !result.success || !Array.isArray(result.data)) return;
+
+        subfasesPorFaseEdit = {};
+        nombresFaseEdit = {};
+        
+        selectFase.innerHTML = '<option value="" disabled selected>Selecciona una fase...</option>';
+
+        result.data.forEach(fase => {
+            const idFase = String(fase.id);
+            nombresFaseEdit[idFase] = fase.nombre;
+            subfasesPorFaseEdit[idFase] = Array.isArray(fase.subfases) ? fase.subfases : [];
+
+            const opt = document.createElement("option");
+            opt.value = idFase;
+            opt.textContent = fase.nombre;
+            selectFase.appendChild(opt);
+        });
+    } catch (error) {
+        console.error("Error al cargar fases para edición:", error);
+    }
+}
+
+function onCambioFaseEdit() {
+    const idFase = document.getElementById("edit-select-fase").value;
+    const selectSub = document.getElementById("edit-select-subfase");
+
+    if (!idFase) {
+        selectSub.innerHTML = '<option value="" disabled selected>Primero selecciona una fase...</option>';
+        selectSub.disabled = true;
+        return;
+    }
+
+    const subfases = subfasesPorFaseEdit[idFase] || [];
+    selectSub.disabled = false;
+    selectSub.innerHTML = '<option value="" disabled selected>Selecciona una subfase...</option>';
+
+    subfases.forEach(subfase => {
+        const opt = document.createElement("option");
+        opt.value = subfase.id;
+        opt.textContent = subfase.nombre;
+        selectSub.appendChild(opt);
+    });
 }
 
 function cerrarSesion() {
