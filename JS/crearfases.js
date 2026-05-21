@@ -254,18 +254,24 @@ async function crearEstimacion() {
     setBusy("est", false);
 
     if (result && result.success) {
-        agregarItemListaCreada(
-            "lista-estimaciones",
-            "contenedor-estimaciones-creadas",
-            `${subfaseSeleccionadaEst.nombre} - ${tarea} (${tiempoMin}h-${tiempoMax}h)`
-        );
-        document.getElementById("input-tarea-est").value = "";
-        document.getElementById("input-tmin").value = "";
-        document.getElementById("input-tmax").value = "";
-        mostrarExito(`Estimacion "${tarea}" creada correctamente.`);
+        abrirEstimacionCreada(tarea);
+        return;
     } else {
         mostrarError((result && result.mensaje) || "Error al crear la estimacion.");
     }
+}
+
+function abrirEstimacionCreada(nombreTarea) {
+    if (!subfaseSeleccionadaEst) {
+        return;
+    }
+
+    localStorage.setItem("idSubfase", String(subfaseSeleccionadaEst.id));
+    localStorage.setItem("subfaseSeleccionada", subfaseSeleccionadaEst.nombre);
+    localStorage.setItem("faseSeleccionada", nombresFase[String(subfaseSeleccionadaEst.idFase)] || "Fase");
+    localStorage.setItem("nombreTarea", nombreTarea);
+
+    window.location.assign("paginatareas.html");
 }
 
 function agregarItemListaCreada(listaId, contenedorId, texto) {

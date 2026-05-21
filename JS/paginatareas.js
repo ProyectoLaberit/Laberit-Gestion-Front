@@ -1,3 +1,5 @@
+let vinculacionesGitlabActuales = [];
+
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -47,13 +49,16 @@ async function cargarDetallesTar() {
     }
 
     try {
-        const result = await peticionSegura(`/estimaciones/proyecto/${proyectoId}/especifica`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: parametros
-        });
+        const [result] = await Promise.all([
+            peticionSegura(`/estimaciones/proyecto/${proyectoId}/especifica`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: parametros
+            }),
+            cargarVinculacionesGitlab(proyectoId)
+        ]);
 
         if (result && result.success) {
             const espec = result.data;
@@ -74,6 +79,14 @@ async function cargarDetallesTar() {
                     ` : ""}
                 </div>
             `).join("");
+
+            const colGitlab = espec.map((p) => {
+                const vinculacion = obtenerVinculacionGitlab(p.idTareaProyecto);
+                return `
+                <div class="gitlab-item">
+                    ${renderizarContenidoGitlab(vinculacion, p.numeroGitlab)}
+                </div>`;
+            }).join("");
 
             const colReal = espec.map((p) => {
                 const tiempoRealValor = p.tiempoReal;
@@ -117,6 +130,7 @@ async function cargarDetallesTar() {
 
             tabla.innerHTML = `
                 <div class="b-col">${colDeptos}</div>
+                <div class="b-col">${colGitlab}</div>
                 <div class="b-col">${colReal}</div>
                 <div class="b-col">${colMin}</div>
                 <div class="b-col">${colMax}</div>
@@ -127,6 +141,128 @@ async function cargarDetallesTar() {
     } catch (error) {
         console.error("Error en la llamada:", error);
     }
+}
+
+async function cargarVinculacionesGitlab(proyectoId) {
+    if (!proyectoId) {
+        vinculacionesGitlabActuales = [];
+        return;
+    }
+
+    try {
+        const result = await peticionSegura("/gitlab/vinculadas");
+
+        if (!result || !result.success || !Array.isArray(result.data)) {
+            vinculacionesGitlabActuales = [];
+            return;
+        }
+
+        vinculacionesGitlabActuales = result.data
+            .map(normalizarVinculacionGitlab)
+            .filter((vinc) => vinc && String(vinc.idProyecto || "") === String(proyectoId));
+    } catch (error) {
+        vinculacionesGitlabActuales = [];
+        console.error("No se pudieron cargar las vinculaciones de GitLab:", error);
+    }
+}
+
+function normalizarVinculacionGitlab(vinc) {
+    if (!vinc || typeof vinc !== "object") {
+        return null;
+    }
+
+    const tareaProyecto = vinc.tareaProyecto && typeof vinc.tareaProyecto === "object"
+        ? vinc.tareaProyecto
+        : {};
+
+    return {
+        issueId: String(vinc.issueId || "").trim(),
+        iidGitlab: vinc.iidGitlab != null ? Number(vinc.iidGitlab) : null,
+        titulo: String(vinc.titulo || "").trim(),
+        estado: String(vinc.estado || "").trim(),
+        idTareaProyecto: tareaProyecto.idTareaProyecto != null ? Number(tareaProyecto.idTareaProyecto) : null,
+        idProyecto: tareaProyecto.idProyecto != null ? Number(tareaProyecto.idProyecto) : null
+    };
+}
+
+function obtenerVinculacionGitlab(idTareaProyecto) {
+    return vinculacionesGitlabActuales.find(
+        (vinc) => String(vinc.idTareaProyecto || "") === String(idTareaProyecto || "")
+    ) || null;
+}
+
+function renderizarContenidoGitlab(vinculacion, numeroGitlab) {
+    if (!vinculacion) {
+        if (numeroGitlab) {
+            return `
+                <div class="gitlab-title">#${escaparHtml(numeroGitlab)}</div>
+                <div class="gitlab-meta">
+                    <span class="gitlab-empty">Pendiente de validar</span>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="gitlab-title gitlab-empty"></div>
+            <div class="gitlab-meta">
+                <span class="gitlab-empty">No hay una vinculacion valida en GitLab</span>
+            </div>
+        `;
+    }
+
+    const numero = vinculacion.iidGitlab != null ? `#${vinculacion.iidGitlab}` : (numeroGitlab ? `#${numeroGitlab}` : "#-");
+    const titulo = vinculacion.titulo || "Tarea sin titulo";
+    const estadoTexto = formatearEstadoGitlab(vinculacion.estado);
+    const estadoClase = obtenerClaseEstadoGitlab(vinculacion.estado);
+
+    return `
+        <div class="gitlab-title">${escaparHtml(numero)} - ${escaparHtml(titulo)}</div>
+        <div class="gitlab-meta">
+            <span>${escaparHtml(vinculacion.issueId || "Issue registrada")}</span>
+            <span class="gitlab-state ${estadoClase}">${escaparHtml(estadoTexto)}</span>
+        </div>
+    `;
+}
+
+function obtenerClaseEstadoGitlab(estado) {
+    const normalizado = String(estado || "").trim().toLowerCase();
+
+    if (normalizado === "opened" || normalizado === "open") {
+        return "gitlab-state-opened";
+    }
+
+    if (normalizado === "closed" || normalizado === "close") {
+        return "gitlab-state-closed";
+    }
+
+    return "gitlab-state-other";
+}
+
+function formatearEstadoGitlab(estado) {
+    const normalizado = String(estado || "").trim().toLowerCase();
+
+    if (normalizado === "opened" || normalizado === "open") {
+        return "Abierta";
+    }
+
+    if (normalizado === "closed" || normalizado === "close") {
+        return "Cerrada";
+    }
+
+    if (!normalizado) {
+        return "Sin estado";
+    }
+
+    return normalizado.replaceAll("_", " ");
+}
+
+function escaparHtml(valor) {
+    return String(valor ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;")
+        .replaceAll("'", "&#39;");
 }
 
 function irAVisualizarTareas(idDetalleEstimacion, idDepartamento, nombreDepartamento) {
