@@ -29,11 +29,77 @@ async function cargarPaginaDetalles() {
         document.getElementById("botones-admin").style.display = "flex";
     }
 
+    const btnDescargarExcel = document.getElementById("btn-descargar-excel");
+    if (btnDescargarExcel) {
+        btnDescargarExcel.addEventListener("click", descargarExcelActual);
+    }
+
     await cargarHistorialExcels(proyectoId);
 
     document.getElementById("input-busqueda").addEventListener("input", (e) => {
         renderizarTodo(e.target.value, estructuraActual, idsActuales);
     });
+}
+
+async function descargarExcelActual() {
+    const token = localStorage.getItem("token");
+    const btn = document.getElementById("btn-descargar-excel");
+    const selectExcel = document.getElementById("select-historial-excel");
+    const idExcel = idExcelSeleccionadoActual || selectExcel?.value;
+
+    if (!idExcel) {
+        mostrarToast("No hay ningun Excel seleccionado para descargar.", "error");
+        return;
+    }
+
+    const textoOriginal = btn ? btn.innerHTML : "";
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            Descargando...
+        `;
+    }
+
+    try {
+        const response = await fetch(`${URL_BASE}/excel/exportar/${encodeURIComponent(idExcel)}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`Error ${response.status} al descargar el Excel.`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const enlace = document.createElement("a");
+        enlace.href = url;
+        enlace.download = `Estimacion_Proyecto_${idExcel}.xlsx`;
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
+        window.URL.revokeObjectURL(url);
+
+        mostrarToast("Excel descargado correctamente.", "success");
+    } catch (error) {
+        console.error("Error al descargar el Excel:", error);
+        mostrarToast("No se pudo descargar el Excel.", "error");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        }
+    }
 }
 
 async function sincronizar() {
