@@ -177,11 +177,17 @@ function normalizarVinculacionGitlab(vinc) {
 
     return {
         issueId: String(vinc.issueId || "").trim(),
-        iidGitlab: vinc.iidGitlab != null ? Number(vinc.iidGitlab) : null,
+        numeroGitLab: vinc.numeroGitLab != null
+            ? Number(vinc.numeroGitLab)
+            : (vinc.iidGitlab != null ? Number(vinc.iidGitlab) : null),
         titulo: String(vinc.titulo || "").trim(),
         estado: String(vinc.estado || "").trim(),
-        idTareaProyecto: tareaProyecto.idTareaProyecto != null ? Number(tareaProyecto.idTareaProyecto) : null,
-        idProyecto: tareaProyecto.idProyecto != null ? Number(tareaProyecto.idProyecto) : null
+        idTareaProyecto: vinc.idTareaProyecto != null
+            ? Number(vinc.idTareaProyecto)
+            : (tareaProyecto.idTareaProyecto != null ? Number(tareaProyecto.idTareaProyecto) : null),
+        idProyecto: vinc.idProyecto != null
+            ? Number(vinc.idProyecto)
+            : (tareaProyecto.idProyecto != null ? Number(tareaProyecto.idProyecto) : null)
     };
 }
 
@@ -210,15 +216,14 @@ function renderizarContenidoGitlab(vinculacion, numeroGitlab) {
         `;
     }
 
-    const numero = vinculacion.iidGitlab != null ? `#${vinculacion.iidGitlab}` : (numeroGitlab ? `#${numeroGitlab}` : "#-");
+    const numero = vinculacion.numeroGitLab != null ? `#${vinculacion.numeroGitLab}` : (numeroGitlab ? `#${numeroGitlab}` : "#-");
     const titulo = vinculacion.titulo || "Tarea sin titulo";
     const estadoTexto = formatearEstadoGitlab(vinculacion.estado);
     const estadoClase = obtenerClaseEstadoGitlab(vinculacion.estado);
 
     return `
-        <div class="gitlab-title">${escaparHtml(numero)} - ${escaparHtml(titulo)}</div>
-        <div class="gitlab-meta">
-            <span>${escaparHtml(vinculacion.issueId || "Issue registrada")}</span>
+        <div class="gitlab-linked-row">
+            <div class="gitlab-title">${escaparHtml(numero)} - ${escaparHtml(titulo)}</div>
             <span class="gitlab-state ${estadoClase}">${escaparHtml(estadoTexto)}</span>
         </div>
     `;
