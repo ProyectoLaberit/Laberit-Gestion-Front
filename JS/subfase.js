@@ -1,16 +1,43 @@
+let tareasSubfaseActuales = [];
+let tareasSeleccionadas = new Set();
+let puedeGestionarTareasActual = false;
+let modoEliminacion = false;
+
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
         return;
     }
 
-    const btnAnadir = document.querySelector('button[onclick="abrirAñadirManual()"]');
-    if (btnAnadir && !esAdmin()) {
-        btnAnadir.style.display = "none";
-    }
-
+    puedeGestionarTareasActual = typeof esAdmin === "function" && esAdmin();
+    configurarControlesGestion();
     cargarDatosSubfase();
 };
+
+function configurarControlesGestion() {
+    const btnAnadir = document.getElementById("btn-anadir-tarea");
+    const btnActivarEliminacion = document.getElementById("btn-activar-eliminacion");
+    const accionesModoEliminacion = document.getElementById("acciones-modo-eliminacion");
+    const toolbarSeleccion = document.getElementById("selection-toolbar");
+
+    if (!puedeGestionarTareasActual) {
+        if (btnAnadir) {
+            btnAnadir.style.display = "none";
+        }
+        if (btnActivarEliminacion) {
+            btnActivarEliminacion.style.display = "none";
+        }
+        if (accionesModoEliminacion) {
+            accionesModoEliminacion.style.display = "none";
+        }
+        if (toolbarSeleccion) {
+            toolbarSeleccion.style.display = "none";
+        }
+        return;
+    }
+
+    actualizarModoEliminacionUI();
+}
 
 async function cargarDatosSubfase() {
     const proyectoId = localStorage.getItem("proyectoId");
@@ -52,45 +79,248 @@ async function cargarDatosSubfase() {
             body: parametros
         });
 
-        if (result && result.success) {
-            const tar = result.data;
-            const tabla = document.getElementById("tablaTar");
-
-            tabla.innerHTML = tar.map((p) => {
-                const tiempoReal = p.tiempoTotalReal;
-                let displayTiempo = "-";
-
-                if (tiempoReal !== undefined && tiempoReal !== null) {
-                    const numeroHoras = parseFloat(tiempoReal);
-                    if (!isNaN(numeroHoras)) {
-                        displayTiempo = formatoHoras(numeroHoras) + "h";
-                    }
-                }
-
-                return `<div class="b-col" id="col-nombre" onclick="detalleTarea('${p.nombreTarea}')">
-                    <div class="item">
-                        <div class="item-name">${p.nombreTarea}</div>
-                    </div>
-                </div>
-
-                <div class="b-col" id="col-clockify">
-                    <div class="est-item">
-                        <div class="est-val">${displayTiempo}</div>
-                    </div>
-                </div>
-
-                <div class="b-col" id="col-estimaciones">
-                    <div class="est-item">
-                        <div class="est-val">${p.tiempoTotalMin} - ${p.tiempoTotalMax}</div>
-                    </div>
-                </div>`;
-            }).join("");
-        } else {
+        if (!result || !result.success) {
             console.warn("Aviso del backend:", result ? result.message : "Sin respuesta");
+            return;
         }
+
+        tareasSubfaseActuales = Array.isArray(result.data) ? result.data : [];
+        sincronizarSeleccionConDatos();
+        renderizarTablaTareas();
+        actualizarModoEliminacionUI();
     } catch (error) {
         console.error("Error en la llamada:", error);
     }
+}
+
+function renderizarTablaTareas() {
+    const tabla = document.getElementById("tablaTar");
+    if (!tabla) {
+        return;
+    }
+
+    if (!tareasSubfaseActuales || tareasSubfaseActuales.length === 0) {
+        tabla.innerHTML = `
+            <div class="b-col">
+                <div class="item">
+                    <div class="item-name text-muted">No hay tareas en esta subfase.</div>
+                </div>
+            </div>
+            <div class="b-col">
+                <div class="est-item">
+                    <div class="est-val">-</div>
+                </div>
+            </div>
+            <div class="b-col">
+                <div class="est-item">
+                    <div class="est-val">-</div>
+                </div>
+            </div>`;
+        return;
+    }
+
+    tabla.innerHTML = tareasSubfaseActuales.map((tarea, index) => {
+        const clave = obtenerClaveTarea(tarea, index);
+        const nombreTarea = tarea.nombreTarea || "Sin nombre";
+        const nombreTareaEscapado = escaparParaJs(nombreTarea);
+        const seleccionada = tareasSeleccionadas.has(clave);
+        const claseItem = seleccionada ? "item item-selected" : "item";
+        const claseEst = seleccionada ? "est-item task-linked-selected" : "est-item";
+        const tiempoEstimado = `${tarea.tiempoTotalMin} - ${tarea.tiempoTotalMax}`;
+
+        let displayTiempo = "-";
+        if (tarea.tiempoTotalReal !== undefined && tarea.tiempoTotalReal !== null) {
+            const numeroHoras = parseFloat(tarea.tiempoTotalReal);
+            if (!isNaN(numeroHoras)) {
+                displayTiempo = formatoHoras(numeroHoras) + "h";
+            }
+        }
+
+        const accionNombre = modoEliminacion
+            ? `onclick="toggleSeleccionTarea('${clave}')"`
+            : `onclick="detalleTarea('${nombreTareaEscapado}')"`; 
+
+        return `
+            <div class="b-col">
+                <div class="${claseItem}" ${accionNombre}>
+                    <div class="item-name">${escaparHtml(nombreTarea)}</div>
+                </div>
+            </div>
+
+            <div class="b-col">
+                <div class="${claseEst}">
+                    <div class="est-val">${escaparHtml(displayTiempo)}</div>
+                </div>
+            </div>
+
+            <div class="b-col">
+                <div class="${claseEst}">
+                    <div class="est-val">${escaparHtml(tiempoEstimado)}</div>
+                </div>
+            </div>`;
+    }).join("");
+}
+
+function activarModoEliminacion() {
+    if (!puedeGestionarTareasActual) {
+        return;
+    }
+
+    modoEliminacion = true;
+    tareasSeleccionadas.clear();
+    renderizarTablaTareas();
+    actualizarModoEliminacionUI();
+}
+
+function cancelarModoEliminacion() {
+    modoEliminacion = false;
+    tareasSeleccionadas.clear();
+    renderizarTablaTareas();
+    actualizarModoEliminacionUI();
+}
+
+function toggleSeleccionTarea(claveTarea) {
+    if (!modoEliminacion) {
+        return;
+    }
+
+    if (tareasSeleccionadas.has(claveTarea)) {
+        tareasSeleccionadas.delete(claveTarea);
+    } else {
+        tareasSeleccionadas.add(claveTarea);
+    }
+
+    renderizarTablaTareas();
+    actualizarModoEliminacionUI();
+}
+
+function actualizarModoEliminacionUI() {
+    const board = document.getElementById("board-tareas");
+    const toolbarSeleccion = document.getElementById("selection-toolbar");
+    const btnActivarEliminacion = document.getElementById("btn-activar-eliminacion");
+    const accionesModoEliminacion = document.getElementById("acciones-modo-eliminacion");
+    const btnConfirmar = document.getElementById("btn-confirmar-eliminacion");
+    const textoSeleccion = document.getElementById("texto-seleccion-tareas");
+
+    if (!puedeGestionarTareasActual) {
+        return;
+    }
+
+    if (board) {
+        board.classList.toggle("board-delete-mode", modoEliminacion);
+    }
+
+    if (toolbarSeleccion) {
+        toolbarSeleccion.classList.toggle("d-none", !modoEliminacion);
+    }
+
+    if (btnActivarEliminacion) {
+        btnActivarEliminacion.classList.toggle("d-none", modoEliminacion);
+    }
+
+    if (accionesModoEliminacion) {
+        accionesModoEliminacion.classList.toggle("d-none", !modoEliminacion);
+    }
+
+    if (btnConfirmar) {
+        btnConfirmar.disabled = tareasSeleccionadas.size === 0;
+        btnConfirmar.textContent = tareasSeleccionadas.size > 0
+            ? `Eliminar seleccionadas (${tareasSeleccionadas.size})`
+            : "Eliminar seleccionadas";
+    }
+
+    if (textoSeleccion) {
+        if (!modoEliminacion) {
+            textoSeleccion.textContent = "Haz clic en las tareas que quieras borrar y confirma la eliminacion.";
+        } else if (tareasSeleccionadas.size === 0) {
+            textoSeleccion.textContent = "Selecciona una o varias tareas para borrarlas.";
+        } else {
+            textoSeleccion.textContent = `${tareasSeleccionadas.size} tarea${tareasSeleccionadas.size !== 1 ? "s" : ""} seleccionada${tareasSeleccionadas.size !== 1 ? "s" : ""}.`;
+        }
+    }
+}
+
+function sincronizarSeleccionConDatos() {
+    const clavesDisponibles = new Set(
+        tareasSubfaseActuales.map((tarea, index) => obtenerClaveTarea(tarea, index))
+    );
+
+    tareasSeleccionadas = new Set(
+        Array.from(tareasSeleccionadas).filter((clave) => clavesDisponibles.has(clave))
+    );
+}
+
+async function eliminarTareasSeleccionadas() {
+    if (!modoEliminacion || tareasSeleccionadas.size === 0) {
+        return;
+    }
+
+    const tareasAEliminar = tareasSubfaseActuales.filter((tarea, index) =>
+        tareasSeleccionadas.has(obtenerClaveTarea(tarea, index))
+    );
+
+    if (tareasAEliminar.length === 0) {
+        return;
+    }
+
+    const mensaje = tareasAEliminar.length === 1
+        ? `Seguro que quieres eliminar la tarea "${tareasAEliminar[0].nombreTarea}"?`
+        : `Seguro que quieres eliminar estas ${tareasAEliminar.length} tareas?`;
+
+    if (!confirm(mensaje)) {
+        return;
+    }
+
+    const btnConfirmar = document.getElementById("btn-confirmar-eliminacion");
+    const textoOriginal = btnConfirmar ? btnConfirmar.textContent : "";
+    if (btnConfirmar) {
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = "Eliminando...";
+    }
+
+    const errores = [];
+    for (const tarea of tareasAEliminar) {
+        const resultado = await eliminarUnaTarea(tarea.nombreTarea);
+        if (!resultado.success) {
+            errores.push(tarea.nombreTarea);
+        }
+    }
+
+    if (btnConfirmar) {
+        btnConfirmar.textContent = textoOriginal;
+    }
+
+    if (errores.length > 0) {
+        alert(`No se pudieron eliminar estas tareas: ${errores.join(", ")}`);
+    }
+
+    cancelarModoEliminacion();
+    await cargarDatosSubfase();
+}
+
+async function eliminarUnaTarea(nombreTarea) {
+    const proyectoId = localStorage.getItem("proyectoId");
+    const idSubfase = localStorage.getItem("idSubfase");
+    const idExcelElegido = localStorage.getItem(`idExcelHistorialSeleccionado-${proyectoId}`);
+
+    if (!proyectoId || !idSubfase || !nombreTarea) {
+        return { success: false };
+    }
+
+    const query = new URLSearchParams({ nombreTarea });
+    if (idExcelElegido) {
+        query.append("idExcelElegido", idExcelElegido);
+    }
+
+    const result = await peticionSegura(
+        `/estimaciones/proyecto/${proyectoId}/subfase/${idSubfase}/tarea?${query.toString()}`,
+        { method: "DELETE" }
+    );
+
+    return {
+        success: Boolean(result && result.success),
+        result
+    };
 }
 
 function detalleTarea(nombreTarea) {
@@ -98,13 +328,41 @@ function detalleTarea(nombreTarea) {
     window.location.href = "paginatareas.html";
 }
 
-function abrirAñadirManual() {
+function abrirAnadirManual() {
     window.location.href = "creartarea.html";
 }
 
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
+}
+
+function obtenerClaveTarea(tarea, index) {
+    const idBase = tarea && tarea.idTarea != null ? String(tarea.idTarea) : `fila-${index}`;
+    const nombreBase = normalizarNombreTarea(tarea && tarea.nombreTarea ? tarea.nombreTarea : "");
+    return `${idBase}-${nombreBase}`;
+}
+
+function normalizarNombreTarea(texto) {
+    return String(texto || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-");
+}
+
+function escaparParaJs(valor) {
+    return String(valor || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
+}
+
+function escaparHtml(valor) {
+    return String(valor || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 function formatoHoras(decimal) {
