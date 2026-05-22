@@ -175,7 +175,7 @@ function renderizarTablaEspecifica() {
                 <div class="item-name">${nombreDepartamento}</div>
                 ${puedeVisualizarTareas ? `
                 <button class="btn btn-sm btn-outline-secondary" style="font-size:0.72rem;white-space:nowrap;"
-                    onclick="irAVisualizarTareas(${Number(p.id)}, ${Number(p.idDepartamento)}, '${nombreDepartamentoEscapado}')">
+                    onclick="irAVisualizarTareas(${Number(p.id)}, ${Number(p.idTareaProyecto)}, ${Number(p.idDepartamento)}, '${nombreDepartamentoEscapado}')"> 
                     Visualizar tareas
                 </button>
                 ` : ""}
@@ -596,12 +596,13 @@ function obtenerClaveDetalle(detalle, index) {
     return `detalle-${idTareaProyecto}-${idDepartamento}-${index}`;
 }
 
-function irAVisualizarTareas(idDetalleEstimacion, idDepartamento, nombreDepartamento) {
+function irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartamento, nombreDepartamento) {
     if (typeof esEmpleado === "function" && esEmpleado()) {
         alert("No tienes permisos para acceder a esta seccion.");
         return;
     }
 
+    localStorage.setItem("idTareaProyectoVis", idTareaProyecto);
     localStorage.setItem("idDetalleEstimacionVis", idDetalleEstimacion);
     localStorage.setItem("idDepartamentoVis", idDepartamento);
     localStorage.setItem("nombreDepartamentoVis", nombreDepartamento);
