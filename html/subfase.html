@@ -121,6 +121,24 @@
                 </div>
             </div>
         </div>
+
+        <div class="delete-confirm-overlay d-none" id="delete-confirm-overlay">
+            <div class="delete-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+                <div class="delete-confirm-badge">Confirmacion</div>
+                <h2 class="delete-confirm-title" id="delete-confirm-title">Eliminar tareas</h2>
+                <p class="delete-confirm-text" id="delete-confirm-text">
+                    Seguro que quieres eliminar las tareas seleccionadas?
+                </p>
+                <div class="delete-confirm-actions">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cerrarConfirmacionEliminacion()">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" id="btn-modal-confirmar-eliminacion" onclick="confirmarEliminacionTareas()">
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer class="custom-footer py-3">

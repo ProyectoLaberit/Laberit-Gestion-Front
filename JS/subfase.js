@@ -2,6 +2,7 @@ let tareasSubfaseActuales = [];
 let tareasSeleccionadas = new Set();
 let puedeGestionarTareasActual = false;
 let modoEliminacion = false;
+let tareasPendientesEliminacion = [];
 
 window.onload = function () {
     if (!localStorage.getItem("token")) {
@@ -263,23 +264,66 @@ async function eliminarTareasSeleccionadas() {
         return;
     }
 
-    const mensaje = tareasAEliminar.length === 1
-        ? `Seguro que quieres eliminar la tarea "${tareasAEliminar[0].nombreTarea}"?`
-        : `Seguro que quieres eliminar estas ${tareasAEliminar.length} tareas?`;
+    abrirConfirmacionEliminacion(tareasAEliminar);
+}
 
-    if (!confirm(mensaje)) {
+function abrirConfirmacionEliminacion(tareasAEliminar) {
+    const overlay = document.getElementById("delete-confirm-overlay");
+    const texto = document.getElementById("delete-confirm-text");
+    if (!overlay || !texto) {
+        return;
+    }
+
+    tareasPendientesEliminacion = Array.isArray(tareasAEliminar) ? tareasAEliminar.slice() : [];
+    if (tareasPendientesEliminacion.length === 0) {
+        return;
+    }
+
+    texto.textContent = tareasPendientesEliminacion.length === 1
+        ? `Seguro que quieres eliminar la tarea "${tareasPendientesEliminacion[0].nombreTarea}"?`
+        : `Seguro que quieres eliminar estas ${tareasPendientesEliminacion.length} tareas?`;
+
+    overlay.classList.remove("d-none");
+}
+
+function cerrarConfirmacionEliminacion() {
+    const overlay = document.getElementById("delete-confirm-overlay");
+    const btnModalConfirmar = document.getElementById("btn-modal-confirmar-eliminacion");
+
+    tareasPendientesEliminacion = [];
+
+    if (overlay) {
+        overlay.classList.add("d-none");
+    }
+
+    if (btnModalConfirmar) {
+        btnModalConfirmar.disabled = false;
+        btnModalConfirmar.textContent = "Eliminar";
+    }
+}
+
+async function confirmarEliminacionTareas() {
+    if (!Array.isArray(tareasPendientesEliminacion) || tareasPendientesEliminacion.length === 0) {
+        cerrarConfirmacionEliminacion();
         return;
     }
 
     const btnConfirmar = document.getElementById("btn-confirmar-eliminacion");
+    const btnModalConfirmar = document.getElementById("btn-modal-confirmar-eliminacion");
     const textoOriginal = btnConfirmar ? btnConfirmar.textContent : "";
+    const textoModalOriginal = btnModalConfirmar ? btnModalConfirmar.textContent : "";
+
     if (btnConfirmar) {
         btnConfirmar.disabled = true;
         btnConfirmar.textContent = "Eliminando...";
     }
+    if (btnModalConfirmar) {
+        btnModalConfirmar.disabled = true;
+        btnModalConfirmar.textContent = "Eliminando...";
+    }
 
     const errores = [];
-    for (const tarea of tareasAEliminar) {
+    for (const tarea of tareasPendientesEliminacion) {
         const resultado = await eliminarUnaTarea(tarea.nombreTarea);
         if (!resultado.success) {
             errores.push(tarea.nombreTarea);
@@ -289,11 +333,15 @@ async function eliminarTareasSeleccionadas() {
     if (btnConfirmar) {
         btnConfirmar.textContent = textoOriginal;
     }
+    if (btnModalConfirmar) {
+        btnModalConfirmar.textContent = textoModalOriginal;
+    }
 
     if (errores.length > 0) {
         alert(`No se pudieron eliminar estas tareas: ${errores.join(", ")}`);
     }
 
+    cerrarConfirmacionEliminacion();
     cancelarModoEliminacion();
     await cargarDatosSubfase();
 }
