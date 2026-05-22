@@ -44,7 +44,7 @@ window.onload = async function () {
 function obtenerContextoVista() {
     return {
         proyectoId: localStorage.getItem("proyectoId"),
-        idDetalleEstimacion: localStorage.getItem("idDetalleEstimacionVis"),
+        idTareaProyecto: localStorage.getItem("idTareaProyectoVis") || localStorage.getItem("idDetalleEstimacionVis"),
         idDepartamento: localStorage.getItem("idDepartamentoVis")
     };
 }
@@ -117,12 +117,12 @@ function formatearFechaInput(fecha) {
 }
 
 async function cargarImputaciones() {
-    const { proyectoId, idDetalleEstimacion, idDepartamento } = obtenerContextoVista();
+    const { proyectoId, idTareaProyecto, idDepartamento } = obtenerContextoVista();
 
     // 1. Capturamos la subfase real directamente
     const subfaseReal = localStorage.getItem("subfaseSeleccionada") || "";
 
-    if (!proyectoId || !idDetalleEstimacion || !idDepartamento) {
+    if (!proyectoId || !idTareaProyecto || !idDepartamento) {
         mostrarErrorTabla("Faltan datos de navegacion. Vuelve atras.");
         return;
     }
@@ -135,7 +135,7 @@ async function cargarImputaciones() {
 
     setEstadoCargaTabla("Cargando tareas...");
 
-    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}?subfase=${encodeURIComponent(subfaseReal)}`);
+    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idTareaProyecto}/${idDepartamento}?subfase=${encodeURIComponent(subfaseReal)}`);
 
     if (!result || !result.success) {
         mostrarErrorTabla("Error al cargar las tareas.");
@@ -147,13 +147,12 @@ async function cargarImputaciones() {
 }
 
 async function filtrarPorFechas() {
-    const { proyectoId, idDetalleEstimacion, idDepartamento } = obtenerContextoVista();
+    const { proyectoId, idTareaProyecto, idDepartamento } = obtenerContextoVista();
     const desde = document.getElementById("fecha-desde")?.value;
     const hasta = document.getElementById("fecha-hasta")?.value;
-    // 1. Capturamos la subfase real
     const subfaseReal = localStorage.getItem("subfaseSeleccionada") || "";
 
-    if (!proyectoId || !idDetalleEstimacion || !idDepartamento) {
+    if (!proyectoId || !idTareaProyecto || !idDepartamento) {
         mostrarErrorTabla("Faltan datos de navegacion. Vuelve atras.");
         return;
     }
@@ -165,7 +164,7 @@ async function filtrarPorFechas() {
 
     setEstadoCargaTabla("Filtrando tareas...");
 
-    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idDetalleEstimacion}/${idDepartamento}/fechas?desde=${desde}&hasta=${hasta}&subfase=${encodeURIComponent(subfaseReal)}`);
+    const result = await peticionSegura(`/imputaciones/departamento/${proyectoId}/${idTareaProyecto}/${idDepartamento}/fechas?desde=${desde}&hasta=${hasta}&subfase=${encodeURIComponent(subfaseReal)}`);
 
     if (!result || !result.success) {
         mostrarErrorTabla((result && result.mensaje) || "Error al filtrar por fechas.");
@@ -566,9 +565,9 @@ async function marcarValida(id, btn) {
     btn.disabled = true;
     btn.textContent = "Vinculando...";
 
-    const { idDetalleEstimacion } = obtenerContextoVista();
+    const { idTareaProyecto } = obtenerContextoVista();
 
-    const result = await peticionSegura(`/imputaciones/alternar-validacion/${id}/${idDetalleEstimacion}`, {
+    const result = await peticionSegura(`/imputaciones/alternar-validacion/${id}/${idTareaProyecto}`, {
         method: "PUT"
     });
 
@@ -576,7 +575,7 @@ async function marcarValida(id, btn) {
         const imputacion = todasLasImputaciones.find(i => i.idImputacionClockify === id);
         if (imputacion) {
             imputacion.valida = true;
-            imputacion.idDetalleEstimacion = Number(idDetalleEstimacion);
+            imputacion.idTareaProyecto = Number(idTareaProyecto);
         }
 
         actualizarEstadisticas();
@@ -597,9 +596,9 @@ async function desvincularImputacion(id, btn) {
     btn.disabled = true;
     btn.textContent = "Desvinculando...";
 
-    const { idDetalleEstimacion } = obtenerContextoVista();
+    const { idTareaProyecto } = obtenerContextoVista();
 
-    const result = await peticionSegura(`/imputaciones/alternar-validacion/${id}/${idDetalleEstimacion}`, {
+    const result = await peticionSegura(`/imputaciones/alternar-validacion/${id}/${idTareaProyecto}`, {
         method: "PUT"
     });
 
@@ -607,7 +606,7 @@ async function desvincularImputacion(id, btn) {
         const imputacion = todasLasImputaciones.find(i => i.idImputacionClockify === id);
         if (imputacion) {
             imputacion.valida = false;
-            imputacion.idDetalleEstimacion = null;
+            imputacion.idTareaProyecto = null;
         }
 
         actualizarEstadisticas();
