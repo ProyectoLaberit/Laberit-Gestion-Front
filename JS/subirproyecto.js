@@ -19,7 +19,13 @@ function mostrarNombre(input) {
 }
 
 async function guardarProyecto() {
+    const formulario = document.getElementById('form-subir-proyecto');
     const feedback = document.getElementById('msg-feedback');
+
+    if (!formulario.checkValidity()) {
+        formulario.reportValidity();
+        return;
+    }
 
     // Comprobar si hay un archivo seleccionado en el input
     const fileInput = document.getElementById('archivoInput');
@@ -131,7 +137,7 @@ async function cargarClockify() {
         if (result && result.success) {
             const select = document.getElementById("clockifyId");
 
-            select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+            select.innerHTML = '<option value="" disabled selected>Selecciona un proyecto</option>';
 
             result.data.forEach(item => {
                 const option = document.createElement("option");
@@ -163,7 +169,7 @@ async function cargarGitlab() {
 
             const select = document.getElementById("gitlabId");
 
-            select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+            select.innerHTML = '<option value="" disabled selected>Selecciona un proyecto</option>';
 
             result.data.forEach(item => {
                 const option = document.createElement("option");
