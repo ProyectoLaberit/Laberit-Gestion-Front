@@ -124,6 +124,7 @@ async function sincronizar() {
     if (result && result.success) {
         const ahora = new Date().toISOString();
         localStorage.setItem(`ultima-sync-${proyectoId}`, ahora);
+        await refrescarDetallesActuales(true);
         mostrarUltimaSync(ahora);
         mostrarToast("Sincronizacion completada correctamente.", "success");
 
@@ -132,6 +133,28 @@ async function sincronizar() {
         }
     } else {
         mostrarToast((result && result.mensaje) || "Error al sincronizar.", "error");
+    }
+}
+
+async function refrescarDetallesActuales(mantenerFiltro = false) {
+    const proyectoId = localStorage.getItem("proyectoId");
+    const inputBusqueda = document.getElementById("input-busqueda");
+    const contenedor = document.getElementById("contenedor-fases");
+    const filtroActual = mantenerFiltro && inputBusqueda ? inputBusqueda.value : "";
+
+    if (contenedor) {
+        contenedor.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Actualizando horas...
+            </div>`;
+    }
+
+    await cargarSubfases(proyectoId, idExcelSeleccionadoActual);
+
+    if (mantenerFiltro && inputBusqueda) {
+        inputBusqueda.value = filtroActual;
+        renderizarTodo(filtroActual, estructuraActual, idsActuales);
     }
 }
 

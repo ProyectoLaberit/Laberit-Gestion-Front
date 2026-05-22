@@ -1,17 +1,45 @@
 let vinculacionesGitlabActuales = [];
+let detallesTareaActuales = [];
+let detallesSeleccionados = new Set();
+let detallesPendientesEliminacion = [];
+let puedeGestionarEstimacionesActual = false;
+let modoEliminacion = false;
 
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
-    } else {
-        const btnEditarTiempos = document.querySelector('a[href="editarestimaciones.html"]');
-        if (btnEditarTiempos && !esAdmin()) {
-            btnEditarTiempos.style.display = "none";
-        }
-
-        cargarDetallesTar();
+        return;
     }
+
+    puedeGestionarEstimacionesActual = typeof esAdmin === "function" && esAdmin();
+    configurarControlesGestion();
+    cargarDetallesTar();
 };
+
+function configurarControlesGestion() {
+    const btnEditar = document.getElementById("btn-editar-estimaciones");
+    const btnActivarEliminacion = document.getElementById("btn-activar-eliminacion");
+    const accionesModoEliminacion = document.getElementById("acciones-modo-eliminacion");
+    const toolbarSeleccion = document.getElementById("selection-toolbar");
+
+    if (!puedeGestionarEstimacionesActual) {
+        if (btnEditar) {
+            btnEditar.style.display = "none";
+        }
+        if (btnActivarEliminacion) {
+            btnActivarEliminacion.style.display = "none";
+        }
+        if (accionesModoEliminacion) {
+            accionesModoEliminacion.style.display = "none";
+        }
+        if (toolbarSeleccion) {
+            toolbarSeleccion.style.display = "none";
+        }
+        return;
+    }
+
+    actualizarModoEliminacionUI();
+}
 
 function cerrarSesion() {
     localStorage.clear();
@@ -60,87 +88,369 @@ async function cargarDetallesTar() {
             cargarVinculacionesGitlab(proyectoId)
         ]);
 
-        if (result && result.success) {
-            const espec = result.data;
-            const tabla = document.getElementById("tablaEspec");
-            const puedeVisualizarTareas = typeof esEmpleado === "function" ? !esEmpleado() : true;
-            const claseItemDepto = puedeVisualizarTareas
-                ? "item d-flex align-items-center justify-content-between gap-2"
-                : "item item-solo-texto";
-
-            const colDeptos = espec.map((p) => `
-                <div class="${claseItemDepto}">
-                    <div class="item-name">${p.nombreDepartamento}</div>
-                    ${puedeVisualizarTareas ? `
-                    <button class="btn btn-sm btn-outline-secondary" style="font-size:0.72rem;white-space:nowrap;"
-                        onclick="irAVisualizarTareas(${p.id}, ${p.idDepartamento}, '${(p.nombreDepartamento || "").replace(/'/g, "\\'")}')">
-                        Visualizar tareas
-                    </button>
-                    ` : ""}
-                </div>
-            `).join("");
-
-            const colGitlab = espec.map((p) => {
-                const vinculacion = obtenerVinculacionGitlab(p.idTareaProyecto);
-                return `
-                <div class="gitlab-item">
-                    ${renderizarContenidoGitlab(vinculacion, p.numeroGitlab)}
-                </div>`;
-            }).join("");
-
-            const colReal = espec.map((p) => {
-                const tiempoRealValor = p.tiempoReal;
-                let tiempoRealDisplay = "-";
-
-                if (tiempoRealValor !== undefined && tiempoRealValor !== null) {
-                    const numeroHoras = parseFloat(tiempoRealValor);
-                    if (!isNaN(numeroHoras)) {
-                        tiempoRealDisplay = formatoHoras(numeroHoras) + "h";
-                    }
-                }
-
-                const displayGit = p.numeroGitlab ? `#${p.numeroGitlab}` : "-";
-
-                return `
-                <div class="time-item">
-                    <div class="time-val text-primary fw-bold" style="font-size: 1.1rem;">${tiempoRealDisplay}</div>
-                    <div class="time-lbl">${displayGit} - gitlab</div>
-                </div>`;
-            }).join("");
-
-            const colMin = espec.map((p) => {
-                const displayGit = p.numeroGitlab ? `#${p.numeroGitlab}` : "-";
-
-                return `
-                <div class="time-item">
-                    <div class="time-val time-min">${p.tiempoMin}h</div>
-                    <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit} - gitlab</div>
-                </div>`;
-            }).join("");
-
-            const colMax = espec.map((p) => {
-                const displayGit = p.numeroGitlab ? `#${p.numeroGitlab}` : "-";
-
-                return `
-                <div class="time-item">
-                    <div class="time-val time-max">${p.tiempoMax}h</div>
-                    <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit} - gitlab</div>
-                </div>`;
-            }).join("");
-
-            tabla.innerHTML = `
-                <div class="b-col">${colDeptos}</div>
-                <div class="b-col">${colGitlab}</div>
-                <div class="b-col">${colReal}</div>
-                <div class="b-col">${colMin}</div>
-                <div class="b-col">${colMax}</div>
-            `;
+        if (result && result.success && Array.isArray(result.data)) {
+            detallesTareaActuales = result.data;
         } else {
+            detallesTareaActuales = [];
             console.warn("Aviso:", result ? result.message : "Sin respuesta");
         }
+
+        sincronizarSeleccionConDatos();
+        renderizarTablaEspecifica();
+        actualizarModoEliminacionUI();
     } catch (error) {
+        detallesTareaActuales = [];
+        renderizarTablaEspecifica();
         console.error("Error en la llamada:", error);
     }
+}
+
+function renderizarTablaEspecifica() {
+    const tabla = document.getElementById("tablaEspec");
+    if (!tabla) {
+        return;
+    }
+
+    if (!Array.isArray(detallesTareaActuales) || detallesTareaActuales.length === 0) {
+        tabla.innerHTML = `
+            <div class="b-col">
+                <div class="item item-solo-texto">
+                    <div class="item-name text-muted">No hay estimaciones para esta tarea.</div>
+                </div>
+            </div>
+            <div class="b-col">
+                <div class="gitlab-item">
+                    <div class="gitlab-meta">
+                        <span class="gitlab-empty">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="b-col">
+                <div class="time-item">
+                    <div class="time-val">-</div>
+                    <div class="time-lbl">&nbsp;</div>
+                </div>
+            </div>
+            <div class="b-col">
+                <div class="time-item">
+                    <div class="time-val time-min">-</div>
+                    <div class="time-lbl">&nbsp;</div>
+                </div>
+            </div>
+            <div class="b-col">
+                <div class="time-item">
+                    <div class="time-val time-max">-</div>
+                    <div class="time-lbl">&nbsp;</div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    const puedeVisualizarTareas = typeof esEmpleado === "function" ? !esEmpleado() : true;
+
+    const colDeptos = detallesTareaActuales.map((p, index) => {
+        const clave = obtenerClaveDetalle(p, index);
+        const seleccionada = detallesSeleccionados.has(clave);
+        const claseItem = seleccionada
+            ? "item item-selected d-flex align-items-center justify-content-between gap-2"
+            : "item d-flex align-items-center justify-content-between gap-2";
+        const nombreDepartamento = escaparHtml(p.nombreDepartamento || "Departamento");
+        const nombreDepartamentoEscapado = escaparParaJs(p.nombreDepartamento || "");
+
+        if (modoEliminacion) {
+            return `
+                <div class="${claseItem}" onclick="toggleSeleccionDetalle('${clave}')">
+                    <div class="item-name">${nombreDepartamento}</div>
+                </div>
+            `;
+        }
+
+        const claseNormal = puedeVisualizarTareas
+            ? "item d-flex align-items-center justify-content-between gap-2"
+            : "item item-solo-texto";
+
+        return `
+            <div class="${claseNormal}">
+                <div class="item-name">${nombreDepartamento}</div>
+                ${puedeVisualizarTareas ? `
+                <button class="btn btn-sm btn-outline-secondary" style="font-size:0.72rem;white-space:nowrap;"
+                    onclick="irAVisualizarTareas(${Number(p.id)}, ${Number(p.idDepartamento)}, '${nombreDepartamentoEscapado}')">
+                    Visualizar tareas
+                </button>
+                ` : ""}
+            </div>
+        `;
+    }).join("");
+
+    const colGitlab = detallesTareaActuales.map((p, index) => {
+        const vinculacion = obtenerVinculacionGitlab(p.idTareaProyecto);
+        const claseGitlab = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
+            ? "gitlab-item gitlab-item-selected"
+            : "gitlab-item";
+
+        return `
+            <div class="${claseGitlab}">
+                ${renderizarContenidoGitlab(vinculacion, p.numeroGitlab)}
+            </div>`;
+    }).join("");
+
+    const colReal = detallesTareaActuales.map((p, index) => {
+        const claseTiempo = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
+            ? "time-item time-item-selected"
+            : "time-item";
+        const tiempoRealValor = p.tiempoReal;
+        let tiempoRealDisplay = "-";
+
+        if (tiempoRealValor !== undefined && tiempoRealValor !== null) {
+            const numeroHoras = parseFloat(tiempoRealValor);
+            if (!isNaN(numeroHoras)) {
+                tiempoRealDisplay = formatoHoras(numeroHoras) + "h";
+            }
+        }
+
+        const displayGit = p.numeroGitlab ? `#${escaparHtml(p.numeroGitlab)}` : "-";
+
+        return `
+            <div class="${claseTiempo}">
+                <div class="time-val text-primary fw-bold" style="font-size: 1.1rem;">${tiempoRealDisplay}</div>
+                <div class="time-lbl">${displayGit} - gitlab</div>
+            </div>`;
+    }).join("");
+
+    const colMin = detallesTareaActuales.map((p, index) => {
+        const claseTiempo = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
+            ? "time-item time-item-selected"
+            : "time-item";
+        const displayGit = p.numeroGitlab ? `#${escaparHtml(p.numeroGitlab)}` : "-";
+
+        return `
+            <div class="${claseTiempo}">
+                <div class="time-val time-min">${escaparHtml(p.tiempoMin)}h</div>
+                <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit} - gitlab</div>
+            </div>`;
+    }).join("");
+
+    const colMax = detallesTareaActuales.map((p, index) => {
+        const claseTiempo = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
+            ? "time-item time-item-selected"
+            : "time-item";
+        const displayGit = p.numeroGitlab ? `#${escaparHtml(p.numeroGitlab)}` : "-";
+
+        return `
+            <div class="${claseTiempo}">
+                <div class="time-val time-max">${escaparHtml(p.tiempoMax)}h</div>
+                <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit} - gitlab</div>
+            </div>`;
+    }).join("");
+
+    tabla.innerHTML = `
+        <div class="b-col">${colDeptos}</div>
+        <div class="b-col">${colGitlab}</div>
+        <div class="b-col">${colReal}</div>
+        <div class="b-col">${colMin}</div>
+        <div class="b-col">${colMax}</div>
+    `;
+}
+
+function activarModoEliminacion() {
+    if (!puedeGestionarEstimacionesActual) {
+        return;
+    }
+
+    modoEliminacion = true;
+    detallesSeleccionados.clear();
+    renderizarTablaEspecifica();
+    actualizarModoEliminacionUI();
+}
+
+function cancelarModoEliminacion() {
+    modoEliminacion = false;
+    detallesSeleccionados.clear();
+    cerrarConfirmacionEliminacion();
+    renderizarTablaEspecifica();
+    actualizarModoEliminacionUI();
+}
+
+function toggleSeleccionDetalle(claveDetalle) {
+    if (!modoEliminacion) {
+        return;
+    }
+
+    if (detallesSeleccionados.has(claveDetalle)) {
+        detallesSeleccionados.delete(claveDetalle);
+    } else {
+        detallesSeleccionados.add(claveDetalle);
+    }
+
+    renderizarTablaEspecifica();
+    actualizarModoEliminacionUI();
+}
+
+function actualizarModoEliminacionUI() {
+    const toolbarSeleccion = document.getElementById("selection-toolbar");
+    const btnEditar = document.getElementById("btn-editar-estimaciones");
+    const btnActivarEliminacion = document.getElementById("btn-activar-eliminacion");
+    const accionesModoEliminacion = document.getElementById("acciones-modo-eliminacion");
+    const btnConfirmar = document.getElementById("btn-confirmar-eliminacion");
+    const textoSeleccion = document.getElementById("texto-seleccion-estimaciones");
+
+    if (!puedeGestionarEstimacionesActual) {
+        return;
+    }
+
+    if (toolbarSeleccion) {
+        toolbarSeleccion.classList.toggle("d-none", !modoEliminacion);
+    }
+
+    if (btnEditar) {
+        btnEditar.classList.toggle("d-none", modoEliminacion);
+    }
+
+    if (btnActivarEliminacion) {
+        btnActivarEliminacion.classList.toggle("d-none", modoEliminacion);
+    }
+
+    if (accionesModoEliminacion) {
+        accionesModoEliminacion.classList.toggle("d-none", !modoEliminacion);
+    }
+
+    if (btnConfirmar) {
+        btnConfirmar.disabled = detallesSeleccionados.size === 0;
+        btnConfirmar.textContent = detallesSeleccionados.size > 0
+            ? `Eliminar seleccionadas (${detallesSeleccionados.size})`
+            : "Eliminar seleccionadas";
+    }
+
+    if (textoSeleccion) {
+        if (!modoEliminacion) {
+            textoSeleccion.textContent = "Haz clic en los departamentos que quieras borrar y confirma la eliminacion.";
+        } else if (detallesSeleccionados.size === 0) {
+            textoSeleccion.textContent = "Selecciona uno o varios departamentos para borrarlos.";
+        } else {
+            textoSeleccion.textContent = `${detallesSeleccionados.size} estimacion${detallesSeleccionados.size !== 1 ? "es" : ""} seleccionada${detallesSeleccionados.size !== 1 ? "s" : ""}.`;
+        }
+    }
+}
+
+function sincronizarSeleccionConDatos() {
+    const clavesDisponibles = new Set(
+        detallesTareaActuales.map((detalle, index) => obtenerClaveDetalle(detalle, index))
+    );
+
+    detallesSeleccionados = new Set(
+        Array.from(detallesSeleccionados).filter((clave) => clavesDisponibles.has(clave))
+    );
+}
+
+function eliminarEstimacionesSeleccionadas() {
+    if (!modoEliminacion || detallesSeleccionados.size === 0) {
+        return;
+    }
+
+    const detallesAEliminar = detallesTareaActuales.filter((detalle, index) =>
+        detallesSeleccionados.has(obtenerClaveDetalle(detalle, index))
+    );
+
+    if (detallesAEliminar.length === 0) {
+        return;
+    }
+
+    abrirConfirmacionEliminacion(detallesAEliminar);
+}
+
+function abrirConfirmacionEliminacion(detallesAEliminar) {
+    const overlay = document.getElementById("delete-confirm-overlay");
+    const texto = document.getElementById("delete-confirm-text");
+    if (!overlay || !texto) {
+        return;
+    }
+
+    detallesPendientesEliminacion = Array.isArray(detallesAEliminar) ? detallesAEliminar.slice() : [];
+    if (detallesPendientesEliminacion.length === 0) {
+        return;
+    }
+
+    texto.textContent = detallesPendientesEliminacion.length === 1
+        ? `Seguro que quieres eliminar la estimacion del departamento "${detallesPendientesEliminacion[0].nombreDepartamento}"?`
+        : `Seguro que quieres eliminar estas ${detallesPendientesEliminacion.length} estimaciones?`;
+
+    overlay.classList.remove("d-none");
+}
+
+function cerrarConfirmacionEliminacion() {
+    const overlay = document.getElementById("delete-confirm-overlay");
+    const btnModalConfirmar = document.getElementById("btn-modal-confirmar-eliminacion");
+
+    detallesPendientesEliminacion = [];
+
+    if (overlay) {
+        overlay.classList.add("d-none");
+    }
+
+    if (btnModalConfirmar) {
+        btnModalConfirmar.disabled = false;
+        btnModalConfirmar.textContent = "Eliminar";
+    }
+}
+
+async function confirmarEliminacionEstimaciones() {
+    if (!Array.isArray(detallesPendientesEliminacion) || detallesPendientesEliminacion.length === 0) {
+        cerrarConfirmacionEliminacion();
+        return;
+    }
+
+    const btnConfirmar = document.getElementById("btn-confirmar-eliminacion");
+    const btnModalConfirmar = document.getElementById("btn-modal-confirmar-eliminacion");
+    const textoOriginal = btnConfirmar ? btnConfirmar.textContent : "";
+    const textoModalOriginal = btnModalConfirmar ? btnModalConfirmar.textContent : "";
+
+    if (btnConfirmar) {
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = "Eliminando...";
+    }
+    if (btnModalConfirmar) {
+        btnModalConfirmar.disabled = true;
+        btnModalConfirmar.textContent = "Eliminando...";
+    }
+
+    const errores = [];
+    for (const detalle of detallesPendientesEliminacion) {
+        const resultado = await eliminarUnaEstimacion(detalle.id);
+        if (!resultado.success) {
+            errores.push(detalle.nombreDepartamento || `ID ${detalle.id}`);
+        }
+    }
+
+    if (btnConfirmar) {
+        btnConfirmar.textContent = textoOriginal;
+    }
+    if (btnModalConfirmar) {
+        btnModalConfirmar.textContent = textoModalOriginal;
+    }
+
+    if (errores.length > 0) {
+        alert(`No se pudieron eliminar estas estimaciones: ${errores.join(", ")}`);
+    }
+
+    cerrarConfirmacionEliminacion();
+    cancelarModoEliminacion();
+    await cargarDetallesTar();
+}
+
+async function eliminarUnaEstimacion(idDetalleEstimacion) {
+    if (!idDetalleEstimacion) {
+        return { success: false };
+    }
+
+    const result = await peticionSegura(`/estimaciones/${idDetalleEstimacion}`, {
+        method: "DELETE"
+    });
+
+    return {
+        success: Boolean(result && result.success),
+        result
+    };
 }
 
 async function cargarVinculacionesGitlab(proyectoId) {
@@ -268,6 +578,22 @@ function escaparHtml(valor) {
         .replaceAll(">", "&gt;")
         .replaceAll("\"", "&quot;")
         .replaceAll("'", "&#39;");
+}
+
+function escaparParaJs(valor) {
+    return String(valor || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
+}
+
+function obtenerClaveDetalle(detalle, index) {
+    if (detalle && detalle.id != null) {
+        return `detalle-${detalle.id}`;
+    }
+
+    const idTareaProyecto = detalle && detalle.idTareaProyecto != null ? detalle.idTareaProyecto : "sin-tp";
+    const idDepartamento = detalle && detalle.idDepartamento != null ? detalle.idDepartamento : "sin-depto";
+    return `detalle-${idTareaProyecto}-${idDepartamento}-${index}`;
 }
 
 function irAVisualizarTareas(idDetalleEstimacion, idDepartamento, nombreDepartamento) {

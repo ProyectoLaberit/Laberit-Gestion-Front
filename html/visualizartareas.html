@@ -233,11 +233,6 @@
             <div class="edit-modal-text mb-3">Actualiza los datos y guarda los cambios.</div>
             
             <div>
-                <label class="form-label fw-semibold mb-1" style="font-size: 0.9rem;">Nombre de la tarea</label>
-                <input type="text" id="edit-modal-input" class="edit-modal-input mb-0" maxlength="255">
-            </div>
-
-            <div class="mt-3">
                 <label class="form-label fw-semibold mb-1" style="font-size: 0.9rem;">Fase</label>
                 <select id="edit-select-fase" class="form-select" onchange="onCambioFaseEdit()">
                     <option value="" disabled selected>Cargando fases...</option>
@@ -249,6 +244,11 @@
                 <select id="edit-select-subfase" class="form-select">
                     <option value="" disabled selected>Primero selecciona una fase...</option>
                 </select>
+            </div>
+
+            <div>
+                <label class="form-label fw-semibold mb-1" style="font-size: 0.9rem;">Nombre de la tarea</label>
+                <input type="text" id="edit-modal-input" class="edit-modal-input mb-0" maxlength="255">
             </div>
 
             <div class="edit-modal-actions">

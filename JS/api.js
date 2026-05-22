@@ -17,6 +17,11 @@ const NAV_ITEMS = [
         roles: ["SuperAdministrador", "Administrador"]
     },
     {
+        href: "gestionproyectos.html",
+        label: "Gestion Proyectos",
+        roles: ["SuperAdministrador", "Administrador"]
+    },
+    {
         href: "altausuarios.html",
         label: "Alta Usuarios",
         roles: ["SuperAdministrador", "Administrador"]
