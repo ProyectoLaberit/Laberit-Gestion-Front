@@ -5,6 +5,21 @@ let detallesPendientesEliminacion = [];
 let puedeGestionarEstimacionesActual = false;
 let modoEliminacion = false;
 
+function setVinculacionesActuales(data){
+    vinculacionesGitlabActuales = data;
+}
+function getVinculacionesActuales(){
+    return vinculacionesGitlabActuales;
+}
+
+// Función de debug para verificar el estado de las vinculaciones
+function debugVinculacionesGitlab() {
+    console.log("===== DEBUG: Vinculaciones GitLab Actuales =====");
+    console.log("Total de vinculaciones:", getVinculacionesActuales().length);
+    console.log("Datos completos:", getVinculacionesActuales());
+    return getVinculacionesActuales();
+}
+
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -84,12 +99,12 @@ async function cargarDetallesTar() {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
                 body: parametros
-            }),
-            cargarVinculacionesGitlab(proyectoId)
+            })
         ]);
 
         if (result && result.success && Array.isArray(result.data)) {
             detallesTareaActuales = result.data;
+            console.log("Detalles cargados:", result.data);
         } else {
             detallesTareaActuales = [];
             console.warn("Aviso:", result ? result.message : "Sin respuesta");
@@ -155,8 +170,8 @@ function renderizarTablaEspecifica() {
         const claseItem = seleccionada
             ? "item item-selected d-flex align-items-center justify-content-between gap-2"
             : "item d-flex align-items-center justify-content-between gap-2";
-        const nombreDepartamento = escaparHtml(p.nombreDepartamento || "Departamento");
-        const nombreDepartamentoEscapado = escaparParaJs(p.nombreDepartamento || "");
+        const nombreDepartamento = escaparHtml(p.nombreDep || "Departamento");
+        const nombreDepartamentoEscapado = escaparParaJs(p.nombreDep || "");
 
         if (modoEliminacion) {
             return `
@@ -175,7 +190,7 @@ function renderizarTablaEspecifica() {
                 <div class="item-name">${nombreDepartamento}</div>
                 ${puedeVisualizarTareas ? `
                 <button class="btn btn-sm btn-outline-secondary" style="font-size:0.72rem;white-space:nowrap;"
-                    onclick="irAVisualizarTareas(${Number(p.id)}, ${Number(p.idTareaProyecto)}, ${Number(p.idDepartamento)}, '${nombreDepartamentoEscapado}')"> 
+                    onclick="irAVisualizarTareas(${Number(p.idTarea)}, ${Number(p.idTarea)}, ${Number(p.idSubFase)}, '${nombreDepartamentoEscapado}')">  
                     Visualizar tareas
                 </button>
                 ` : ""}
@@ -184,14 +199,13 @@ function renderizarTablaEspecifica() {
     }).join("");
 
     const colGitlab = detallesTareaActuales.map((p, index) => {
-        const vinculacion = obtenerVinculacionGitlab(p.idTareaProyecto);
         const claseGitlab = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
             ? "gitlab-item gitlab-item-selected"
             : "gitlab-item";
 
         return `
             <div class="${claseGitlab}">
-                ${renderizarContenidoGitlab(vinculacion, p.numeroGitlab)}
+                ${renderizarContenidoGitlab(p)}
             </div>`;
     }).join("");
 
@@ -199,7 +213,7 @@ function renderizarTablaEspecifica() {
         const claseTiempo = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
             ? "time-item time-item-selected"
             : "time-item";
-        const tiempoRealValor = p.tiempoReal;
+        const tiempoRealValor = p.tiempoClockify;
         let tiempoRealDisplay = "-";
 
         if (tiempoRealValor !== undefined && tiempoRealValor !== null) {
@@ -209,7 +223,7 @@ function renderizarTablaEspecifica() {
             }
         }
 
-        const displayGit = p.numeroGitlab ? `#${escaparHtml(p.numeroGitlab)}` : "-";
+        const displayGit = p.numeroGit ? `#${escaparHtml(p.numeroGit)}` : "-";
 
         return `
             <div class="${claseTiempo}">
@@ -222,7 +236,7 @@ function renderizarTablaEspecifica() {
         const claseTiempo = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
             ? "time-item time-item-selected"
             : "time-item";
-        const displayGit = p.numeroGitlab ? `#${escaparHtml(p.numeroGitlab)}` : "-";
+        const displayGit = p.numeroGit ? `#${escaparHtml(p.numeroGit)}` : "-";
 
         return `
             <div class="${claseTiempo}">
@@ -235,7 +249,7 @@ function renderizarTablaEspecifica() {
         const claseTiempo = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
             ? "time-item time-item-selected"
             : "time-item";
-        const displayGit = p.numeroGitlab ? `#${escaparHtml(p.numeroGitlab)}` : "-";
+        const displayGit = p.numeroGit ? `#${escaparHtml(p.numeroGit)}` : "-";
 
         return `
             <div class="${claseTiempo}">
@@ -453,88 +467,30 @@ async function eliminarUnaEstimacion(idDetalleEstimacion) {
     };
 }
 
-async function cargarVinculacionesGitlab(proyectoId) {
-    if (!proyectoId) {
-        vinculacionesGitlabActuales = [];
-        return;
-    }
+// Funciones auxiliares para renderización y utilidades
 
-    try {
-        const result = await peticionSegura("/gitlab/vinculadas");
-
-        if (!result || !result.success || !Array.isArray(result.data)) {
-            vinculacionesGitlabActuales = [];
-            return;
-        }
-
-        vinculacionesGitlabActuales = result.data
-            .map(normalizarVinculacionGitlab)
-            .filter((vinc) => vinc && String(vinc.idProyecto || "") === String(proyectoId));
-    } catch (error) {
-        vinculacionesGitlabActuales = [];
-        console.error("No se pudieron cargar las vinculaciones de GitLab:", error);
-    }
-}
-
-function normalizarVinculacionGitlab(vinc) {
-    if (!vinc || typeof vinc !== "object") {
-        return null;
-    }
-
-    const tareaProyecto = vinc.tareaProyecto && typeof vinc.tareaProyecto === "object"
-        ? vinc.tareaProyecto
-        : {};
-
-    return {
-        issueId: String(vinc.issueId || "").trim(),
-        numeroGitLab: vinc.numeroGitLab != null
-            ? Number(vinc.numeroGitLab)
-            : (vinc.iidGitlab != null ? Number(vinc.iidGitlab) : null),
-        titulo: String(vinc.titulo || "").trim(),
-        estado: String(vinc.estado || "").trim(),
-        idTareaProyecto: vinc.idTareaProyecto != null
-            ? Number(vinc.idTareaProyecto)
-            : (tareaProyecto.idTareaProyecto != null ? Number(tareaProyecto.idTareaProyecto) : null),
-        idProyecto: vinc.idProyecto != null
-            ? Number(vinc.idProyecto)
-            : (tareaProyecto.idProyecto != null ? Number(tareaProyecto.idProyecto) : null)
-    };
-}
 
 function obtenerVinculacionGitlab(idTareaProyecto) {
-    return vinculacionesGitlabActuales.find(
-        (vinc) => String(vinc.idTareaProyecto || "") === String(idTareaProyecto || "")
-    ) || null;
+    // Esta función ya no se usa, los datos vienen directamente en el objeto
+    return null;
 }
 
-function renderizarContenidoGitlab(vinculacion, numeroGitlab) {
-    if (!vinculacion) {
-        if (numeroGitlab) {
-            return `
-                <div class="gitlab-title">#${escaparHtml(numeroGitlab)}</div>
-                <div class="gitlab-meta">
-                    <span class="gitlab-empty">Pendiente de validar</span>
-                </div>
-            `;
-        }
-
+function renderizarContenidoGitlab(p) {
+    if (!p || !p.numeroGit) {
         return `
             <div class="gitlab-title gitlab-empty"></div>
             <div class="gitlab-meta">
-                <span class="gitlab-empty">No hay una vinculacion valida en GitLab</span>
+                <span class="gitlab-empty">No hay una vinculación válida en GitLab</span>
             </div>
         `;
     }
 
-    const numero = vinculacion.numeroGitLab != null ? `#${vinculacion.numeroGitLab}` : (numeroGitlab ? `#${numeroGitlab}` : "#-");
-    const titulo = vinculacion.titulo || "Tarea sin titulo";
-    const estadoTexto = formatearEstadoGitlab(vinculacion.estado);
-    const estadoClase = obtenerClaseEstadoGitlab(vinculacion.estado);
+    const numero = p.numeroGit ? `#${p.numeroGit}` : "#-";
+    const titulo = p.nombreTareaGit || "Tarea sin título";
 
     return `
         <div class="gitlab-linked-row">
             <div class="gitlab-title">${escaparHtml(numero)} - ${escaparHtml(titulo)}</div>
-            <span class="gitlab-state ${estadoClase}">${escaparHtml(estadoTexto)}</span>
         </div>
     `;
 }
@@ -587,13 +543,11 @@ function escaparParaJs(valor) {
 }
 
 function obtenerClaveDetalle(detalle, index) {
-    if (detalle && detalle.id != null) {
-        return `detalle-${detalle.id}`;
+    if (detalle && detalle.idTarea != null) {
+        return `detalle-${detalle.idTarea}-${detalle.nombreDep || "sin-dep"}`;
     }
 
-    const idTareaProyecto = detalle && detalle.idTareaProyecto != null ? detalle.idTareaProyecto : "sin-tp";
-    const idDepartamento = detalle && detalle.idDepartamento != null ? detalle.idDepartamento : "sin-depto";
-    return `detalle-${idTareaProyecto}-${idDepartamento}-${index}`;
+    return `detalle-sin-id-${index}`;
 }
 
 function irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartamento, nombreDepartamento) {
