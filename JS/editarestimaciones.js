@@ -1,6 +1,8 @@
 let tareasGitlabDisponibles = [];
 let vinculacionesGitlab = [];
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = async function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -16,6 +18,7 @@ window.onload = async function () {
     }
 };
 
+// Carga las tareas de GitLab del proyecto actual y las normaliza para el front.
 async function cargarTareasGitlab() {
     const proyectoId = localStorage.getItem("proyectoId");
 
@@ -46,6 +49,7 @@ async function cargarTareasGitlab() {
     }
 }
 
+// Carga las vinculaciones actuales de GitLab y se queda solo con las del proyecto abierto.
 async function cargarVinculacionesGitlab() {
     const proyectoId = localStorage.getItem("proyectoId");
 
@@ -71,6 +75,7 @@ async function cargarVinculacionesGitlab() {
     }
 }
 
+// Normaliza la estructura de una vinculacion de GitLab para usarla con seguridad en el front.
 function normalizarVinculacionGitlab(vinc) {
     if (!vinc || typeof vinc !== "object") {
         return null;
@@ -92,6 +97,7 @@ function normalizarVinculacionGitlab(vinc) {
     };
 }
 
+// Carga del backend las estimaciones de la tarea actual y prepara su formulario de edicion.
 async function cargarDatosActuales() {
     const proyectoId = localStorage.getItem("proyectoId");
     const idSubfase = localStorage.getItem("idSubfase");
@@ -133,6 +139,7 @@ async function cargarDatosActuales() {
     }
 }
 
+// Genera el formulario de edicion para cada departamento asociado a la tarea.
 function pintarFormulario(estimaciones) {
     const contenedor = document.getElementById("contenedor-inputs");
 
@@ -203,10 +210,12 @@ function pintarFormulario(estimaciones) {
     }).join("");
 }
 
+// Busca la vinculacion de GitLab que corresponde a la estimacion actual.
 function obtenerVinculacionActual(idTareaProyecto) {
     return vinculacionesGitlab.find(vinc => String(vinc.idTareaProyecto || "") === String(idTareaProyecto || "")) || null;
 }
 
+// Devuelve solo las tareas de GitLab que todavia no estan ocupadas por otra vinculacion.
 function obtenerOpcionesNoAsociadas(issueActualId) {
     const issuesOcupadas = new Set(
         vinculacionesGitlab
@@ -217,12 +226,14 @@ function obtenerOpcionesNoAsociadas(issueActualId) {
     return tareasGitlabDisponibles.filter(tarea => !issuesOcupadas.has(tarea.id));
 }
 
+// Construye el texto visible de una tarea de GitLab usando numero y titulo.
 function formatearTareaGitlab(tarea) {
     const iid = tarea.iid != null ? tarea.iid : tarea.iidGitlab;
     const titulo = tarea.title || tarea.titulo || "";
     return iid != null ? `#${iid} - ${titulo}` : titulo;
 }
 
+// Actualiza actualizar titulo segun el estado actual de la pantalla.
 function actualizarTitulo(nombreTarea) {
     const titulo = document.getElementById("titulo-tarea");
     const nombreVisible = nombreTarea && nombreTarea.trim() ? nombreTarea.trim() : "Editar Estimaciones";
@@ -231,6 +242,7 @@ function actualizarTitulo(nombreTarea) {
         : `Editando: ${nombreVisible}`;
 }
 
+// Escapa texto para insertarlo de forma segura dentro de HTML.
 function escaparHtml(valor) {
     return String(valor ?? "")
         .replaceAll("&", "&amp;")
@@ -240,6 +252,7 @@ function escaparHtml(valor) {
         .replaceAll("'", "&#39;");
 }
 
+// Convierte un valor de texto a numero aceptando comas como separador decimal.
 function parsearNumero(valor) {
     if (typeof valor !== "string") {
         return Number.NaN;
@@ -248,6 +261,7 @@ function parsearNumero(valor) {
     return parseFloat(valor.replace(",", ".").trim());
 }
 
+// Limpia el estado visual de error del campo indicado.
 function limpiarEstadoCampo(campo) {
     if (!campo) {
         return;
@@ -256,6 +270,7 @@ function limpiarEstadoCampo(campo) {
     campo.classList.remove("is-invalid");
 }
 
+// Marca un campo como invalido para mostrar feedback inmediato al usuario.
 function marcarCampoInvalido(campo) {
     if (!campo) {
         return;
@@ -264,6 +279,7 @@ function marcarCampoInvalido(campo) {
     campo.classList.add("is-invalid");
 }
 
+// Valida validar formulario antes de continuar con la accion actual.
 function validarFormulario() {
     let formularioValido = true;
 
@@ -297,6 +313,7 @@ function validarFormulario() {
     return formularioValido;
 }
 
+// Guarda los cambios de todas las estimaciones y sincroniza sus vinculaciones de GitLab.
 async function actualizarEstimaciones() {
     if (!validarFormulario()) {
         mostrarFeedback("Revisa los tiempos antes de guardar.", "danger");
@@ -359,6 +376,7 @@ async function actualizarEstimaciones() {
     }
 }
 
+// Sincroniza en GitLab los cambios de asociacion elegidos en el formulario.
 async function sincronizarVinculacionesGitlab(datosActualizados) {
     const cambios = datosActualizados.filter(dato => dato.issueNuevaId && dato.issueNuevaId !== dato.issueActualId);
 
@@ -398,6 +416,7 @@ async function sincronizarVinculacionesGitlab(datosActualizados) {
     }
 }
 
+// Decide el nombre final de la tarea, priorizando el nombre editado si existe.
 function obtenerNombreFinal(index) {
     const inputNuevoNombre = document.getElementById(`nuevo-nombre-${index}`);
     const nombreActual = document.querySelector(`input[name="tareaActual-${index}"]`).value || "";
@@ -410,12 +429,14 @@ function obtenerNombreFinal(index) {
     return nuevoNombre || nombreActual;
 }
 
+// Muestra un mensaje breve de estado asociado al formulario actual.
 function mostrarFeedback(mensaje, tipo) {
     const feedback = document.getElementById("msg-feedback");
     feedback.className = `mt-3 text-center text-${tipo}`;
     feedback.innerText = mensaje;
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";

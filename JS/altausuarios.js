@@ -1,4 +1,6 @@
 // ── Verificación de acceso: solo Administrador o SuperAdministrador ───────────
+// Al cargar la pagina, comprueba que exista sesion y que el usuario tenga
+// permisos de administrador. Si no, redirige o muestra un bloqueo visual.
 window.addEventListener("DOMContentLoaded", function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -47,6 +49,8 @@ document.body.innerHTML = `
 });
 
 // ── Toggle visibilidad contraseña ─────────────────────────────────────────────
+// Alterna entre mostrar y ocultar la contrasena del campo indicado,
+// y actualiza el icono del boton segun el estado actual.
 function togglePass(fieldId, btn) {
     const input = document.getElementById(fieldId);
     const isText = input.type === 'text';
@@ -57,6 +61,8 @@ function togglePass(fieldId, btn) {
 }
 
 // ── Evaluador de fortaleza de contraseña ──────────────────────────────────────
+// Calcula una puntuacion basica de fortaleza usando longitud, mayusculas,
+// numeros y simbolos, y refleja el resultado en la barra visual.
 function evaluarContrasena() {
     const val = document.getElementById('password').value;
     const bar = document.getElementById('strength-bar');
@@ -83,6 +89,8 @@ function evaluarContrasena() {
 }
 
 // ── Validación ────────────────────────────────────────────────────────────────
+// Valida nombre, email y contrasenas antes de enviar el formulario.
+// Tambien marca cada campo como valido o invalido para dar feedback visual.
 function validar() {
     let ok = true;
     const nombre = document.getElementById('nombre');
@@ -111,6 +119,9 @@ function validar() {
 }
 
 // ── Crear usuario (solo ADMIN llega aquí) ─────────────────────────────────────
+// Recoge los datos del formulario, construye el payload y llama al backend para crear el usuario. Si todo sale bien, limpia el formulario y muestra aviso.
+// Recoge los datos del formulario, construye el payload y llama al backend
+// para crear el usuario. Si todo sale bien, limpia el formulario y muestra aviso.
 async function crearUsuario() {
     ocultarMensajes();
     if (!validar()) return;
@@ -145,7 +156,10 @@ async function crearUsuario() {
 }
 
 // ── Helpers de UI ─────────────────────────────────────────────────────────────
-function setBusy(loading) {
+// Activa o desactiva el estado de carga del boton principal para evitar envios duplicados mientras se procesa la peticion.
+// Activa o desactiva el estado de carga de la accion actual
+// para evitar envios duplicados mientras se procesa la peticion.
+function setBusy(loading) {                                     
     const btn  = document.getElementById('btn-submit');
     const text = document.getElementById('btn-text');
     const spin = document.getElementById('btn-spinner');
@@ -154,23 +168,32 @@ function setBusy(loading) {
     spin.classList.toggle('d-none', !loading);
 }
 
+// Muestra el mensaje de exito y desplaza la vista hacia arriba para que sea visible.
+// Muestra un mensaje de exito y lo hace visible en la parte superior de la vista.
 function mostrarExito(msg) {
     document.getElementById('msg-success-text').textContent = msg;
     document.getElementById('msg-success').classList.add('show');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Muestra el mensaje de error y desplaza la vista hacia arriba para destacarlo.
+// Muestra un mensaje de error visible para informar del problema actual.
 function mostrarError(msg) {
     document.getElementById('msg-error-text').textContent = msg;
     document.getElementById('msg-error').classList.add('show');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Oculta ambos mensajes de estado antes de una nueva accion del usuario.
+// Oculta los mensajes de estado antes de iniciar una nueva accion.
 function ocultarMensajes() {
     document.getElementById('msg-success').classList.remove('show');
     document.getElementById('msg-error').classList.remove('show');
 }
 
+// Restaura el formulario a su estado inicial, incluidos validaciones,
+// rol por defecto y medidor visual de fortaleza.
+// Restablece el formulario a su estado inicial y limpia las validaciones previas.
 function resetForm() {
     ['nombre','email','password','password2'].forEach(id => {
         const el = document.getElementById(id);
@@ -185,6 +208,7 @@ function resetForm() {
     ocultarMensajes();
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = 'login.html';

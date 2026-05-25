@@ -1,6 +1,8 @@
 let todosLosProyectos = [];
 let proyectoAEliminar = null;
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -51,6 +53,7 @@ window.onload = function () {
     configurarModalEliminar();
 };
 
+// Carga la lista de proyectos, la guarda en sesion y actualiza la tabla principal.
 async function cargarProyectos() {
     const result = await peticionSegura("/proyectos/cargar");
 
@@ -67,6 +70,7 @@ async function cargarProyectos() {
     renderizarTabla(todosLosProyectos);
 }
 
+// Pinta la tabla principal de esta vista usando los datos disponibles.
 function renderizarTabla(proyectos) {
     const tbody = document.getElementById("tabla-proyectos");
     const contador = document.getElementById("contador-proyectos");
@@ -138,6 +142,7 @@ function renderizarTabla(proyectos) {
     }).join("");
 }
 
+// Filtra la tabla de proyectos usando el texto escrito en el buscador.
 function filtrarProyectos() {
     const filtro = document.getElementById("input-busqueda").value.toLowerCase().trim();
     const filtrados = todosLosProyectos.filter((proyecto) =>
@@ -148,12 +153,14 @@ function filtrarProyectos() {
     renderizarTabla(filtrados);
 }
 
+// Guarda el proyecto seleccionado y abre su pantalla de edicion.
 function irAEditarProyecto(id) {
     localStorage.setItem("proyectoId", String(id));
     localStorage.setItem("proyectos", JSON.stringify(todosLosProyectos));
     window.location.href = "editarproyecto.html";
 }
 
+// Abre el modal de confirmacion reforzada para borrar un proyecto.
 function confirmarEliminarProyecto(id, nombre) {
     proyectoAEliminar = { id, nombre };
 
@@ -174,6 +181,7 @@ function confirmarEliminarProyecto(id, nombre) {
     setTimeout(() => input.focus(), 200);
 }
 
+// Configura los eventos del modal de eliminacion y ejecuta el borrado al confirmar.
 function configurarModalEliminar() {
     const input = document.getElementById("input-confirmacion-proyecto");
     const boton = document.getElementById("btn-confirmar-eliminar-proyecto");
@@ -230,6 +238,7 @@ function configurarModalEliminar() {
     });
 }
 
+// Devuelve el badge visual que representa si un proyecto esta activo o inactivo.
 function obtenerBadgeEstado(activo) {
     const estaActivo = activo === true || activo === "true";
     if (estaActivo) {
@@ -239,6 +248,7 @@ function obtenerBadgeEstado(activo) {
     return '<span class="badge-estado badge-inactivo">Inactivo</span>';
 }
 
+// Convierte la fecha del proyecto a un formato corto para la tabla.
 function formatearFecha(valor) {
     if (!valor) {
         return "Sin fecha";
@@ -260,6 +270,7 @@ function formatearFecha(valor) {
     return `${day}/${month}/${year}`;
 }
 
+// Escapa texto para reutilizarlo con seguridad dentro de atributos o eventos inline.
 function escaparTexto(texto) {
     return String(texto)
         .replace(/\\/g, "\\\\")
@@ -268,6 +279,7 @@ function escaparTexto(texto) {
         .replace(/\n/g, "\\n");
 }
 
+// Escapa texto para insertarlo de forma segura dentro de HTML.
 function escaparHtml(valor) {
     return String(valor)
         .replace(/&/g, "&amp;")
@@ -277,6 +289,7 @@ function escaparHtml(valor) {
         .replace(/'/g, "&#39;");
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";

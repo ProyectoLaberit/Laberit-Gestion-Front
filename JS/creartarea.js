@@ -1,6 +1,8 @@
 let departamentosDisponibles = [];
 let departamentosSeleccionados = [];
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -12,6 +14,7 @@ window.onload = function () {
     mostrarContexto();
 };
 
+// Carga el contexto de proyecto, fase y subfase que se muestra en la cabecera.
 async function mostrarContexto() {
     const subfase = localStorage.getItem("subfaseSeleccionada") || "Subfase";
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
@@ -37,6 +40,7 @@ async function mostrarContexto() {
     }
 }
 
+// Resuelve el nombre de la fase actual usando el almacenamiento local o el backend.
 async function obtenerFaseActual(proyectoId) {
     const faseGuardada = localStorage.getItem("faseSeleccionada");
     if (faseGuardada) {
@@ -72,6 +76,7 @@ async function obtenerFaseActual(proyectoId) {
     }
 }
 
+// Carga los departamentos disponibles y actualiza los selectores o resumenes relacionados.
 async function cargarDepartamentos() {
     const toggle = document.getElementById("select-departamento");
     const placeholder = document.getElementById("departamento-placeholder");
@@ -100,6 +105,7 @@ async function cargarDepartamentos() {
     actualizarResumenDepartamentos();
 }
 
+// Abre o cierra el selector multiple de departamentos.
 function toggleDropdownDepartamentos(event) {
     event.stopPropagation();
 
@@ -115,6 +121,7 @@ function toggleDropdownDepartamentos(event) {
     toggle.classList.toggle("open", abierto);
 }
 
+// Cierra el selector de departamentos cuando el usuario hace clic fuera de el.
 function manejarClickFueraDropdown(event) {
     const wrapper = document.getElementById("departamento-wrapper");
     if (!wrapper || wrapper.contains(event.target)) {
@@ -124,6 +131,7 @@ function manejarClickFueraDropdown(event) {
     cerrarDropdownDepartamentos();
 }
 
+// Cierra visualmente el desplegable de departamentos.
 function cerrarDropdownDepartamentos() {
     const toggle = document.getElementById("select-departamento");
     const menu = document.getElementById("departamento-menu");
@@ -137,6 +145,7 @@ function cerrarDropdownDepartamentos() {
     }
 }
 
+// Pinta las opciones del selector multiple de departamentos segun el estado actual.
 function renderizarOpcionesDepartamentos() {
     const menu = document.getElementById("departamento-menu");
     if (!menu) {
@@ -160,6 +169,7 @@ function renderizarOpcionesDepartamentos() {
     `).join("");
 }
 
+// Anade o quita un departamento de la seleccion actual.
 function toggleDepartamento(idDepartamento) {
     const id = Number(idDepartamento);
 
@@ -173,6 +183,7 @@ function toggleDepartamento(idDepartamento) {
     actualizarResumenDepartamentos();
 }
 
+// Elimina un departamento ya seleccionado desde la lista de tags visibles.
 function quitarDepartamento(idDepartamento, event) {
     if (event) {
         event.stopPropagation();
@@ -183,6 +194,7 @@ function quitarDepartamento(idDepartamento, event) {
     actualizarResumenDepartamentos();
 }
 
+// Actualiza el resumen textual y las etiquetas de los departamentos seleccionados.
 function actualizarResumenDepartamentos(textoManual) {
     const placeholder = document.getElementById("departamento-placeholder");
     const tags = document.getElementById("departamento-tags");
@@ -216,6 +228,7 @@ function actualizarResumenDepartamentos(textoManual) {
     marcarDepartamentosValidos();
 }
 
+// Marca el selector de departamentos como invalido cuando falta seleccion.
 function marcarDepartamentosInvalidos() {
     const toggle = document.getElementById("select-departamento");
     const feedback = document.getElementById("departamento-feedback");
@@ -225,6 +238,7 @@ function marcarDepartamentosInvalidos() {
     feedback.classList.add("show");
 }
 
+// Marca el selector de departamentos como valido cuando ya hay seleccion.
 function marcarDepartamentosValidos() {
     const toggle = document.getElementById("select-departamento");
     const feedback = document.getElementById("departamento-feedback");
@@ -234,6 +248,7 @@ function marcarDepartamentosValidos() {
     feedback.classList.remove("show");
 }
 
+// Limpia el estado visual de validacion del selector de departamentos.
 function limpiarValidacionDepartamentos() {
     const toggle = document.getElementById("select-departamento");
     const feedback = document.getElementById("departamento-feedback");
@@ -242,6 +257,7 @@ function limpiarValidacionDepartamentos() {
     feedback.classList.remove("show");
 }
 
+// Valida el formulario y crea la tarea en todos los departamentos seleccionados.
 async function guardarTarea() {
     ocultarMensajes();
 
@@ -350,6 +366,8 @@ async function guardarTarea() {
     }
 }
 
+// Activa o desactiva el estado de carga de la accion actual
+// para evitar envios duplicados mientras se procesa la peticion.
 function setBusy(loading) {
     const btn = document.getElementById("btn-guardar");
     const text = document.getElementById("btn-text");
@@ -359,6 +377,7 @@ function setBusy(loading) {
     spin.classList.toggle("d-none", !loading);
 }
 
+// Muestra un mensaje de exito y lo hace visible en la parte superior de la vista.
 function mostrarExito(msg) {
     const el = document.getElementById("msg-success");
     document.getElementById("msg-success-text").textContent = msg;
@@ -366,6 +385,7 @@ function mostrarExito(msg) {
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// Muestra un mensaje de error visible para informar del problema actual.
 function mostrarError(msg) {
     const el = document.getElementById("msg-error");
     document.getElementById("msg-error-text").textContent = msg;
@@ -373,11 +393,13 @@ function mostrarError(msg) {
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// Oculta los mensajes de estado antes de iniciar una nueva accion.
 function ocultarMensajes() {
     document.getElementById("msg-success").classList.remove("show");
     document.getElementById("msg-error").classList.remove("show");
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";

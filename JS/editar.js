@@ -1,5 +1,7 @@
 let proyectoActual = null;
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = async function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -11,6 +13,7 @@ window.onload = async function () {
     await cargarProyectoActual();
 };
 
+// Refleja en la interfaz el nombre del archivo que acaba de seleccionar el usuario.
 function mostrarNombre(input) {
     const label = document.getElementById("labelArchivo");
     if (!label) {
@@ -27,6 +30,7 @@ function mostrarNombre(input) {
     label.style.color = "";
 }
 
+// Recupera el proyecto seleccionado desde la sesion y rellena el formulario de edicion.
 async function cargarProyectoActual() {
     const proyectoId = localStorage.getItem("proyectoId");
     const feedback = document.getElementById("msg-feedback");
@@ -60,6 +64,7 @@ async function cargarProyectoActual() {
     actualizarModoPantalla();
 }
 
+// Ajusta titulos y mensajes segun el proyecto ya tenga Excel asociado o no.
 function actualizarModoPantalla() {
     const titulo = document.getElementById("titulo-editar-proyecto");
     const botonGuardar = document.getElementById("btn-guardar-proyecto");
@@ -83,6 +88,7 @@ function actualizarModoPantalla() {
     textoAyudaExcel.innerText = "Este proyecto ya existe. Ahora puedes adjuntarle el Excel y completar la importación.";
 }
 
+// Convierte distintas fechas de entrada al formato esperado por un input date.
 function normalizarFechaInput(valor) {
     if (!valor) {
         return "";
@@ -103,6 +109,7 @@ function normalizarFechaInput(valor) {
     return `${year}-${month}-${day}`;
 }
 
+// Selecciona en un desplegable el valor recibido si existe entre las opciones cargadas.
 function seleccionarValorEnSelect(idSelect, valor) {
     const select = document.getElementById(idSelect);
     if (!select || valor === undefined || valor === null || valor === "") {
@@ -117,6 +124,7 @@ function seleccionarValorEnSelect(idSelect, valor) {
     }
 }
 
+// Guarda el proyecto actual en el backend y, si corresponde, sube tambien su Excel.
 async function guardarProyecto() {
     const feedback = document.getElementById("msg-feedback");
     const fileInput = document.getElementById("archivoInput");
@@ -184,6 +192,7 @@ async function guardarProyecto() {
     }
 }
 
+// Sube el Excel del proyecto usando multipart para completar la importacion.
 async function subirExcelProyecto(proyectoId, archivo) {
     const formData = new FormData();
     formData.append("archivo", archivo);
@@ -202,6 +211,7 @@ async function subirExcelProyecto(proyectoId, archivo) {
     return response.json();
 }
 
+// Carga las opciones de Clockify disponibles y las inserta en el selector correspondiente.
 async function cargarClockify() {
     const feedback = document.getElementById("msg-feedback");
 
@@ -226,6 +236,7 @@ async function cargarClockify() {
     }
 }
 
+// Carga las opciones de GitLab disponibles y las inserta en el selector correspondiente.
 async function cargarGitlab() {
     const feedback = document.getElementById("msg-feedback");
 
@@ -250,6 +261,7 @@ async function cargarGitlab() {
     }
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";

@@ -1,4 +1,4 @@
-const URL_BASE = "http://localhost:8080/api";
+﻿const URL_BASE = "http://localhost:8080/api";
 
 const NAV_ITEMS = [
     {
@@ -38,6 +38,8 @@ const NAV_ITEMS = [
     }
 ];
 
+// Realiza peticiones al backend anadiendo el token de sesion,
+// controlando errores comunes y redirigiendo si la sesion expira.
 async function peticionSegura(endpoint, opciones = {}) {
     const token = localStorage.getItem("token");
 
@@ -95,27 +97,33 @@ async function peticionSegura(endpoint, opciones = {}) {
     }
 }
 
+// Devuelve el rol guardado para el usuario actual en la sesion.
 function getRolActual() {
     return localStorage.getItem("usuarioRol") || "";
 }
 
+// Comprueba si el usuario actual tiene permisos de administrador.
 function esAdmin() {
     const rol = getRolActual();
     return rol === "SuperAdministrador" || rol === "Administrador";
 }
 
+// Comprueba si el usuario actual tiene el rol de SuperAdministrador.
 function esSuperAdmin() {
     return getRolActual() === "SuperAdministrador";
 }
 
+// Comprueba si el usuario actual tiene el rol de Empleado.
 function esEmpleado() {
     return getRolActual() === "Empleado";
 }
 
+// Devuelve el identificador del usuario autenticado.
 function getIdActual() {
     return parseInt(localStorage.getItem("usuarioId") || "0", 10);
 }
 
+// Valida que exista sesion y que el rol actual pueda acceder a esta vista.
 function verificarAcceso(rolesPermitidos) {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -134,16 +142,19 @@ function verificarAcceso(rolesPermitidos) {
     return true;
 }
 
+// Devuelve el nombre del archivo HTML actual para poder ocultarlo del menu.
 function obtenerNombrePaginaActual() {
     const ruta = window.location.pathname || "";
     const partes = ruta.split(/[\\/]/);
     return (partes[partes.length - 1] || "").toLowerCase();
 }
 
+// Comprueba si un elemento del menu debe mostrarse para el rol indicado.
 function puedeVerNavItem(item, rol) {
     return item.roles.includes(rol);
 }
 
+// Construye la barra de navegacion mostrando solo los enlaces permitidos.
 function renderizarNavbar() {
     const navLista = document.querySelector(".navbar-nav");
     if (!navLista) {
@@ -170,6 +181,7 @@ function renderizarNavbar() {
     `;
 }
 
+// Traduce los alias de rol minimo a los roles reales usados por la aplicacion.
 function normalizarRolMinimo(valor) {
     switch ((valor || "").toUpperCase()) {
         case "ADMIN":
@@ -185,6 +197,7 @@ function normalizarRolMinimo(valor) {
     }
 }
 
+// Oculta los elementos del DOM cuyo rol minimo no cumple el usuario actual.
 function aplicarRestriccionesPorRol() {
     const rol = getRolActual();
 
@@ -196,9 +209,11 @@ function aplicarRestriccionesPorRol() {
     });
 }
 
+// Recalcula los permisos visibles en la interfaz segun el rol actual.
 function aplicarPermisosDom() {
     renderizarNavbar();
     aplicarRestriccionesPorRol();
 }
 
+// Inicializa la navegacion y aplica las restricciones visibles al cargar la pagina.
 document.addEventListener("DOMContentLoaded", aplicarPermisosDom);
