@@ -1,5 +1,7 @@
 // const URL_BASE = "http://localhost:8080/api";
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     // if (!localStorage.getItem("sesionActiva")) {
     if (!localStorage.getItem("token")) {
@@ -10,6 +12,7 @@ window.onload = function () {
     }
 };
 
+// Refleja en la interfaz el nombre del archivo que acaba de seleccionar el usuario.
 function mostrarNombre(input) {
     const label = document.getElementById('labelArchivo');
     if (input.files.length > 0) {
@@ -18,6 +21,7 @@ function mostrarNombre(input) {
     }
 }
 
+// Guarda el proyecto actual en el backend y, si corresponde, sube tambien su Excel.
 async function guardarProyecto() {
     const formulario = document.getElementById('form-subir-proyecto');
     const feedback = document.getElementById('msg-feedback');
@@ -118,11 +122,13 @@ async function guardarProyecto() {
     }
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
 }
 
+// Carga las opciones de Clockify disponibles y las inserta en el selector correspondiente.
 async function cargarClockify() {
     const feedback = document.getElementById('msg-feedback');
 
@@ -154,6 +160,7 @@ async function cargarClockify() {
 
 }
 
+// Carga las opciones de GitLab disponibles y las inserta en el selector correspondiente.
 async function cargarGitlab() {
     const feedback = document.getElementById('msg-feedback');
 

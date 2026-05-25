@@ -4,6 +4,8 @@ let puedeGestionarTareasActual = false;
 let modoEliminacion = false;
 let tareasPendientesEliminacion = [];
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -15,6 +17,7 @@ window.onload = function () {
     cargarDatosSubfase();
 };
 
+// Muestra u oculta acciones de gestion segun los permisos del usuario actual.
 function configurarControlesGestion() {
     const btnAnadir = document.getElementById("btn-anadir-tarea");
     const btnActivarEliminacion = document.getElementById("btn-activar-eliminacion");
@@ -40,6 +43,7 @@ function configurarControlesGestion() {
     actualizarModoEliminacionUI();
 }
 
+// Carga las tareas de la subfase actual y actualiza la tabla principal.
 async function cargarDatosSubfase() {
     const proyectoId = localStorage.getItem("proyectoId");
     const idSub = localStorage.getItem("idSubfase");
@@ -94,6 +98,7 @@ async function cargarDatosSubfase() {
     }
 }
 
+// Pinta la tabla de tareas de la subfase respetando el modo normal o de eliminacion.
 function renderizarTablaTareas() {
     const tabla = document.getElementById("tablaTar");
     if (!tabla) {
@@ -162,6 +167,7 @@ function renderizarTablaTareas() {
     }).join("");
 }
 
+// Activa el modo de seleccion multiple para poder borrar varios elementos.
 function activarModoEliminacion() {
     if (!puedeGestionarTareasActual) {
         return;
@@ -173,6 +179,7 @@ function activarModoEliminacion() {
     actualizarModoEliminacionUI();
 }
 
+// Sale del modo de eliminacion y limpia la seleccion actual.
 function cancelarModoEliminacion() {
     modoEliminacion = false;
     tareasSeleccionadas.clear();
@@ -180,6 +187,7 @@ function cancelarModoEliminacion() {
     actualizarModoEliminacionUI();
 }
 
+// Anade o quita una tarea de la seleccion actual en modo eliminacion.
 function toggleSeleccionTarea(claveTarea) {
     if (!modoEliminacion) {
         return;
@@ -195,6 +203,7 @@ function toggleSeleccionTarea(claveTarea) {
     actualizarModoEliminacionUI();
 }
 
+// Sincroniza la interfaz con el estado actual del modo de eliminacion.
 function actualizarModoEliminacionUI() {
     const board = document.getElementById("board-tareas");
     const toolbarSeleccion = document.getElementById("selection-toolbar");
@@ -241,6 +250,7 @@ function actualizarModoEliminacionUI() {
     }
 }
 
+// Conserva solo las selecciones que siguen existiendo tras recargar los datos.
 function sincronizarSeleccionConDatos() {
     const clavesDisponibles = new Set(
         tareasSubfaseActuales.map((tarea, index) => obtenerClaveTarea(tarea, index))
@@ -251,6 +261,7 @@ function sincronizarSeleccionConDatos() {
     );
 }
 
+// Prepara el borrado de las tareas seleccionadas y abre la confirmacion.
 async function eliminarTareasSeleccionadas() {
     if (!modoEliminacion || tareasSeleccionadas.size === 0) {
         return;
@@ -267,6 +278,7 @@ async function eliminarTareasSeleccionadas() {
     abrirConfirmacionEliminacion(tareasAEliminar);
 }
 
+// Abre el dialogo de confirmacion y prepara los elementos pendientes de borrar.
 function abrirConfirmacionEliminacion(tareasAEliminar) {
     const overlay = document.getElementById("delete-confirm-overlay");
     const texto = document.getElementById("delete-confirm-text");
@@ -286,6 +298,7 @@ function abrirConfirmacionEliminacion(tareasAEliminar) {
     overlay.classList.remove("d-none");
 }
 
+// Cierra el dialogo de confirmacion y limpia el estado temporal de borrado.
 function cerrarConfirmacionEliminacion() {
     const overlay = document.getElementById("delete-confirm-overlay");
     const btnModalConfirmar = document.getElementById("btn-modal-confirmar-eliminacion");
@@ -302,6 +315,7 @@ function cerrarConfirmacionEliminacion() {
     }
 }
 
+// Ejecuta el borrado de las tareas pendientes y refresca la subfase al finalizar.
 async function confirmarEliminacionTareas() {
     if (!Array.isArray(tareasPendientesEliminacion) || tareasPendientesEliminacion.length === 0) {
         cerrarConfirmacionEliminacion();
@@ -346,6 +360,7 @@ async function confirmarEliminacionTareas() {
     await cargarDatosSubfase();
 }
 
+// Elimina una tarea concreta de la subfase y devuelve el resultado de la operacion.
 async function eliminarUnaTarea(nombreTarea) {
     const proyectoId = localStorage.getItem("proyectoId");
     const idSubfase = localStorage.getItem("idSubfase");
@@ -371,26 +386,31 @@ async function eliminarUnaTarea(nombreTarea) {
     };
 }
 
+// Guarda la tarea seleccionada y abre la pantalla de detalle de estimaciones.
 function detalleTarea(nombreTarea) {
     localStorage.setItem("nombreTarea", nombreTarea);
     window.location.href = "paginatareas.html";
 }
 
+// Navega a la pantalla donde se puede crear una tarea manualmente.
 function abrirAnadirManual() {
     window.location.href = "creartarea.html";
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
 }
 
+// Genera una clave estable para identificar una tarea dentro de la subfase.
 function obtenerClaveTarea(tarea, index) {
     const idBase = tarea && tarea.idTarea != null ? String(tarea.idTarea) : `fila-${index}`;
     const nombreBase = normalizarNombreTarea(tarea && tarea.nombreTarea ? tarea.nombreTarea : "");
     return `${idBase}-${nombreBase}`;
 }
 
+// Normaliza normalizar nombre tarea para compararlo o reutilizarlo de forma consistente.
 function normalizarNombreTarea(texto) {
     return String(texto || "")
         .trim()
@@ -398,12 +418,14 @@ function normalizarNombreTarea(texto) {
         .replace(/\s+/g, "-");
 }
 
+// Escapa texto para insertarlo de forma segura en codigo JavaScript inline.
 function escaparParaJs(valor) {
     return String(valor || "")
         .replace(/\\/g, "\\\\")
         .replace(/'/g, "\\'");
 }
 
+// Escapa texto para insertarlo de forma segura dentro de HTML.
 function escaparHtml(valor) {
     return String(valor || "")
         .replace(/&/g, "&amp;")
@@ -413,6 +435,7 @@ function escaparHtml(valor) {
         .replace(/'/g, "&#39;");
 }
 
+// Convierte horas decimales a un formato mas legible para mostrarlo en pantalla.
 function formatoHoras(decimal) {
     if (!decimal || isNaN(decimal)) {
         return "0";

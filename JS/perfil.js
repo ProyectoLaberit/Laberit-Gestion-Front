@@ -1,4 +1,6 @@
 // ── Verificación de sesión al cargar ──────────────────────────────────────────
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -9,11 +11,13 @@ window.onload = function () {
     cargarDatosPerfil();
 };
 
+// Detecta si el perfil se ha abierto en modo edicion desde otra pantalla.
 function esModoEdicionAjena() {
     const params = new URLSearchParams(window.location.search);
     return params.get("edit") === "1";
 }
 
+// Limpia el contexto temporal de edicion cuando se entra al perfil propio.
 function prepararContextoPerfil() {
     if (!esModoEdicionAjena()) {
         localStorage.removeItem("usuarioEditando");
@@ -23,12 +27,15 @@ function prepararContextoPerfil() {
 // Devuelve los datos del usuario a mostrar/editar.
 // Si hay un "usuarioEditando" en localStorage (viene desde gestionusuarios),
 // usa ese. Si no, usa el propio usuario autenticado.
+// Devuelve los datos del usuario a mostrar o editar.
+// Si se viene desde gestion de usuarios, prioriza el usuario almacenado para edicion.
 function getDatosActuales() {
     const editando = localStorage.getItem("usuarioEditando");
     if (esModoEdicionAjena() && editando) return JSON.parse(editando);
     return JSON.parse(localStorage.getItem("usuarioData"));
 }
 
+// Indica si se esta editando el perfil de otro usuario y no el propio.
 function esEdicionAjena() {
     return esModoEdicionAjena() && !!localStorage.getItem("usuarioEditando");
 }
@@ -36,15 +43,18 @@ function esEdicionAjena() {
 const AVATAR_POR_DEFECTO = "avatar_masculino.png";
 const AVATARES_VALIDOS = ["avatar_masculino.png", "avatar_femenino.png"];
 
+// Normaliza el nombre del avatar y aplica uno por defecto si no es valido.
 function normalizarAvatar(nombreArchivo) {
     const limpio = String(nombreArchivo || "").trim().split("/").pop().split("\\").pop();
     return AVATARES_VALIDOS.includes(limpio) ? limpio : AVATAR_POR_DEFECTO;
 }
 
+// Construye la ruta local del avatar que debe mostrarse en pantalla.
 function getRutaAvatar(nombreArchivo) {
     return `../img/${normalizarAvatar(nombreArchivo)}`;
 }
 
+// Actualiza la imagen de perfil visible y sincroniza el selector de avatares.
 function aplicarAvatarPerfil(nombreArchivo) {
     const avatarFileName = normalizarAvatar(nombreArchivo);
     const profileImg = document.getElementById('profile-img');
@@ -65,6 +75,7 @@ function aplicarAvatarPerfil(nombreArchivo) {
     avatarSeleccionadoTemporal = avatarFileName;
 }
 
+// Carga en pantalla los datos del perfil actual o del usuario que se esta editando.
 function cargarDatosPerfil() {
     const userData = getDatosActuales();
     if (!userData) return;
@@ -90,6 +101,7 @@ function cargarDatosPerfil() {
     }
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.removeItem("usuarioEditando");
     localStorage.clear();
@@ -97,6 +109,7 @@ function cerrarSesion() {
 }
 
 // ── Modal de edición ──────────────────────────────────────────────────────────
+// Abre el modal de edicion y lo prepara segun el campo que se quiere modificar.
 function abrirModal(campo) {
     const userData = getDatosActuales();
 
@@ -131,6 +144,7 @@ function abrirModal(campo) {
     modalInstance.show();
 }
 
+// Guarda en el backend los cambios del modal de edicion y actualiza la vista.
 async function guardarEdicion() {
     const userData = getDatosActuales();
     const campo = document.getElementById('campoAEditar').value;
@@ -195,6 +209,7 @@ async function guardarEdicion() {
 
 let avatarSeleccionadoTemporal = "";
 
+// Abre el modal de seleccion de avatar dejando marcado el avatar actual.
 function abrirModalFoto() {
     const userData = getDatosActuales();
     const avatarFileName = normalizarAvatar(userData.foto);
@@ -215,12 +230,14 @@ function abrirModalFoto() {
     modalInstance.show();
 }
 
+// Guarda temporalmente el avatar elegido y resalta la opcion activa.
 function seleccionarAvatar(nombreArchivo, elementoContenedor) {
     avatarSeleccionadoTemporal = normalizarAvatar(nombreArchivo);
     document.querySelectorAll('#modalEdicionFoto .selector-avatar').forEach(img => img.classList.remove('active'));
     elementoContenedor.querySelector('.selector-avatar').classList.add('active');
 }
 
+// Guarda el avatar seleccionado en el backend y actualiza la sesion local.
 async function guardarFoto() {
     const userData = getDatosActuales();
     const token = localStorage.getItem("token");

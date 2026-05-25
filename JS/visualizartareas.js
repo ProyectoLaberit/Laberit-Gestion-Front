@@ -6,6 +6,8 @@ let idImputacionEditando = null;
 let subfasesPorFaseEdit = {};
 let nombresFaseEdit = {};
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = async function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -41,6 +43,7 @@ window.onload = async function () {
     document.addEventListener("keydown", manejarTeclasModalEdicion);
 };
 
+// Recupera del almacenamiento local el contexto necesario para esta vista.
 function obtenerContextoVista() {
     return {
         proyectoId: localStorage.getItem("proyectoId"),
@@ -49,6 +52,7 @@ function obtenerContextoVista() {
     };
 }
 
+// Rellena la ruta de navegacion con el contexto guardado en localStorage.
 function cargarBreadcrumb() {
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoId = localStorage.getItem("proyectoId");
@@ -64,6 +68,7 @@ function cargarBreadcrumb() {
     document.getElementById("dept-nombre").innerText = nombreDept;
 }
 
+// Inicializa el filtro de fechas con un rango por defecto de los ultimos 30 dias.
 function inicializarRangoFechas() {
     const hoy = new Date();
     const hace30Dias = new Date();
@@ -80,6 +85,7 @@ function inicializarRangoFechas() {
     inputHasta.value = formatearFechaInput(hoy);
 }
 
+// Conecta los inputs de fecha para que el filtrado se recalcule automaticamente.
 function configurarFiltrosAutomaticos() {
     const inputDesde = document.getElementById("fecha-desde");
     const inputHasta = document.getElementById("fecha-hasta");
@@ -88,6 +94,7 @@ function configurarFiltrosAutomaticos() {
         return;
     }
 
+// Reaplica el filtro por fechas cada vez que cambia alguno de los dos inputs.
     const aplicarFiltroAutomatico = async () => {
         inputDesde.max = inputHasta.value || "";
         inputHasta.min = inputDesde.value || "";
@@ -109,6 +116,7 @@ function configurarFiltrosAutomaticos() {
     inputHasta.addEventListener("change", aplicarFiltroAutomatico);
 }
 
+// Convierte un objeto Date al formato que esperan los inputs de tipo date.
 function formatearFechaInput(fecha) {
     const year = fecha.getFullYear();
     const month = String(fecha.getMonth() + 1).padStart(2, "0");
@@ -116,6 +124,7 @@ function formatearFechaInput(fecha) {
     return `${year}-${month}-${day}`;
 }
 
+// Carga las imputaciones del contexto actual y actualiza la tabla y sus metricas.
 async function cargarImputaciones() {
     const { proyectoId, idTareaProyecto, idDepartamento } = obtenerContextoVista();
 
@@ -146,6 +155,7 @@ async function cargarImputaciones() {
     actualizarEstadoFiltro("Mostrando todas las imputaciones del departamento.");
 }
 
+// Aplica el filtro por fechas sobre las imputaciones del contexto actual.
 async function filtrarPorFechas() {
     const { proyectoId, idTareaProyecto, idDepartamento } = obtenerContextoVista();
     const desde = document.getElementById("fecha-desde")?.value;
@@ -175,11 +185,13 @@ async function filtrarPorFechas() {
     actualizarEstadoFiltro(`Filtrando del ${formatearFechaTexto(desde)} al ${formatearFechaTexto(hasta)}.`);
 }
 
+// Restablece el rango de fechas por defecto y vuelve a cargar las imputaciones.
 async function limpiarFiltroFechas() {
     inicializarRangoFechas();
     await cargarImputaciones();
 }
 
+// Guarda las imputaciones cargadas, recalcula estadisticas y repinta la tabla.
 function aplicarDatosImputaciones(imputaciones) {
     todasLasImputaciones = imputaciones;
     paginaActual = 1;
@@ -187,6 +199,7 @@ function aplicarDatosImputaciones(imputaciones) {
     renderPagina();
 }
 
+// Filtra las imputaciones huerfanas que realmente corresponden al departamento y tarea actuales.
 function extraerHuerfanasRelacionadas(huerfanasResult, idDepartamento, desde = null, hasta = null) {
     if (!huerfanasResult || !huerfanasResult.success || !Array.isArray(huerfanasResult.data)) {
         return [];
@@ -198,6 +211,7 @@ function extraerHuerfanasRelacionadas(huerfanasResult, idDepartamento, desde = n
         .filter(imputacion => estaEnRango(imputacion.fecha, desde, hasta));
 }
 
+// Une dos colecciones de imputaciones sin duplicados y las deja ordenadas.
 function combinarImputacionesVista(imputacionesBase, imputacionesExtra) {
     const mapa = new Map();
 
@@ -219,6 +233,7 @@ function combinarImputacionesVista(imputacionesBase, imputacionesExtra) {
     });
 }
 
+// Comprueba si una imputacion pertenece a la tarea mostrada en esta pantalla.
 function coincideConTareaActual(imputacion) {
     const tareaActual = normalizarTexto(localStorage.getItem("nombreTarea") || document.getElementById("bc-tarea")?.innerText || "");
     const tareaImputacion = normalizarTexto(imputacion.tareaExtraida || imputacion.descripcionOriginal || "");
@@ -232,6 +247,7 @@ function coincideConTareaActual(imputacion) {
         || tareaActual.includes(tareaImputacion);
 }
 
+// Normaliza texto para compararlo sin tildes, mayusculas ni espacios sobrantes.
 function normalizarTexto(texto) {
     return String(texto || "")
         .normalize("NFD")
@@ -240,6 +256,7 @@ function normalizarTexto(texto) {
         .trim();
 }
 
+// Comprueba si una fecha de texto cae dentro del rango indicado.
 function estaEnRango(fechaTexto, desde = null, hasta = null) {
     if (!fechaTexto) {
         return false;
@@ -260,11 +277,13 @@ function estaEnRango(fechaTexto, desde = null, hasta = null) {
     return true;
 }
 
+// Muestra un estado de carga temporal mientras se actualiza la tabla.
 function setEstadoCargaTabla(texto) {
     const tbody = document.getElementById("tabla-tareas");
     tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="spinner-border spinner-border-sm me-2"></div>${texto}</td></tr>`;
 }
 
+// Sustituye la tabla por un mensaje de error cuando la carga falla.
 function mostrarErrorTabla(mensaje) {
     const tbody = document.getElementById("tabla-tareas");
     tbody.innerHTML = `<tr><td colspan="8" class="empty-state text-danger">${mensaje}</td></tr>`;
@@ -272,6 +291,7 @@ function mostrarErrorTabla(mensaje) {
     document.getElementById("pag-btns").innerHTML = "";
 }
 
+// Actualiza el mensaje que explica el filtro activo en esta vista.
 function actualizarEstadoFiltro(mensaje) {
     const estado = document.getElementById("estado-filtro");
     if (estado) {
@@ -279,6 +299,7 @@ function actualizarEstadoFiltro(mensaje) {
     }
 }
 
+// Recalcula estadisticas y contadores a partir de las imputaciones visibles.
 function actualizarEstadisticas() {
     const total = todasLasImputaciones.length;
     const correctas = todasLasImputaciones.filter(i => i.valida).length;
@@ -311,6 +332,7 @@ function actualizarEstadisticas() {
     document.getElementById("ring-fill").style.strokeDashoffset = offset;
 }
 
+// Redondea horas decimales a un texto corto con horas y minutos.
 function redondearH(horas) {
     if (!horas || horas === 0) {
         return "0h";
@@ -326,6 +348,7 @@ function redondearH(horas) {
     return `${horasEnteras}h`;
 }
 
+// Cambia el filtro activo entre todas, correctas o incorrectas y repinta la tabla.
 function setFiltro(filtro) {
     filtroActual = filtro;
     paginaActual = 1;
@@ -349,6 +372,7 @@ function setFiltro(filtro) {
     renderPagina();
 }
 
+// Aplica filtros y paginacion antes de pintar la pagina actual de resultados.
 function renderPagina() {
     const busqueda = (document.getElementById("input-busqueda")?.value || "").toLowerCase().trim();
 
@@ -390,6 +414,7 @@ function renderPagina() {
     renderPaginacion(total, totalPag);
 }
 
+// Pinta la tabla principal de esta vista usando los datos ya filtrados.
 function renderTabla(filas, inicio, total) {
     const tbody = document.getElementById("tabla-tareas");
 
@@ -464,6 +489,7 @@ function renderTabla(filas, inicio, total) {
         `Mostrando ${inicio + 1} a ${Math.min(inicio + filas.length, total)} de ${total} tareas`;
 }
 
+// Genera los controles de paginacion segun la pagina actual y el total disponible.
 function renderPaginacion(total, totalPag) {
     const contenedor = document.getElementById("pag-btns");
     contenedor.innerHTML = "";
@@ -501,6 +527,7 @@ function renderPaginacion(total, totalPag) {
     contenedor.appendChild(next);
 }
 
+// Crea un boton de paginacion reutilizable con su accion asociada.
 function crearPagBtn(label, disabled, onClick) {
     const btn = document.createElement("button");
     btn.className = "pag-btn";
@@ -514,6 +541,7 @@ function crearPagBtn(label, disabled, onClick) {
     return btn;
 }
 
+// Crea un separador visual para la paginacion cuando hay muchas paginas.
 function crearPagSpan(texto) {
     const span = document.createElement("span");
     span.className = "pag-btn";
@@ -522,12 +550,14 @@ function crearPagSpan(texto) {
     return span;
 }
 
+// Actualiza cuantas filas se muestran por pagina y repinta la tabla.
 function perPageChange() {
     porPagina = parseInt(document.getElementById("per-page").value, 10);
     paginaActual = 1;
     renderPagina();
 }
 
+// Lanza la sincronizacion de imputaciones desde Clockify y recarga la tabla.
 async function sincronizarImputaciones() {
     const { proyectoId } = obtenerContextoVista();
     const btn = document.getElementById("btn-sincronizar");
@@ -561,6 +591,7 @@ async function sincronizarImputaciones() {
     actualizarEstadoFiltro(result.mensaje || "Sincronizacion completada.");
 }
 
+// Marca una imputacion como vinculada a la tarea actual y actualiza la tabla.
 async function marcarValida(id, btn) {
     btn.disabled = true;
     btn.textContent = "Vinculando...";
@@ -588,6 +619,7 @@ async function marcarValida(id, btn) {
     alert((result && result.mensaje) || "Error al vincular.");
 }
 
+// Desvincula una imputacion de la tarea actual tras confirmacion del usuario.
 async function desvincularImputacion(id, btn) {
     if (!confirm("Seguro que quieres desvincular esta imputacion?")) {
         return;
@@ -619,6 +651,7 @@ async function desvincularImputacion(id, btn) {
     alert((result && result.mensaje) || "Error al desvincular.");
 }
 
+// Borra una imputacion concreta y actualiza la vista si la operacion termina bien.
 async function eliminarImputacion(id, btn) {
     if (!confirm("Seguro que quieres borrar esta imputacion?")) {
         return;
@@ -643,6 +676,7 @@ async function eliminarImputacion(id, btn) {
     alert((result && result.mensaje) || "Error al borrar.");
 }
 
+// Abre el modal de edicion cargando la tarea actual de la imputacion elegida.
 function editarImputacion(id) {
     const imputacion = todasLasImputaciones.find(i => i.idImputacionClockify === id);
     if (!imputacion) {
@@ -673,6 +707,7 @@ function editarImputacion(id) {
     }, 0);
 }
 
+// Cierra el modal de edicion y limpia su estado temporal.
 function cerrarModalEdicion(event) {
     if (event && event.target && event.target.id !== "edit-modal-overlay") {
         return;
@@ -698,6 +733,7 @@ function cerrarModalEdicion(event) {
     idImputacionEditando = null;
 }
 
+// Guarda los cambios hechos sobre una imputacion y actualiza la fila en pantalla.
 async function guardarEdicionImputacion() {
     if (!idImputacionEditando) {
         return;
@@ -762,6 +798,7 @@ async function guardarEdicionImputacion() {
     alert((result && result.mensaje) || "Error al editar la tarea.");
 }
 
+// Gestiona atajos de teclado del modal de edicion, como Enter y Escape.
 function manejarTeclasModalEdicion(event) {
     const overlay = document.getElementById("edit-modal-overlay");
     if (!overlay || !overlay.classList.contains("show")) {
@@ -777,11 +814,13 @@ function manejarTeclasModalEdicion(event) {
     }
 }
 
+// Convierte una fecha ISO a un texto breve en formato local.
 function formatearFechaTexto(valor) {
     const fecha = new Date(valor);
     return fecha.toLocaleDateString("es-ES");
 }
 
+// Carga las fases del proyecto para alimentar los selectores del modal de edicion.
 async function cargarFasesYSubfasesEdit() {
     const proyectoId = localStorage.getItem("proyectoId");
     const selectFase = document.getElementById("edit-select-fase");
@@ -813,6 +852,7 @@ async function cargarFasesYSubfasesEdit() {
     }
 }
 
+// Recarga las subfases disponibles para el selector de edicion del modal.
 function onCambioFaseEdit() {
     const idFase = document.getElementById("edit-select-fase").value;
     const selectSub = document.getElementById("edit-select-subfase");
@@ -835,6 +875,7 @@ function onCambioFaseEdit() {
     });
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";

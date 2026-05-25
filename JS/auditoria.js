@@ -1,6 +1,8 @@
 let todosLosLogs = [];
 let ordenFechaDesc = true;
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -30,6 +32,7 @@ window.onload = function () {
     actualizarIndicadorOrdenFecha();
 };
 
+// Carga los registros de auditoria y actualiza la tabla principal.
 async function cargarLogs() {
     const tbody = document.getElementById("tabla-logs");
     tbody.innerHTML = `<tr><td colspan="5" class="empty-state">
@@ -47,6 +50,7 @@ async function cargarLogs() {
     aplicarFiltros();
 }
 
+// Aplica los filtros activos de auditoria antes de volver a pintar la tabla.
 function aplicarFiltros() {
     const accion = document.getElementById("filtro-accion").value;
     const texto = document.getElementById("filtro-texto").value.toLowerCase().trim();
@@ -72,12 +76,14 @@ function aplicarFiltros() {
     renderizarTabla(ordenarLogsPorFecha(filtrados));
 }
 
+// Alterna el orden ascendente o descendente de los registros por fecha.
 function toggleOrdenFecha() {
     ordenFechaDesc = !ordenFechaDesc;
     actualizarIndicadorOrdenFecha();
     aplicarFiltros();
 }
 
+// Actualiza la flecha y el texto de ayuda segun el orden activo de fechas.
 function actualizarIndicadorOrdenFecha() {
     const arrow = document.getElementById("sort-fecha-arrow");
     if (!arrow) {
@@ -90,6 +96,7 @@ function actualizarIndicadorOrdenFecha() {
         : "Mostrando primero las fechas mas antiguas";
 }
 
+// Ordena una lista de logs segun la fecha y el sentido seleccionado.
 function ordenarLogsPorFecha(logs) {
     return [...logs].sort((a, b) => {
         const fechaA = a.fechaHora ? new Date(a.fechaHora).getTime() : 0;
@@ -98,6 +105,7 @@ function ordenarLogsPorFecha(logs) {
     });
 }
 
+// Pinta la tabla principal de esta vista usando los datos disponibles.
 function renderizarTabla(logs) {
     const tbody = document.getElementById("tabla-logs");
     const contador = document.getElementById("contador-logs");
@@ -126,10 +134,12 @@ function renderizarTabla(logs) {
     `).join("");
 }
 
+// Formatea el identificador de usuario para mostrarlo de forma consistente.
 function formatearIdUsuario(idUsuario) {
     return idUsuario !== undefined && idUsuario !== null ? `#${idUsuario}` : "-";
 }
 
+// Genera el bloque visual del usuario afectado dentro de un log de auditoria.
 function renderUsuarioObjetivo(log) {
     if (log.idUsuarioObjetivo === undefined || log.idUsuarioObjetivo === null) {
         return `<span class="text-muted">-</span>`;
@@ -148,6 +158,7 @@ function renderUsuarioObjetivo(log) {
     `;
 }
 
+// Convierte la fecha del log a un formato corto y legible.
 function formatearFecha(fechaHora) {
     if (!fechaHora) {
         return "-";
@@ -159,6 +170,7 @@ function formatearFecha(fechaHora) {
         + fecha.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 }
 
+// Devuelve el badge visual asociado al tipo de accion registrada en auditoria.
 function badgeAccion(accion) {
     const mapa = {
         IMPORTAR_EXCEL: ["badge-importacion", "Importacion Excel"],
@@ -178,6 +190,7 @@ function badgeAccion(accion) {
     return `<span class="badge-accion ${cls}">${label}</span>`;
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";

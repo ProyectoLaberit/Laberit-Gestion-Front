@@ -1,5 +1,6 @@
 const URL_BASE = "http://localhost:8080/api";
 
+// Envia las credenciales al backend, guarda la sesion y navega a proyectos si son validas.
 async function realizarLogin() {
     const msgEl = document.getElementById('msg-login');
     msgEl.innerText = "";

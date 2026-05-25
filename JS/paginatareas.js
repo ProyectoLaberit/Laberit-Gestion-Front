@@ -20,6 +20,8 @@ function debugVinculacionesGitlab() {
     return getVinculacionesActuales();
 }
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -31,6 +33,7 @@ window.onload = function () {
     cargarDetallesTar();
 };
 
+// Muestra u oculta acciones de gestion segun los permisos del usuario actual.
 function configurarControlesGestion() {
     const btnEditar = document.getElementById("btn-editar-estimaciones");
     const btnActivarEliminacion = document.getElementById("btn-activar-eliminacion");
@@ -56,11 +59,13 @@ function configurarControlesGestion() {
     actualizarModoEliminacionUI();
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
 }
 
+// Carga las estimaciones de la tarea actual y actualiza toda la vista de detalle.
 async function cargarDetallesTar() {
     const proyectoId = localStorage.getItem("proyectoId");
     const idSub = localStorage.getItem("idSubfase");
@@ -120,6 +125,7 @@ async function cargarDetallesTar() {
     }
 }
 
+// Pinta la vista detallada de estimaciones agrupadas por departamento.
 function renderizarTablaEspecifica() {
     const tabla = document.getElementById("tablaEspec");
     if (!tabla) {
@@ -267,6 +273,7 @@ function renderizarTablaEspecifica() {
     `;
 }
 
+// Activa el modo de seleccion multiple para poder borrar varios elementos.
 function activarModoEliminacion() {
     if (!puedeGestionarEstimacionesActual) {
         return;
@@ -278,6 +285,7 @@ function activarModoEliminacion() {
     actualizarModoEliminacionUI();
 }
 
+// Sale del modo de eliminacion y limpia la seleccion actual.
 function cancelarModoEliminacion() {
     modoEliminacion = false;
     detallesSeleccionados.clear();
@@ -286,6 +294,7 @@ function cancelarModoEliminacion() {
     actualizarModoEliminacionUI();
 }
 
+// Anade o quita una estimacion de la seleccion actual en modo eliminacion.
 function toggleSeleccionDetalle(claveDetalle) {
     if (!modoEliminacion) {
         return;
@@ -301,6 +310,7 @@ function toggleSeleccionDetalle(claveDetalle) {
     actualizarModoEliminacionUI();
 }
 
+// Sincroniza la interfaz con el estado actual del modo de eliminacion.
 function actualizarModoEliminacionUI() {
     const toolbarSeleccion = document.getElementById("selection-toolbar");
     const btnEditar = document.getElementById("btn-editar-estimaciones");
@@ -347,6 +357,7 @@ function actualizarModoEliminacionUI() {
     }
 }
 
+// Conserva solo las selecciones que siguen existiendo tras recargar los datos.
 function sincronizarSeleccionConDatos() {
     const clavesDisponibles = new Set(
         detallesTareaActuales.map((detalle, index) => obtenerClaveDetalle(detalle, index))
@@ -357,6 +368,7 @@ function sincronizarSeleccionConDatos() {
     );
 }
 
+// Prepara el borrado de las estimaciones seleccionadas y abre la confirmacion.
 function eliminarEstimacionesSeleccionadas() {
     if (!modoEliminacion || detallesSeleccionados.size === 0) {
         return;
@@ -373,6 +385,7 @@ function eliminarEstimacionesSeleccionadas() {
     abrirConfirmacionEliminacion(detallesAEliminar);
 }
 
+// Abre el dialogo de confirmacion y prepara los elementos pendientes de borrar.
 function abrirConfirmacionEliminacion(detallesAEliminar) {
     const overlay = document.getElementById("delete-confirm-overlay");
     const texto = document.getElementById("delete-confirm-text");
@@ -392,6 +405,7 @@ function abrirConfirmacionEliminacion(detallesAEliminar) {
     overlay.classList.remove("d-none");
 }
 
+// Cierra el dialogo de confirmacion y limpia el estado temporal de borrado.
 function cerrarConfirmacionEliminacion() {
     const overlay = document.getElementById("delete-confirm-overlay");
     const btnModalConfirmar = document.getElementById("btn-modal-confirmar-eliminacion");
@@ -408,6 +422,7 @@ function cerrarConfirmacionEliminacion() {
     }
 }
 
+// Ejecuta el borrado de las estimaciones pendientes y recarga la vista al terminar.
 async function confirmarEliminacionEstimaciones() {
     if (!Array.isArray(detallesPendientesEliminacion) || detallesPendientesEliminacion.length === 0) {
         cerrarConfirmacionEliminacion();
@@ -452,6 +467,7 @@ async function confirmarEliminacionEstimaciones() {
     await cargarDetallesTar();
 }
 
+// Elimina una estimacion concreta y devuelve un resumen del resultado.
 async function eliminarUnaEstimacion(idDetalleEstimacion) {
     if (!idDetalleEstimacion) {
         return { success: false };
@@ -470,6 +486,7 @@ async function eliminarUnaEstimacion(idDetalleEstimacion) {
 // Funciones auxiliares para renderización y utilidades
 
 
+// Recupera la vinculacion de GitLab asociada a una tarea del proyecto.
 function obtenerVinculacionGitlab(idTareaProyecto) {
     // Esta función ya no se usa, los datos vienen directamente en el objeto
     return null;
@@ -495,6 +512,7 @@ function renderizarContenidoGitlab(p) {
     `;
 }
 
+// Traduce el estado de GitLab a una clase CSS usada para colorear el badge.
 function obtenerClaseEstadoGitlab(estado) {
     const normalizado = String(estado || "").trim().toLowerCase();
 
@@ -509,6 +527,7 @@ function obtenerClaseEstadoGitlab(estado) {
     return "gitlab-state-other";
 }
 
+// Convierte el estado tecnico de GitLab a un texto mas legible para el usuario.
 function formatearEstadoGitlab(estado) {
     const normalizado = String(estado || "").trim().toLowerCase();
 
@@ -527,6 +546,7 @@ function formatearEstadoGitlab(estado) {
     return normalizado.replaceAll("_", " ");
 }
 
+// Escapa texto para insertarlo de forma segura dentro de HTML.
 function escaparHtml(valor) {
     return String(valor ?? "")
         .replaceAll("&", "&amp;")
@@ -536,12 +556,14 @@ function escaparHtml(valor) {
         .replaceAll("'", "&#39;");
 }
 
+// Escapa texto para insertarlo de forma segura en codigo JavaScript inline.
 function escaparParaJs(valor) {
     return String(valor || "")
         .replace(/\\/g, "\\\\")
         .replace(/'/g, "\\'");
 }
 
+// Genera una clave estable para identificar una estimacion dentro de la tabla.
 function obtenerClaveDetalle(detalle, index) {
     if (detalle && detalle.idTarea != null) {
         return `detalle-${detalle.idTarea}-${detalle.nombreDep || "sin-dep"}`;
@@ -550,6 +572,7 @@ function obtenerClaveDetalle(detalle, index) {
     return `detalle-sin-id-${index}`;
 }
 
+// Guarda el contexto del departamento actual y abre la pantalla de visualizacion de imputaciones.
 function irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartamento, nombreDepartamento) {
     if (typeof esEmpleado === "function" && esEmpleado()) {
         alert("No tienes permisos para acceder a esta seccion.");
@@ -563,6 +586,7 @@ function irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartament
     window.location.href = "visualizartareas.html";
 }
 
+// Convierte horas decimales a un formato mas legible para mostrarlo en pantalla.
 function formatoHoras(decimal) {
     if (!decimal || isNaN(decimal)) {
         return "0";

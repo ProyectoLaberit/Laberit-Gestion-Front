@@ -5,12 +5,14 @@ if (!localStorage.getItem("token")) {
 }
 
 // Cerrar sesion
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
 }
 
 // Pintar proyectos
+// Carga los proyectos visibles, sus resumenes y pinta las tarjetas en ambas categorias.
 async function pintarProyectos() {
     console.log("EJECUTANDO PINTAR PROYECTOS. Leyendo filtros...");
 
@@ -72,6 +74,7 @@ async function pintarProyectos() {
         (p) => p.excels === false || p.excels === "false" || !p.excels
     );
 
+// Genera las tarjetas HTML de proyectos separando la accion principal segun tengan Excel o no.
     const generarTarjetas = (lista, tieneExcel) => {
         if (lista.length === 0) {
             return '<div class="col-12 text-center text-muted py-4">No hay proyectos en esta categoria.</div>';
@@ -133,12 +136,14 @@ async function pintarProyectos() {
     contenedorSinExcel.innerHTML = generarTarjetas(proyectosSinExcel, false);
 }
 
+// Guarda el proyecto seleccionado y navega a su pantalla de detalles.
 function verDetalles(proyectoId) {
     console.log("Ver detalles del proyecto:", proyectoId);
     localStorage.setItem("proyectoId", proyectoId);
     window.location.href = "detalles.html";
 }
 
+// Guarda el proyecto seleccionado y abre la pantalla para adjuntarle un Excel.
 function anadirExcel(proyectoId) {
     localStorage.setItem("proyectoId", proyectoId);
     window.location.href = "editarproyecto.html";
@@ -148,6 +153,7 @@ const usuarioData = localStorage.getItem("usuarioData");
 void usuarioData;
 pintarProyectos();
 
+// Convierte horas decimales a un formato mas legible para mostrarlo en pantalla.
 function formatoHoras(decimal) {
     if (!decimal || Number.isNaN(decimal)) {
         return "0h";

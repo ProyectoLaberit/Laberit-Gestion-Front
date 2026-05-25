@@ -1,3 +1,5 @@
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -11,6 +13,7 @@ let idsActuales = {};
 let resumenSubfases = {};
 let idExcelSeleccionadoActual = null;
 
+// Inicializa la pantalla de detalles del proyecto y engancha sus eventos principales.
 async function cargarPaginaDetalles() {
     const proyectoId = localStorage.getItem("proyectoId");
 
@@ -41,6 +44,7 @@ async function cargarPaginaDetalles() {
     });
 }
 
+// Descarga el Excel actualmente seleccionado en el historial del proyecto.
 async function descargarExcelActual() {
     const token = localStorage.getItem("token");
     const btn = document.getElementById("btn-descargar-excel");
@@ -102,6 +106,7 @@ async function descargarExcelActual() {
     }
 }
 
+// Lanza la sincronizacion del proyecto actual y actualiza la vista cuando termina.
 async function sincronizar() {
     const proyectoId = localStorage.getItem("proyectoId");
     const btn = document.getElementById("btn-sincronizar");
@@ -136,6 +141,7 @@ async function sincronizar() {
     }
 }
 
+// Recarga las subfases y mantiene, si procede, el filtro que ya tenia el usuario.
 async function refrescarDetallesActuales(mantenerFiltro = false) {
     const proyectoId = localStorage.getItem("proyectoId");
     const inputBusqueda = document.getElementById("input-busqueda");
@@ -158,6 +164,7 @@ async function refrescarDetallesActuales(mantenerFiltro = false) {
     }
 }
 
+// Muestra en pantalla la fecha y hora de la ultima sincronizacion realizada.
 function mostrarUltimaSync(isoString) {
     const fecha = new Date(isoString);
     const formateada = fecha.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })
@@ -167,6 +174,7 @@ function mostrarUltimaSync(isoString) {
     document.getElementById("ultima-sincronizacion").style.display = "inline";
 }
 
+// Muestra una notificacion flotante temporal con el resultado de una accion.
 function mostrarToast(mensaje, tipo) {
     const anterior = document.getElementById("toast-sync");
     if (anterior) {
@@ -198,6 +206,7 @@ function mostrarToast(mensaje, tipo) {
     setTimeout(() => toast.remove(), 4000);
 }
 
+// Carga el historial de Excels del proyecto y selecciona el que debe mostrarse.
 async function cargarHistorialExcels(proyectoId) {
     const select = document.getElementById("select-historial-excel");
     select.innerHTML = '<option value="">Cargando historial...</option>';
@@ -245,6 +254,7 @@ async function cargarHistorialExcels(proyectoId) {
     await cargarSubfases(proyectoId, idExcelSeleccionadoActual);
 }
 
+// Reacciona al cambio de Excel en el historial y recarga las fases correspondientes.
 async function onCambioExcel(select) {
     const idExcel = select.value;
     if (!idExcel) {
@@ -265,6 +275,7 @@ async function onCambioExcel(select) {
     await cargarSubfases(proyectoId, idExcelSeleccionadoActual);
 }
 
+// Carga las fases o subfases correspondientes al proyecto o al Excel seleccionado.
 async function cargarSubfases(proyectoId, idExcelSeleccionado = null) {
     const endpoint = idExcelSeleccionado
         ? `/fases/por-excel/${idExcelSeleccionado}`
@@ -280,6 +291,7 @@ async function cargarSubfases(proyectoId, idExcelSeleccionado = null) {
     await procesarYRenderizar(result.data);
 }
 
+// Reordena las fases cargadas, obtiene sus resumenes y lanza el render principal.
 async function procesarYRenderizar(fases) {
     const estructura = {};
     const ids = {};
@@ -315,6 +327,7 @@ async function procesarYRenderizar(fases) {
     renderizarTodo("", estructura, ids);
 }
 
+// Recorre la estructura de fases y subfases para pintar solo las que cumplen el filtro.
 function renderizarTodo(filtro = "", estr, ids) {
     const contenedor = document.getElementById("contenedor-fases");
     contenedor.innerHTML = "";
@@ -375,6 +388,7 @@ function renderizarTodo(filtro = "", estr, ids) {
     }
 }
 
+// Guarda la subfase elegida y navega a la pantalla de sus tareas.
 function irASubfase(nombreSubfase) {
     const partes = nombreSubfase.split(",");
     const proyectoId = localStorage.getItem("proyectoId");
@@ -389,15 +403,18 @@ function irASubfase(nombreSubfase) {
     window.location.href = "subfase.html";
 }
 
+// Construye la clave usada en localStorage para recordar el Excel elegido.
 function obtenerClaveExcelSeleccionado(proyectoId) {
     return `idExcelHistorialSeleccionado-${proyectoId}`;
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
 }
 
+// Convierte horas decimales a un formato mas legible para mostrarlo en pantalla.
 function formatoHoras(decimal) {
     if (!decimal || isNaN(decimal)) {
         return "0h";

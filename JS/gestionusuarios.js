@@ -1,6 +1,8 @@
 let todosLosUsuarios = [];
 let idAEliminar = null;
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -49,6 +51,7 @@ if (!esSuperAdmin() && !esAdmin()) {
     configurarModalEliminar();
 };
 
+// Carga la lista de usuarios y delega su pintado en la tabla principal.
 async function cargarUsuarios() {
     const result = await peticionSegura("/usuarios");
 
@@ -64,6 +67,7 @@ async function cargarUsuarios() {
     renderizarTabla(todosLosUsuarios);
 }
 
+// Pinta la tabla principal de esta vista usando los datos disponibles.
 function renderizarTabla(usuarios) {
     const tbody = document.getElementById("tabla-usuarios");
     const contador = document.getElementById("contador-usuarios");
@@ -131,6 +135,7 @@ function renderizarTabla(usuarios) {
     }).join("");
 }
 
+// Devuelve el badge HTML que representa visualmente el rol del usuario.
 function badgeRol(rol) {
     if (!rol) return `<span class="badge-rol badge-empleado">—</span>`;
     if (rol === "SuperAdministrador") return `<span class="badge-rol badge-superadmin">SuperAdmin</span>`;
@@ -138,6 +143,7 @@ function badgeRol(rol) {
     return `<span class="badge-rol badge-empleado">${rol}</span>`;
 }
 
+// Filtra la tabla de usuarios usando el texto escrito en el buscador.
 function filtrarUsuarios() {
     const filtro = document.getElementById("input-busqueda").value.toLowerCase().trim();
     const filtrados = todosLosUsuarios.filter(u =>
@@ -149,12 +155,14 @@ function filtrarUsuarios() {
 }
 
 // ── Editar: guarda los datos del usuario en localStorage y va a perfil.html ──
+// Guarda el usuario seleccionado y navega al perfil en modo edicion.
 function irAEditar(id, nombre, email, rol, foto) {
     localStorage.setItem("usuarioEditando", JSON.stringify({ id, nombre, email, rol, foto }));
     window.location.href = "perfil.html?edit=1";
 }
 
 // ── Eliminar ──────────────────────────────────────────────────────────────────
+// Abre el modal de confirmacion para eliminar el usuario seleccionado.
 function confirmarEliminar(id, nombre) {
     idAEliminar = id;
     document.getElementById("modal-eliminar-nombre").textContent =
@@ -163,6 +171,7 @@ function confirmarEliminar(id, nombre) {
     modal.show();
 }
 
+// Configura los eventos del modal de eliminacion y ejecuta el borrado al confirmar.
 function configurarModalEliminar() {
     document.getElementById("btn-confirmar-eliminar").addEventListener("click", async () => {
         if (!idAEliminar) return;
@@ -188,6 +197,7 @@ function configurarModalEliminar() {
     });
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";

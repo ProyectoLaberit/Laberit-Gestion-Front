@@ -2,6 +2,8 @@ let subfasesPorFase = {};
 let nombresFase = {};
 let subfaseSeleccionadaEst = null;
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = async function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
@@ -44,6 +46,7 @@ window.onload = async function () {
     await cargarDepartamentos();
 };
 
+// Carga las fases del proyecto y prepara el selector dependiente de subfases.
 async function cargarFasesYSubfases() {
     const proyectoId = localStorage.getItem("proyectoId");
     const selectFase = document.getElementById("select-fase");
@@ -96,6 +99,7 @@ async function cargarFasesYSubfases() {
     }
 }
 
+// Carga los departamentos disponibles y actualiza los selectores o resumenes relacionados.
 async function cargarDepartamentos() {
     const select = document.getElementById("select-depto-est");
     const result = await peticionSegura("/departamentos");
@@ -114,6 +118,7 @@ async function cargarDepartamentos() {
     });
 }
 
+// Recarga las subfases disponibles cuando cambia la fase seleccionada.
 function onCambioFase() {
     const idFase = document.getElementById("select-fase").value;
     const selectSub = document.getElementById("select-subfase");
@@ -144,6 +149,7 @@ function onCambioFase() {
     });
 }
 
+// Guarda la subfase elegida y actualiza el resumen visible del paso actual.
 function onCambioSubfase() {
     const idFase = document.getElementById("select-fase").value;
     const select = document.getElementById("select-subfase");
@@ -167,6 +173,7 @@ function onCambioSubfase() {
     display.classList.add("text-dark", "fw-semibold");
 }
 
+// Restablece el selector de subfases a su estado inicial deshabilitado.
 function resetearSubfases() {
     const selectSub = document.getElementById("select-subfase");
     selectSub.innerHTML = '<option value="" disabled selected>Primero selecciona una fase...</option>';
@@ -174,6 +181,7 @@ function resetearSubfases() {
     limpiarSubfaseSeleccionada();
 }
 
+// Limpia la subfase seleccionada y devuelve el resumen visual a su estado base.
 function limpiarSubfaseSeleccionada() {
     subfaseSeleccionadaEst = null;
 
@@ -183,6 +191,7 @@ function limpiarSubfaseSeleccionada() {
     display.classList.remove("text-dark", "fw-semibold");
 }
 
+// Valida los datos del formulario y crea una estimacion manual en el proyecto actual.
 async function crearEstimacion() {
     ocultarMensajes();
 
@@ -261,6 +270,7 @@ async function crearEstimacion() {
     }
 }
 
+// Guarda el contexto de la estimacion recien creada y abre su pantalla de detalle.
 function abrirEstimacionCreada(nombreTarea) {
     if (!subfaseSeleccionadaEst) {
         return;
@@ -274,6 +284,7 @@ function abrirEstimacionCreada(nombreTarea) {
     window.location.assign("paginatareas.html");
 }
 
+// Anade un elemento visual a la lista de elementos creados recientemente.
 function agregarItemListaCreada(listaId, contenedorId, texto) {
     const contenedor = document.getElementById(contenedorId);
     const lista = document.getElementById(listaId);
@@ -290,6 +301,8 @@ function agregarItemListaCreada(listaId, contenedorId, texto) {
     lista.appendChild(li);
 }
 
+// Activa o desactiva el estado de carga de la accion actual
+// para evitar envios duplicados mientras se procesa la peticion.
 function setBusy(paso, loading) {
     const btn = document.getElementById(`btn-${paso}-text`);
     const spin = document.getElementById(`btn-${paso}-spin`);
@@ -297,6 +310,7 @@ function setBusy(paso, loading) {
     if (spin) spin.classList.toggle("d-none", !loading);
 }
 
+// Muestra un mensaje de exito y lo hace visible en la parte superior de la vista.
 function mostrarExito(msg) {
     document.getElementById("msg-success-text").textContent = msg;
     document.getElementById("msg-success").classList.add("show");
@@ -304,17 +318,20 @@ function mostrarExito(msg) {
     setTimeout(() => document.getElementById("msg-success").classList.remove("show"), 3500);
 }
 
+// Muestra un mensaje de error visible para informar del problema actual.
 function mostrarError(msg) {
     document.getElementById("msg-error-text").textContent = msg;
     document.getElementById("msg-error").classList.add("show");
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// Oculta los mensajes de estado antes de iniciar una nueva accion.
 function ocultarMensajes() {
     document.getElementById("msg-success").classList.remove("show");
     document.getElementById("msg-error").classList.remove("show");
 }
 
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
