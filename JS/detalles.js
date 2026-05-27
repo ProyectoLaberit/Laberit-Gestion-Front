@@ -37,6 +37,11 @@ async function cargarPaginaDetalles() {
         btnDescargarExcel.addEventListener("click", descargarExcelActual);
     }
 
+    const btnDescargarReporteAnalitico = document.getElementById("btn-descargar-reporte-analitico");
+    if (btnDescargarReporteAnalitico) {
+        btnDescargarReporteAnalitico.addEventListener("click", descargarReporteAnaliticoActual);
+    }
+
     await cargarHistorialExcels(proyectoId);
 
     document.getElementById("input-busqueda").addEventListener("input", (e) => {
@@ -46,7 +51,6 @@ async function cargarPaginaDetalles() {
 
 // Descarga el Excel actualmente seleccionado en el historial del proyecto.
 async function descargarExcelActual() {
-    const token = localStorage.getItem("token");
     const btn = document.getElementById("btn-descargar-excel");
     const selectExcel = document.getElementById("select-historial-excel");
     const idExcel = idExcelSeleccionadoActual || selectExcel?.value;
@@ -56,18 +60,56 @@ async function descargarExcelActual() {
         return;
     }
 
-    const textoOriginal = btn ? btn.innerHTML : "";
+    await descargarArchivoExcel({
+        boton: btn,
+        endpoint: `/excel/exportar/${encodeURIComponent(idExcel)}`,
+        nombreFallback: `Estimacion_Proyecto_${idExcel}.xlsx`,
+        mensajeOk: "Excel descargado correctamente.",
+        mensajeError: "No se pudo descargar el Excel."
+    });
+}
 
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `
+// Descarga el reporte analitico del proyecto usando el Excel seleccionado en el historial.
+async function descargarReporteAnaliticoActual() {
+    const proyectoId = localStorage.getItem("proyectoId");
+    const btn = document.getElementById("btn-descargar-reporte-analitico");
+    const selectExcel = document.getElementById("select-historial-excel");
+    const idExcel = idExcelSeleccionadoActual || selectExcel?.value;
+
+    if (!proyectoId) {
+        mostrarToast("No se encontro el proyecto actual.", "error");
+        return;
+    }
+
+    if (!idExcel) {
+        mostrarToast("No hay ningun Excel seleccionado para generar el reporte.", "error");
+        return;
+    }
+
+    await descargarArchivoExcel({
+        boton: btn,
+        endpoint: `/excel/exportar-analitico/${encodeURIComponent(proyectoId)}/${encodeURIComponent(idExcel)}`,
+        nombreFallback: `Reporte_Analitico_Proyecto_${proyectoId}.xlsx`,
+        mensajeOk: "Reporte analitico descargado correctamente.",
+        mensajeError: "No se pudo descargar el reporte analitico."
+    });
+}
+
+// Ejecuta una descarga binaria autenticada y restaura el estado visual del boton al terminar.
+async function descargarArchivoExcel({ boton, endpoint, nombreFallback, mensajeOk, mensajeError }) {
+    const token = localStorage.getItem("token");
+    const textoOriginal = boton ? boton.innerHTML : "";
+
+    if (boton) {
+        boton.disabled = true;
+        boton.innerHTML = `
             <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
             Descargando...
         `;
     }
 
     try {
-        const response = await fetch(`${URL_BASE}/excel/exportar/${encodeURIComponent(idExcel)}`, {
+        const response = await fetch(`${URL_BASE}${endpoint}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -85,25 +127,42 @@ async function descargarExcelActual() {
         }
 
         const blob = await response.blob();
+        const disposition = response.headers.get("Content-Disposition") || response.headers.get("content-disposition") || "";
+        const nombreArchivo = obtenerNombreArchivoDesdeCabecera(disposition) || nombreFallback;
         const url = window.URL.createObjectURL(blob);
         const enlace = document.createElement("a");
         enlace.href = url;
-        enlace.download = `Estimacion_Proyecto_${idExcel}.xlsx`;
+        enlace.download = nombreArchivo;
         document.body.appendChild(enlace);
         enlace.click();
         enlace.remove();
         window.URL.revokeObjectURL(url);
 
-        mostrarToast("Excel descargado correctamente.", "success");
+        mostrarToast(mensajeOk, "success");
     } catch (error) {
         console.error("Error al descargar el Excel:", error);
-        mostrarToast("No se pudo descargar el Excel.", "error");
+        mostrarToast(mensajeError, "error");
     } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = textoOriginal;
+        if (boton) {
+            boton.disabled = false;
+            boton.innerHTML = textoOriginal;
         }
     }
+}
+
+// Recupera el nombre del fichero sugerido por el backend para reutilizarlo en la descarga.
+function obtenerNombreArchivoDesdeCabecera(contentDisposition) {
+    if (!contentDisposition) {
+        return "";
+    }
+
+    const matchUtf = contentDisposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+    if (matchUtf && matchUtf[1]) {
+        return decodeURIComponent(matchUtf[1]).replace(/["']/g, "").trim();
+    }
+
+    const matchNormal = contentDisposition.match(/filename\s*=\s*"?(.*?)"?($|;)/i);
+    return matchNormal && matchNormal[1] ? matchNormal[1].trim() : "";
 }
 
 // Lanza la sincronizacion del proyecto actual y actualiza la vista cuando termina.

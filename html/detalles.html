@@ -53,8 +53,29 @@
             color: #fff;
         }
 
+        .btn-analytic-download {
+            background: #0b5ed7;
+            border-color: #0b5ed7;
+            color: #fff;
+        }
+
+        .btn-analytic-download:hover,
+        .btn-analytic-download:focus {
+            background: #0a58ca;
+            border-color: #0a58ca;
+            color: #fff;
+        }
+
         .detalle-header-actions {
             align-items: center;
+        }
+
+        .detalle-header-actions .btn {
+            min-height: 31px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
         }
 
         @media (min-width: 992px) {
@@ -100,7 +121,7 @@
     <main class="container py-5 flex-grow-1">
 
         <div class="bg-white p-4 rounded border shadow-sm mb-5">
-            <div class="row align-items-center">
+            <div class="row align-items-start">
                 <div class="col-lg-5">
                     <h2 class="h4 mb-1 fw-bold" id="proyecto-nombre-display">Cargando proyecto...</h2>
                     <p class="text-muted mb-0" style="font-size:0.78rem;">
@@ -139,9 +160,21 @@
                             </svg>
                             Descargar Excel
                         </button>
+                        <button class="btn btn-sm btn-analytic-download" id="btn-descargar-reporte-analitico" type="button">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
+                                <path d="M3 3v18h18"/>
+                                <path d="M7 15l3-3 3 2 4-5"/>
+                                <circle cx="7" cy="15" r="1"/>
+                                <circle cx="10" cy="12" r="1"/>
+                                <circle cx="13" cy="14" r="1"/>
+                                <circle cx="17" cy="9" r="1"/>
+                            </svg>
+                            Reporte Analitico
+                        </button>
                     </div>
                 </div>
-                <div class="col-lg-7 d-flex gap-2 justify-content-lg-end mt-3 mt-lg-0">
+                <div class="col-lg-7 d-flex gap-2 justify-content-lg-end mt-3 mt-lg-0 pt-lg-2">
                     <div class="input-group" style="max-width: 450px;">
                         <span class="input-group-text bg-white border-end-0 text-muted">
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
