@@ -216,11 +216,12 @@
                         <th>Titulo</th>
                         <th style="width:150px;">Estado GitLab</th>
                         <th style="width:150px;">Vinculacion</th>
+                        <th style="width:130px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-gitlab">
                     <tr>
-                        <td colspan="5" class="empty-state">
+                        <td colspan="6" class="empty-state">
                             <div class="spinner-border spinner-border-sm me-2"></div>Cargando...
                         </td>
                     </tr>
@@ -234,6 +235,28 @@
         </div>
 
     </main>
+
+    <div class="edit-modal-overlay" id="gitlab-edit-modal-overlay" onclick="cerrarModalEdicionIssue(event)">
+        <div class="edit-modal-box" onclick="event.stopPropagation()">
+            <div class="edit-modal-title">Editar issue de GitLab</div>
+            <div class="edit-modal-text mb-3">Actualiza el nombre que se muestra en la vista local.</div>
+
+            <label class="form-label fw-semibold mb-1" for="gitlab-edit-title" style="font-size: 0.9rem;">
+                Nombre de la issue
+            </label>
+            <input type="text" id="gitlab-edit-title" class="edit-modal-input mb-0" maxlength="255">
+
+            <div class="edit-modal-actions">
+                <button type="button" class="edit-modal-btn edit-modal-btn-secondary" onclick="cerrarModalEdicionIssue()">
+                    Cancelar
+                </button>
+                <button type="button" class="edit-modal-btn edit-modal-btn-primary" id="gitlab-edit-save-btn"
+                    onclick="guardarNombreIssue()">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer class="custom-footer py-3">
         <div class="container text-center">

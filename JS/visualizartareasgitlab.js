@@ -2,6 +2,7 @@ let tareasGitlab = [];
 let filtroGitlabActual = "validas";
 let paginaGitlabActual = 1;
 let gitlabPorPagina = 10;
+let issueEditandoId = null;
 
 // Inicializa la pantalla de control de tareas importadas desde GitLab.
 window.onload = async function () {
@@ -25,6 +26,8 @@ window.onload = async function () {
     cargarBreadcrumbGitlab();
     await cargarTareasGitlab();
     setFiltroGitlab("validas");
+
+    document.addEventListener("keydown", manejarTeclasModalIssue);
 };
 
 // Rellena la ruta superior con el contexto que ya usa la pantalla de tareas.
@@ -213,7 +216,7 @@ function renderTablaGitlab(filas, inicio, total) {
     const tbody = document.getElementById("tabla-gitlab");
 
     if (!filas.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No hay tareas de GitLab que coincidan.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No hay tareas de GitLab que coincidan.</td></tr>`;
         document.getElementById("pag-info").innerText = "Sin resultados";
         return;
     }
@@ -225,6 +228,9 @@ function renderTablaGitlab(filas, inicio, total) {
         const textoEstado = formatearEstadoGitlab(tarea.estado);
         const vinculacion = tarea.valida ? "Valida" : "Pendiente";
         const claseVinculacion = tarea.valida ? "text-success fw-semibold" : "text-danger fw-semibold";
+        const botonEditar = typeof esAdmin === "function" && esAdmin()
+            ? `<button class="btn btn-sm btn-outline-secondary" onclick="editarNombreIssue('${escaparParaJs(tarea.issueId)}')">Editar</button>`
+            : "-";
 
         return `
             <tr>
@@ -233,6 +239,7 @@ function renderTablaGitlab(filas, inicio, total) {
                 <td class="gitlab-issue-title">${escaparHtml(tarea.titulo)}</td>
                 <td><span class="gitlab-state-badge ${claseEstado}">${escaparHtml(textoEstado)}</span></td>
                 <td class="${claseVinculacion}">${vinculacion}</td>
+                <td>${botonEditar}</td>
             </tr>
         `;
     }).join("");
@@ -311,16 +318,128 @@ function crearPagBtnGitlab(label, disabled, onClick) {
 // Muestra un estado de carga temporal en la tabla.
 function setEstadoCargaGitlab(texto) {
     document.getElementById("tabla-gitlab").innerHTML =
-        `<tr><td colspan="5" class="empty-state"><div class="spinner-border spinner-border-sm me-2"></div>${texto}</td></tr>`;
+        `<tr><td colspan="6" class="empty-state"><div class="spinner-border spinner-border-sm me-2"></div>${texto}</td></tr>`;
 }
 
 // Muestra errores de carga en la tabla principal.
 function mostrarErrorGitlab(mensaje) {
     document.getElementById("tabla-gitlab").innerHTML =
-        `<tr><td colspan="5" class="empty-state text-danger">${escaparHtml(mensaje)}</td></tr>`;
+        `<tr><td colspan="6" class="empty-state text-danger">${escaparHtml(mensaje)}</td></tr>`;
     document.getElementById("pag-info").innerText = "Sin resultados";
     document.getElementById("pag-btns").innerHTML = "";
     actualizarEstadoFiltroGitlab(mensaje);
+}
+
+// Abre el modal para editar el titulo local de una issue.
+function editarNombreIssue(issueId) {
+    const tarea = tareasGitlab.find(item => String(item.issueId) === String(issueId));
+    const overlay = document.getElementById("gitlab-edit-modal-overlay");
+    const input = document.getElementById("gitlab-edit-title");
+    const botonGuardar = document.getElementById("gitlab-edit-save-btn");
+
+    if (!tarea || !overlay || !input || !botonGuardar) {
+        alert("No se pudo abrir el editor de la issue.");
+        return;
+    }
+
+    issueEditandoId = tarea.issueId;
+    input.value = tarea.titulo || "";
+    botonGuardar.disabled = false;
+    botonGuardar.textContent = "Guardar";
+    overlay.classList.add("show");
+
+    setTimeout(() => {
+        input.focus();
+        input.select();
+    }, 0);
+}
+
+// Cierra el modal de edicion y limpia el estado temporal.
+function cerrarModalEdicionIssue(event) {
+    if (event && event.target && event.target.id !== "gitlab-edit-modal-overlay") {
+        return;
+    }
+
+    const overlay = document.getElementById("gitlab-edit-modal-overlay");
+    const input = document.getElementById("gitlab-edit-title");
+    const botonGuardar = document.getElementById("gitlab-edit-save-btn");
+
+    if (overlay) {
+        overlay.classList.remove("show");
+    }
+
+    if (input) {
+        input.value = "";
+    }
+
+    if (botonGuardar) {
+        botonGuardar.disabled = false;
+        botonGuardar.textContent = "Guardar";
+    }
+
+    issueEditandoId = null;
+}
+
+// Guarda el nuevo titulo de la issue en backend y actualiza la fila en pantalla.
+async function guardarNombreIssue() {
+    if (!issueEditandoId) {
+        return;
+    }
+
+    const input = document.getElementById("gitlab-edit-title");
+    const botonGuardar = document.getElementById("gitlab-edit-save-btn");
+    const nuevoTitulo = input ? input.value.trim() : "";
+
+    if (!nuevoTitulo) {
+        alert("El nombre de la issue no puede estar vacio.");
+        input?.focus();
+        return;
+    }
+
+    if (botonGuardar) {
+        botonGuardar.disabled = true;
+        botonGuardar.textContent = "Guardando...";
+    }
+
+    const result = await peticionSegura(`/gitlab/issue/${encodeURIComponent(issueEditandoId)}/titulo`, {
+        method: "PUT",
+        body: JSON.stringify({ titulo: nuevoTitulo })
+    });
+
+    if (result && result.success) {
+        const tarea = tareasGitlab.find(item => String(item.issueId) === String(issueEditandoId));
+        if (tarea) {
+            tarea.titulo = nuevoTitulo;
+        }
+
+        renderPaginaGitlab();
+        cerrarModalEdicionIssue();
+        actualizarEstadoFiltroGitlab("Titulo de issue actualizado correctamente.");
+        return;
+    }
+
+    if (botonGuardar) {
+        botonGuardar.disabled = false;
+        botonGuardar.textContent = "Guardar";
+    }
+
+    alert((result && result.mensaje) || "No se pudo actualizar el titulo de la issue.");
+}
+
+// Gestiona Enter y Escape cuando el modal de edicion esta abierto.
+function manejarTeclasModalIssue(event) {
+    const overlay = document.getElementById("gitlab-edit-modal-overlay");
+    if (!overlay || !overlay.classList.contains("show")) {
+        return;
+    }
+
+    if (event.key === "Escape") {
+        cerrarModalEdicionIssue();
+    }
+
+    if (event.key === "Enter") {
+        guardarNombreIssue();
+    }
 }
 
 // Actualiza el texto informativo bajo las acciones de la vista.
@@ -387,6 +506,13 @@ function escaparHtml(valor) {
         .replaceAll(">", "&gt;")
         .replaceAll("\"", "&quot;")
         .replaceAll("'", "&#39;");
+}
+
+// Escapa texto para insertarlo de forma segura en codigo JavaScript inline.
+function escaparParaJs(valor) {
+    return String(valor || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
 }
 
 // Elimina la sesion local y redirige al usuario a la pantalla de login.
