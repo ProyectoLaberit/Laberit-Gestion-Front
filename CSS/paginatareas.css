@@ -298,6 +298,23 @@
             line-height: 1.35;
         }
 
+        .btn-gitlab-view {
+            background: #C01717;
+            border-color: #C01717;
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            white-space: nowrap;
+        }
+
+        .btn-gitlab-view:hover,
+        .btn-gitlab-view:focus {
+            background: #8e1212;
+            border-color: #8e1212;
+            color: #fff;
+        }
+
         .gitlab-state {
             display: inline-flex;
             align-items: center;

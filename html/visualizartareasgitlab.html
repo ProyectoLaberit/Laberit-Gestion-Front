@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LABERIT - Visualizar GitLab</title>
+    <link rel="icon" type="image/png" href="../img/logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/proyectos.css">
+    <link rel="stylesheet" href="../CSS/nav.css">
+    <link rel="stylesheet" href="../CSS/visualizartareas.css">
+    <style>
+        .gitlab-issue-title {
+            max-width: 520px;
+            overflow-wrap: anywhere;
+        }
+
+        .gitlab-state-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 0.2rem 0.65rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .gitlab-state-opened {
+            color: #0f6e56;
+            background: #e5f7f0;
+        }
+
+        .gitlab-state-closed {
+            color: #a32d2d;
+            background: #fdeceb;
+        }
+
+        .gitlab-state-other {
+            color: #8a6d1d;
+            background: #fff4d6;
+        }
+    </style>
+</head>
+
+<body class="bg-light d-flex flex-column min-vh-100">
+
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm laberit-navbar">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center gap-3" href="proyectos.html">
+                <div class="bg-white text-dark rounded d-flex align-items-center justify-content-center fw-bold"
+                    style="width:38px;height:38px;font-size:1.1rem;">L</div>
+                <div class="navbar-brand-custom">
+                    SISTEMA DE SEGUIMIENTO
+                    <span class="navbar-brand-sub">PROYECTOS</span>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3"></ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-4 flex-grow-1">
+
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="proyectos.html">Proyectos</a></li>
+                <li class="breadcrumb-item"><a href="detalles.html" id="bc-proyecto"></a></li>
+                <li class="breadcrumb-item"><a href="subfase.html" id="bc-fase"></a></li>
+                <li class="breadcrumb-item"><a href="subfase.html" id="bc-subfase"></a></li>
+                <li class="breadcrumb-item"><a href="paginatareas.html" id="bc-tarea"></a></li>
+                <li class="breadcrumb-item active">GitLab</li>
+            </ol>
+        </nav>
+
+        <div class="header-card">
+            <div class="row align-items-center g-3">
+                <div class="col-auto d-flex align-items-center gap-3">
+                    <div class="progress-ring">
+                        <svg width="72" height="72" viewBox="0 0 72 72">
+                            <circle class="ring-bg" cx="36" cy="36" r="30" />
+                            <circle class="ring-fill" cx="36" cy="36" r="30" id="ring-fill" stroke-dasharray="188.5"
+                                stroke-dashoffset="188.5" />
+                        </svg>
+                        <div class="ring-text">
+                            <span id="pct-text">0%</span>
+                            <span class="ring-sub">validas</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="dept-title">GitLab: <span id="gitlab-proyecto">Proyecto</span></div>
+                        <div class="dept-sub" id="resumen-gitlab">0 / 0 tareas validas</div>
+                        <div class="dept-sub" id="resumen-estado-gitlab">Preparado para cargar tareas.</div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:#dcfce7;">
+                                    <svg width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2.5"
+                                        viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="9 12 11 14 15 10" />
+                                    </svg>
+                                </div>
+                                <div class="stat-body">
+                                    <div class="stat-val text-success" id="stat-validas">0</div>
+                                    <div class="stat-lbl">Validas</div>
+                                    <div class="stat-pct text-success" id="stat-pct-validas">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:#fee2e2;">
+                                    <svg width="18" height="18" fill="none" stroke="#dc2626" stroke-width="2.5"
+                                        viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="15" y1="9" x2="9" y2="15" />
+                                        <line x1="9" y1="9" x2="15" y2="15" />
+                                    </svg>
+                                </div>
+                                <div class="stat-body">
+                                    <div class="stat-val text-danger" id="stat-invalidas">0</div>
+                                    <div class="stat-lbl">Invalidas</div>
+                                    <div class="stat-pct text-danger" id="stat-pct-invalidas">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:#e0f2fe;">
+                                    <svg width="18" height="18" fill="none" stroke="#0369a1" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M8 12h8" />
+                                    </svg>
+                                </div>
+                                <div class="stat-body">
+                                    <div class="stat-val" id="stat-abiertas">0</div>
+                                    <div class="stat-lbl">Abiertas</div>
+                                    <div class="stat-pct stat-pct-placeholder">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:#fef9c3;">
+                                    <svg width="18" height="18" fill="none" stroke="#ca8a04" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="9 12 11 14 15 10" />
+                                    </svg>
+                                </div>
+                                <div class="stat-body">
+                                    <div class="stat-val" id="stat-cerradas">0</div>
+                                    <div class="stat-lbl">Cerradas</div>
+                                    <div class="stat-pct stat-pct-placeholder">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button class="btn btn-dark btn-sm px-3" id="btn-sincronizar-gitlab" onclick="sincronizarGitLab()">
+                    Sincronizar GitLab
+                </button>
+                <span class="text-muted small" id="estado-filtro">Preparado para cargar tareas de GitLab.</span>
+            </div>
+        </div>
+
+        <div class="filters-toolbar mb-3">
+            <div class="filter-tabs">
+                <button class="filter-tab active active-correctas" id="tab-validas" onclick="setFiltroGitlab('validas')">
+                    Validas (<span id="cnt-validas">0</span>)
+                </button>
+                <button class="filter-tab" id="tab-invalidas" onclick="setFiltroGitlab('invalidas')">
+                    Invalidas (<span id="cnt-invalidas">0</span>)
+                </button>
+                <button class="filter-tab" id="tab-todas" onclick="setFiltroGitlab('todas')">
+                    Todas (<span id="cnt-todas">0</span>)
+                </button>
+            </div>
+            <div class="toolbar-right">
+                <div class="input-group toolbar-search">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="input-busqueda"
+                        placeholder="Buscar issue..." oninput="renderPaginaGitlab()">
+                </div>
+            </div>
+        </div>
+
+        <div class="vis-table shadow-sm mb-3">
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th style="width:44px;">Estado</th>
+                        <th style="width:120px;">Issue</th>
+                        <th>Titulo</th>
+                        <th style="width:150px;">Estado GitLab</th>
+                        <th style="width:150px;">Vinculacion</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-gitlab">
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="spinner-border spinner-border-sm me-2"></div>Cargando...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pag-bar">
+            <span class="pag-info" id="pag-info">-</span>
+            <div class="pag-btns" id="pag-btns"></div>
+        </div>
+
+    </main>
+
+    <footer class="custom-footer py-3">
+        <div class="container text-center">
+            <div class="footer-logo mb-2">L</div>
+            <p class="mb-0 small">&copy; 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
+            <p class="text-muted mb-0" style="font-size:0.7rem;">Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../JS/api.js"></script>
+    <script src="../JS/visualizartareasgitlab.js"></script>
+</body>
+
+</html>

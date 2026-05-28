@@ -493,11 +493,20 @@ function obtenerVinculacionGitlab(idTareaProyecto) {
 }
 
 function renderizarContenidoGitlab(p) {
+    const idTareaProyecto = p && p.idTarea != null ? String(p.idTarea) : "";
+    const numeroGitActual = p && p.numeroGit != null ? String(p.numeroGit) : "";
+    const botonVisualizar = `
+        <button class="btn btn-sm btn-gitlab-view"
+            onclick="irAVisualizarTareasGitlab('${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}')">
+            Ver GitLab
+        </button>
+    `;
     if (!p || !p.numeroGit) {
         return `
             <div class="gitlab-title gitlab-empty"></div>
             <div class="gitlab-meta">
                 <span class="gitlab-empty">No hay una vinculación válida en GitLab</span>
+                ${botonVisualizar}
             </div>
         `;
     }
@@ -508,6 +517,7 @@ function renderizarContenidoGitlab(p) {
     return `
         <div class="gitlab-linked-row">
             <div class="gitlab-title">${escaparHtml(numero)} - ${escaparHtml(titulo)}</div>
+            ${botonVisualizar}
         </div>
     `;
 }
@@ -584,6 +594,18 @@ function irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartament
     localStorage.setItem("idDepartamentoVis", idDepartamento);
     localStorage.setItem("nombreDepartamentoVis", nombreDepartamento);
     window.location.href = "visualizartareas.html";
+}
+
+// Guarda el contexto de GitLab y abre la pantalla de control de issues del proyecto.
+function irAVisualizarTareasGitlab(idTareaProyecto, numeroGit) {
+    if (typeof esEmpleado === "function" && esEmpleado()) {
+        alert("No tienes permisos para acceder a esta seccion.");
+        return;
+    }
+
+    localStorage.setItem("idTareaProyectoGitlabVis", idTareaProyecto || "");
+    localStorage.setItem("numeroGitlabVis", numeroGit || "");
+    window.location.href = "visualizartareasgitlab.html";
 }
 
 // Convierte horas decimales a un formato mas legible para mostrarlo en pantalla.
