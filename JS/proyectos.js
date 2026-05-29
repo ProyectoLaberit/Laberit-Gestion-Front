@@ -84,11 +84,13 @@ async function pintarProyectos() {
             .map((p) => {
                 const tiempos = resumenesProyectos[p.id] || {
                     tiempoRealTotal: 0,
-                    tiempoEstimadoMedia: 0
+                    tiempoEstimadoMin: 0,
+                    tiempoEstimadoMax: 0
                 };
 
                 const displayReal = formatoHoras(parseFloat(tiempos.tiempoRealTotal));
-                const displayMedia = formatoHoras(parseFloat(tiempos.tiempoEstimadoMedia));
+                const displayMin = formatoHoras(parseFloat(tiempos.tiempoEstimadoMin));
+                const displayMax = formatoHoras(parseFloat(tiempos.tiempoEstimadoMax));
                 const accionPrincipal = tieneExcel
                     ? `
                         <button onclick="verDetalles('${p.id}')" class="btn btn-outline-dark btn-sm w-100 fw-medium">
@@ -116,7 +118,7 @@ async function pintarProyectos() {
                                     </div>
 
                                     <div class="project-time-summary">
-                                        ${displayReal} / ${displayMedia}
+                                        ${displayReal} / ${displayMin} - ${displayMax}
                                     </div>
                                 </div>
 

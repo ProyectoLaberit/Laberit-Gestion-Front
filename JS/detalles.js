@@ -420,16 +420,17 @@ function renderizarTodo(filtro = "", estr, ids) {
 
         subfasesFiltradas.forEach((sub) => {
             const idSub = ids[sub];
-            const tiempos = resumenSubfases[idSub] || { tiempoRealTotal: 0, tiempoEstimadoMedia: 0 };
+            const tiempos = resumenSubfases[idSub] || { tiempoRealTotal: 0, tiempoEstimadoMin: 0, tiempoEstimadoMax: 0 };
             const displayReal = formatoHoras(parseFloat(tiempos.tiempoRealTotal));
-            const displayMedia = formatoHoras(parseFloat(tiempos.tiempoEstimadoMedia));
+            const displayMin = formatoHoras(parseFloat(tiempos.tiempoEstimadoMin));
+            const displayMax = formatoHoras(parseFloat(tiempos.tiempoEstimadoMax));
 
             htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-primary mt-2 fw-bold" style="font-size: 0.95rem;">
-                            ${displayReal} / ${displayMedia}
+                            ${displayReal} / ${displayMin} - ${displayMax}
                         </div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
