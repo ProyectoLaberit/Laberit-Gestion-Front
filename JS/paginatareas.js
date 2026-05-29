@@ -1,5 +1,6 @@
 let vinculacionesGitlabActuales = [];
 let detallesTareaActuales = [];
+let issuesGitlabInvalidas = [];
 let detallesSeleccionados = new Set();
 let detallesPendientesEliminacion = [];
 let puedeGestionarEstimacionesActual = false;
@@ -97,14 +98,15 @@ async function cargarDetallesTar() {
     }
 
     try {
-        const [result] = await Promise.all([
+        const [result, gitlabResult] = await Promise.all([
             peticionSegura(`/estimaciones/proyecto/${proyectoId}/especifica`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
                 body: parametros
-            })
+            }),
+            cargarIssuesGitlabInvalidas(proyectoId)
         ]);
 
         if (result && result.success && Array.isArray(result.data)) {
@@ -115,14 +117,49 @@ async function cargarDetallesTar() {
             console.warn("Aviso:", result ? result.message : "Sin respuesta");
         }
 
+        issuesGitlabInvalidas = Array.isArray(gitlabResult) ? gitlabResult : [];
         sincronizarSeleccionConDatos();
         renderizarTablaEspecifica();
         actualizarModoEliminacionUI();
     } catch (error) {
         detallesTareaActuales = [];
+        issuesGitlabInvalidas = [];
         renderizarTablaEspecifica();
         console.error("Error en la llamada:", error);
     }
+}
+
+// Recupera las issues de GitLab pendientes para mostrarlas en el desplegable de vinculacion.
+async function cargarIssuesGitlabInvalidas(proyectoId) {
+    if (!proyectoId) {
+        return [];
+    }
+
+    try {
+        const result = await peticionSegura(`/gitlab/vinculadas/todas/${proyectoId}`);
+
+        if (!result || !result.success || !Array.isArray(result.data)) {
+            return [];
+        }
+
+        return result.data
+            .map(normalizarIssueGitlab)
+            .filter(issue => issue.issueId && !issue.valida);
+    } catch (error) {
+        console.error("No se pudieron cargar las issues invalidas de GitLab:", error);
+        return [];
+    }
+}
+
+// Normaliza los nombres de campos que devuelve el backend para GitLab.
+function normalizarIssueGitlab(issue) {
+    return {
+        issueId: String(issue.issueId || issue.id || "").trim(),
+        numeroGitLab: issue.numeroGitLab ?? issue.numeroGitlab ?? issue.numeroGit ?? "",
+        titulo: String(issue.titulo || issue.title || "Sin titulo").trim(),
+        estado: String(issue.estado || "Sin estado").trim(),
+        valida: issue.valida === true || issue.vinculada === true
+    };
 }
 
 // Pinta la vista detallada de estimaciones agrupadas por departamento.
@@ -178,6 +215,7 @@ function renderizarTablaEspecifica() {
             : "item d-flex align-items-center justify-content-between gap-2";
         const nombreDepartamento = escaparHtml(p.nombreDep || "Departamento");
         const nombreDepartamentoEscapado = escaparParaJs(p.nombreDep || "");
+        const idDepartamento = Number(p.idDepartamento ?? p.idSubFase);
 
         if (modoEliminacion) {
             return `
@@ -196,7 +234,7 @@ function renderizarTablaEspecifica() {
                 <div class="item-name">${nombreDepartamento}</div>
                 ${puedeVisualizarTareas ? `
                 <button class="btn btn-sm btn-outline-secondary" style="font-size:0.72rem;white-space:nowrap;"
-                    onclick="irAVisualizarTareas(${Number(p.idTarea)}, ${Number(p.idTarea)}, ${Number(p.idSubFase)}, '${nombreDepartamentoEscapado}')">  
+                    onclick="irAVisualizarTareas(${Number(p.idTarea)}, ${Number(p.idTarea)}, ${idDepartamento}, '${nombreDepartamentoEscapado}')">  
                     Visualizar tareas
                 </button>
                 ` : ""}
@@ -506,8 +544,8 @@ function renderizarContenidoGitlab(p) {
             <div class="gitlab-title gitlab-empty"></div>
             <div class="gitlab-meta">
                 <span class="gitlab-empty">No hay una vinculación válida en GitLab</span>
-                ${botonVisualizar}
             </div>
+            ${renderizarDesplegableIssuesInvalidas(idTareaProyecto, "Vincular issue pendiente...")}
         `;
     }
 
@@ -519,7 +557,71 @@ function renderizarContenidoGitlab(p) {
             <div class="gitlab-title">${escaparHtml(numero)} - ${escaparHtml(titulo)}</div>
             ${botonVisualizar}
         </div>
+        ${renderizarDesplegableIssuesInvalidas(idTareaProyecto, "Cambiar por issue pendiente...")}
     `;
+}
+
+// Pinta el desplegable con issues pendientes para vincularlas rapidamente a esta tarea.
+function renderizarDesplegableIssuesInvalidas(idTareaProyecto, placeholder = "Vincular issue pendiente...") {
+    if (!idTareaProyecto) {
+        return "";
+    }
+
+    if (!Array.isArray(issuesGitlabInvalidas) || issuesGitlabInvalidas.length === 0) {
+        return `<div class="gitlab-invalid-empty">No hay issues pendientes.</div>`;
+    }
+
+    const opciones = issuesGitlabInvalidas.map(issue => {
+        return `<option value="${escaparHtml(issue.issueId)}">${escaparHtml(formatearIssueGitlab(issue))}</option>`;
+    }).join("");
+
+    return `
+        <select class="form-select form-select-sm gitlab-invalid-select"
+            onchange="vincularIssueGitlabDesdeTabla(this, '${escaparParaJs(idTareaProyecto)}')">
+            <option value="">${escaparHtml(placeholder)}</option>
+            ${opciones}
+        </select>
+    `;
+}
+
+// Construye el texto visible de una issue dentro del desplegable.
+function formatearIssueGitlab(issue) {
+    const numero = issue.numeroGitLab ? `#${issue.numeroGitLab}` : issue.issueId;
+    return `${numero} - ${issue.titulo}`;
+}
+
+// Vincula una issue invalida de GitLab con la tarea seleccionada desde esta tabla.
+async function vincularIssueGitlabDesdeTabla(select, idTareaProyecto) {
+    const issueId = select ? select.value : "";
+
+    if (!issueId || !idTareaProyecto) {
+        return;
+    }
+
+    const textoOriginal = select.options[select.selectedIndex]?.text || "";
+    select.disabled = true;
+    select.options[select.selectedIndex].text = "Vinculando...";
+
+    try {
+        const result = await peticionSegura(
+            `/gitlab/vincular/${encodeURIComponent(issueId)}?nuevoIdTareaProyecto=${encodeURIComponent(idTareaProyecto)}`,
+            { method: "PUT" }
+        );
+
+        if (!result || !result.success) {
+            throw new Error((result && result.mensaje) || "No se pudo vincular la issue.");
+        }
+
+        await cargarDetallesTar();
+    } catch (error) {
+        console.error("Error al vincular issue de GitLab:", error);
+        alert(error.message || "No se pudo vincular la issue de GitLab.");
+        select.disabled = false;
+        if (select.options[select.selectedIndex]) {
+            select.options[select.selectedIndex].text = textoOriginal;
+        }
+        select.value = "";
+    }
 }
 
 // Traduce el estado de GitLab a una clase CSS usada para colorear el badge.

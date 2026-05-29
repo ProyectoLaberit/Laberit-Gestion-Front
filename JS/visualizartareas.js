@@ -38,7 +38,7 @@ window.onload = async function () {
     configurarFiltrosAutomaticos();
     await cargarFasesYSubfasesEdit();
     await cargarImputaciones();
-    setFiltro('correctas');
+    setFiltro('todas');
 
     document.addEventListener("keydown", manejarTeclasModalEdicion);
 };

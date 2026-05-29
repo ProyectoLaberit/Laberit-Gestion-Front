@@ -250,6 +250,8 @@
             flex-direction: column;
             justify-content: center;
             gap: 6px;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .gitlab-item.gitlab-item-selected,
@@ -271,6 +273,7 @@
             justify-content: space-between;
             gap: 12px;
             width: 100%;
+            min-width: 0;
         }
 
         .gitlab-linked-row .gitlab-title {
@@ -286,6 +289,7 @@
             flex-wrap: wrap;
             font-size: .74rem;
             color: #6c757d;
+            min-width: 0;
         }
 
         .gitlab-empty {
@@ -296,6 +300,46 @@
         .gitlab-meta .gitlab-empty {
             font-size: .88rem;
             line-height: 1.35;
+        }
+
+        .gitlab-invalid-select {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            display: block;
+            margin-top: 4px;
+            border-color: #f0d0d0;
+            color: #4b5563;
+            font-size: .76rem;
+            background-color: #fffafa;
+            text-overflow: ellipsis;
+        }
+
+        .gitlab-invalid-select option {
+            max-width: 100%;
+        }
+
+        @media (max-width: 1200px) {
+            .gitlab-linked-row {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .gitlab-linked-row .btn-gitlab-view {
+                align-self: flex-start;
+            }
+        }
+
+        .gitlab-invalid-select:focus {
+            border-color: #C01717;
+            box-shadow: 0 0 0 .15rem rgba(192, 23, 23, .12);
+        }
+
+        .gitlab-invalid-empty {
+            margin-top: 2px;
+            color: #9ca3af;
+            font-size: .74rem;
         }
 
         .btn-gitlab-view {
