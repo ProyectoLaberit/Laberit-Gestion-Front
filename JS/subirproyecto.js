@@ -152,6 +152,10 @@ async function cargarClockify() {
                 select.appendChild(option);
             });
 
+            if (typeof refrescarSelect2 === "function") {
+                refrescarSelect2(select);
+            }
+
         }
     } catch (error) {
         feedback.innerText = "Error de conexión con el servidor.";
@@ -184,6 +188,10 @@ async function cargarGitlab() {
                 option.textContent = item.nombre;
                 select.appendChild(option);
             });
+
+            if (typeof refrescarSelect2 === "function") {
+                refrescarSelect2(select);
+            }
 
         }
     } catch (error) {

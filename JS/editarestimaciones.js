@@ -208,6 +208,10 @@ function pintarFormulario(estimaciones) {
             </div>
         `;
     }).join("");
+
+    if (typeof inicializarSelect2 === "function") {
+        inicializarSelect2(contenedor);
+    }
 }
 
 // Busca la vinculacion de GitLab que corresponde a la estimacion actual.

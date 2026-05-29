@@ -57,6 +57,10 @@ async function cargarFasesYSubfases() {
         selectSub.innerHTML = '<option value="" selected>Primero selecciona un proyecto</option>';
         selectFase.disabled = true;
         selectSub.disabled = true;
+        if (typeof refrescarSelect2 === "function") {
+            refrescarSelect2(selectFase);
+            refrescarSelect2(selectSub);
+        }
         return;
     }
 
@@ -68,6 +72,10 @@ async function cargarFasesYSubfases() {
             selectSub.innerHTML = '<option value="" selected>No hay subfases disponibles</option>';
             selectFase.disabled = true;
             selectSub.disabled = true;
+            if (typeof refrescarSelect2 === "function") {
+                refrescarSelect2(selectFase);
+                refrescarSelect2(selectSub);
+            }
             return;
         }
 
@@ -89,12 +97,19 @@ async function cargarFasesYSubfases() {
         });
 
         resetearSubfases();
+        if (typeof refrescarSelect2 === "function") {
+            refrescarSelect2(selectFase);
+        }
     } catch (error) {
         console.error("Error al cargar fases y subfases:", error);
         selectFase.innerHTML = '<option value="" selected>Error al cargar fases</option>';
         selectSub.innerHTML = '<option value="" selected>Error al cargar subfases</option>';
         selectFase.disabled = true;
         selectSub.disabled = true;
+        if (typeof refrescarSelect2 === "function") {
+            refrescarSelect2(selectFase);
+            refrescarSelect2(selectSub);
+        }
         mostrarError("No se pudieron cargar las fases del proyecto.");
     }
 }
@@ -106,6 +121,9 @@ async function cargarDepartamentos() {
 
     if (!result || !result.success || !result.data || result.data.length === 0) {
         select.innerHTML = '<option value="">Sin departamentos</option>';
+        if (typeof refrescarSelect2 === "function") {
+            refrescarSelect2(select);
+        }
         return;
     }
 
@@ -116,6 +134,10 @@ async function cargarDepartamentos() {
         opt.textContent = d.nombre;
         select.appendChild(opt);
     });
+
+    if (typeof refrescarSelect2 === "function") {
+        refrescarSelect2(select);
+    }
 }
 
 // Recarga las subfases disponibles cuando cambia la fase seleccionada.
@@ -135,6 +157,9 @@ function onCambioFase() {
     if (subfases.length === 0) {
         selectSub.innerHTML = '<option value="" selected>No hay subfases para esta fase</option>';
         selectSub.disabled = true;
+        if (typeof refrescarSelect2 === "function") {
+            refrescarSelect2(selectSub);
+        }
         return;
     }
 
@@ -147,6 +172,10 @@ function onCambioFase() {
         opt.textContent = subfase.nombre;
         selectSub.appendChild(opt);
     });
+
+    if (typeof refrescarSelect2 === "function") {
+        refrescarSelect2(selectSub);
+    }
 }
 
 // Guarda la subfase elegida y actualiza el resumen visible del paso actual.
@@ -179,6 +208,10 @@ function resetearSubfases() {
     selectSub.innerHTML = '<option value="" disabled selected>Primero selecciona una fase...</option>';
     selectSub.disabled = true;
     limpiarSubfaseSeleccionada();
+
+    if (typeof refrescarSelect2 === "function") {
+        refrescarSelect2(selectSub);
+    }
 }
 
 // Limpia la subfase seleccionada y devuelve el resumen visual a su estado base.

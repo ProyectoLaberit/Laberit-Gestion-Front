@@ -275,6 +275,9 @@ async function cargarHistorialExcels(proyectoId) {
     if (!result || !result.success || !result.data || result.data.length === 0) {
         select.innerHTML = '<option value="">Sin historial</option>';
         idExcelSeleccionadoActual = null;
+        if (typeof refrescarSelect2 === "function") {
+            refrescarSelect2(select);
+        }
         return;
     }
 
@@ -310,6 +313,9 @@ async function cargarHistorialExcels(proyectoId) {
 
     idExcelSeleccionadoActual = idInicial;
     localStorage.setItem(claveSeleccion, idExcelSeleccionadoActual);
+    if (typeof refrescarSelect2 === "function") {
+        refrescarSelect2(select);
+    }
     await cargarSubfases(proyectoId, idExcelSeleccionadoActual);
 }
 

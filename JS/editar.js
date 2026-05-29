@@ -121,6 +121,10 @@ function seleccionarValorEnSelect(idSelect, valor) {
 
     if (existeOpcion) {
         select.value = valorTexto;
+
+        if (typeof inicializarSelect2 === "function") {
+            inicializarSelect2(select);
+        }
     }
 }
 
@@ -228,6 +232,10 @@ async function cargarClockify() {
                 option.textContent = item.nombre;
                 select.appendChild(option);
             });
+
+            if (typeof refrescarSelect2 === "function") {
+                refrescarSelect2(select);
+            }
         }
     } catch (error) {
         feedback.className = "mt-3 text-center text-danger";
@@ -253,6 +261,10 @@ async function cargarGitlab() {
                 option.textContent = item.nombre;
                 select.appendChild(option);
             });
+
+            if (typeof refrescarSelect2 === "function") {
+                refrescarSelect2(select);
+            }
         }
     } catch (error) {
         feedback.className = "mt-3 text-center text-danger";

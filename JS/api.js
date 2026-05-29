@@ -215,5 +215,86 @@ function aplicarPermisosDom() {
     aplicarRestriccionesPorRol();
 }
 
-// Inicializa la navegacion y aplica las restricciones visibles al cargar la pagina.
-document.addEventListener("DOMContentLoaded", aplicarPermisosDom);
+// Obtiene todos los selects compatibles dentro del ambito recibido.
+function obtenerSelectsSelect2(scope = document) {
+    if (!scope) {
+        return [];
+    }
+
+    if (scope.matches && scope.matches("select.form-select:not([data-no-select2])")) {
+        return [scope];
+    }
+
+    if (scope.querySelectorAll) {
+        return Array.from(scope.querySelectorAll("select.form-select:not([data-no-select2])"));
+    }
+
+    return [];
+}
+
+// Define un placeholder coherente tomando primero el atributo data-placeholder.
+function obtenerPlaceholderSelect2(select) {
+    const placeholder = select.getAttribute("data-placeholder");
+    if (placeholder) {
+        return placeholder;
+    }
+
+    const primeraOpcion = select.querySelector("option[value=''], option:not([value])");
+    if (primeraOpcion && primeraOpcion.textContent.trim()) {
+        return primeraOpcion.textContent.trim();
+    }
+
+    return "Selecciona una opcion";
+}
+
+// Aplica Select2 a los desplegables Bootstrap para permitir busqueda dentro de las opciones.
+function inicializarSelect2(scope = document, reinicializar = false) {
+    if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.select2) {
+        return;
+    }
+
+    obtenerSelectsSelect2(scope).forEach((select) => {
+        const $select = window.jQuery(select);
+
+        if ($select.hasClass("select2-hidden-accessible")) {
+            if (!reinicializar) {
+                $select.trigger("change.select2");
+                return;
+            }
+
+            $select.select2("destroy");
+        }
+
+        const opciones = {
+            theme: "bootstrap-5",
+            width: select.classList.contains("w-auto") ? "resolve" : "100%",
+            placeholder: obtenerPlaceholderSelect2(select),
+            allowClear: !select.required && !select.multiple,
+            language: {
+                noResults: () => "No se encontraron resultados",
+                searching: () => "Buscando..."
+            }
+        };
+
+        const contenedorModal = select.closest(".modal, .edit-modal-box");
+        if (contenedorModal) {
+            opciones.dropdownParent = window.jQuery(contenedorModal);
+        }
+
+        $select.select2(opciones);
+    });
+}
+
+// Fuerza la reconstruccion de Select2 cuando las opciones del select se cargan dinamicamente.
+function refrescarSelect2(scope = document) {
+    inicializarSelect2(scope, true);
+}
+
+window.inicializarSelect2 = inicializarSelect2;
+window.refrescarSelect2 = refrescarSelect2;
+
+// Inicializa la navegacion, permisos visibles y desplegables con busqueda al cargar la pagina.
+document.addEventListener("DOMContentLoaded", () => {
+    aplicarPermisosDom();
+    inicializarSelect2();
+});

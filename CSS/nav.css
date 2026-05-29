@@ -69,3 +69,113 @@
     font-weight: bold;
     font-size: 0.9rem;
 }
+
+/* Ajuste visual global para Select2 */
+.select2-container--bootstrap-5 .select2-selection {
+    min-height: 42px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: none;
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    color: #212529;
+    line-height: 40px;
+    padding-left: 0;
+    padding-right: 28px;
+    font-size: .95rem;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__placeholder {
+    color: #6c757d;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+    width: 34px;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.select2-container--bootstrap-5.select2-container--open .select2-selection {
+    border-color: rgba(192, 23, 23, .55);
+    box-shadow: 0 0 0 .2rem rgba(192, 23, 23, .12);
+}
+
+.select2-container--bootstrap-5 .select2-dropdown {
+    overflow: hidden;
+    border: 1px solid rgba(192, 23, 23, .25);
+    border-radius: 10px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, .14);
+}
+
+.select2-container--bootstrap-5.select2-container--open {
+    z-index: 9999;
+}
+
+.select2-container--bootstrap-5 .select2-search {
+    padding: 10px 10px 6px;
+}
+
+.select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
+    height: 36px;
+    border: 1px solid #dee2e6;
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: .9rem;
+    outline: none;
+}
+
+.select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field:focus {
+    border-color: rgba(192, 23, 23, .55);
+    box-shadow: 0 0 0 .18rem rgba(192, 23, 23, .10);
+}
+
+.select2-container--bootstrap-5 .select2-results__options {
+    max-height: 220px;
+    padding: 4px;
+}
+
+.select2-container--bootstrap-5 .select2-results__option {
+    border-radius: 7px;
+    margin: 2px 0;
+    padding: 8px 10px;
+    color: #212529;
+    font-size: .92rem;
+}
+
+.select2-container--bootstrap-5 .select2-results__option--selected {
+    background-color: #f1f3f5;
+    color: #212529;
+    font-weight: 600;
+}
+
+.select2-container--bootstrap-5 .select2-results__option--highlighted {
+    background-color: var(--principal);
+    color: #fff;
+}
+
+.select2-container--bootstrap-5 .select2-results__message {
+    color: #6c757d;
+    font-size: .88rem;
+}
+
+.select2-container--bootstrap-5.select2-container--disabled .select2-selection {
+    background-color: #e9ecef;
+    opacity: .75;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__clear {
+    margin-right: 10px;
+    color: #6c757d;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__clear:hover {
+    color: var(--principal);
+}

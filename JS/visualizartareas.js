@@ -847,6 +847,11 @@ async function cargarFasesYSubfasesEdit() {
             opt.textContent = fase.nombre;
             selectFase.appendChild(opt);
         });
+
+        if (typeof refrescarSelect2 === "function") {
+            refrescarSelect2(selectFase);
+            refrescarSelect2(selectSub);
+        }
     } catch (error) {
         console.error("Error al cargar fases para edición:", error);
     }
@@ -860,6 +865,9 @@ function onCambioFaseEdit() {
     if (!idFase) {
         selectSub.innerHTML = '<option value="" disabled selected>Primero selecciona una fase...</option>';
         selectSub.disabled = true;
+        if (typeof refrescarSelect2 === "function") {
+            refrescarSelect2(selectSub);
+        }
         return;
     }
 
@@ -873,6 +881,10 @@ function onCambioFaseEdit() {
         opt.textContent = subfase.nombre;
         selectSub.appendChild(opt);
     });
+
+    if (typeof refrescarSelect2 === "function") {
+        refrescarSelect2(selectSub);
+    }
 }
 
 // Elimina la sesion local y redirige al usuario a la pantalla de login.
