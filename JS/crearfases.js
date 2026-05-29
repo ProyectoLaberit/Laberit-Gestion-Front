@@ -178,7 +178,7 @@ function onCambioFase() {
     }
 }
 
-// Guarda la subfase elegida y actualiza el resumen visible del paso actual.
+// Guarda la subfase elegida para usarla al crear la estimacion.
 function onCambioSubfase() {
     const idFase = document.getElementById("select-fase").value;
     const select = document.getElementById("select-subfase");
@@ -196,10 +196,6 @@ function onCambioSubfase() {
         idFase: parseInt(idFase, 10)
     };
 
-    const display = document.getElementById("display-subfase-est");
-    display.textContent = `${nombresFase[idFase] || "Fase"} > ${nombreSub}`;
-    display.classList.remove("text-muted");
-    display.classList.add("text-dark", "fw-semibold");
 }
 
 // Restablece el selector de subfases a su estado inicial deshabilitado.
@@ -214,14 +210,9 @@ function resetearSubfases() {
     }
 }
 
-// Limpia la subfase seleccionada y devuelve el resumen visual a su estado base.
+// Limpia la subfase seleccionada cuando cambia el contexto del selector.
 function limpiarSubfaseSeleccionada() {
     subfaseSeleccionadaEst = null;
-
-    const display = document.getElementById("display-subfase-est");
-    display.textContent = "- Selecciona una subfase en el paso 2 -";
-    display.classList.add("text-muted");
-    display.classList.remove("text-dark", "fw-semibold");
 }
 
 // Valida los datos del formulario y crea una estimacion manual en el proyecto actual.
