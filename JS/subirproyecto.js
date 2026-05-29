@@ -7,6 +7,7 @@ window.onload = function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
     } else {
+        configurarValidacionSelectsObligatorios();
         cargarClockify();
         cargarGitlab();
     }
@@ -25,6 +26,14 @@ function mostrarNombre(input) {
 async function guardarProyecto() {
     const formulario = document.getElementById('form-subir-proyecto');
     const feedback = document.getElementById('msg-feedback');
+    const selectsValidos = validarSelectsObligatorios();
+
+    if (!selectsValidos) {
+        feedback.className = "mt-3 text-center text-danger";
+        feedback.innerText = "Selecciona un proyecto de Clockify y otro de GitLab antes de guardar.";
+        enfocarPrimerSelectInvalido();
+        return;
+    }
 
     if (!formulario.checkValidity()) {
         formulario.reportValidity();
@@ -120,6 +129,74 @@ async function guardarProyecto() {
         feedback.className = "mt-3 text-center text-danger";
         feedback.innerText = "Error de conexión con el servidor.";
     }
+}
+
+// Conecta la validacion visible de los selects obligatorios usados con Select2.
+function configurarValidacionSelectsObligatorios() {
+    ["clockifyId", "gitlabId"].forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) {
+            return;
+        }
+
+        select.addEventListener("change", () => validarSelectObligatorio(select));
+
+        if (window.jQuery) {
+            window.jQuery(select).on("select2:select select2:clear", () => validarSelectObligatorio(select));
+        }
+    });
+}
+
+// Valida todos los selects obligatorios de integraciones antes de enviar el proyecto.
+function validarSelectsObligatorios() {
+    return ["clockifyId", "gitlabId"]
+        .map(id => document.getElementById(id))
+        .filter(Boolean)
+        .every(select => validarSelectObligatorio(select));
+}
+
+// Marca como invalido el select y su contenedor Select2 cuando no tiene valor.
+function validarSelectObligatorio(select) {
+    const esValido = Boolean(select.value);
+    const select2Container = obtenerContenedorSelect2(select);
+    const error = document.getElementById(`${select.id}-error`);
+
+    select.classList.toggle("is-invalid", !esValido);
+    select.setCustomValidity(esValido ? "" : "Selecciona una opcion.");
+
+    if (select2Container) {
+        select2Container.classList.toggle("is-invalid", !esValido);
+    }
+
+    if (error) {
+        error.style.display = esValido ? "" : "block";
+    }
+
+    return esValido;
+}
+
+// Localiza el contenedor visual que Select2 anade justo despues del select original.
+function obtenerContenedorSelect2(select) {
+    const siguiente = select.nextElementSibling;
+    return siguiente && siguiente.classList.contains("select2-container") ? siguiente : null;
+}
+
+// Lleva el foco al primer desplegable obligatorio pendiente.
+function enfocarPrimerSelectInvalido() {
+    const select = ["clockifyId", "gitlabId"]
+        .map(id => document.getElementById(id))
+        .find(campo => campo && !campo.value);
+
+    if (!select) {
+        return;
+    }
+
+    if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+        window.jQuery(select).select2("open");
+        return;
+    }
+
+    select.focus();
 }
 
 // Elimina la sesion local y redirige al usuario a la pantalla de login.

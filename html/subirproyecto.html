@@ -50,12 +50,20 @@
 
 
                     <div class="col-md-6">
-                        <label for="clockifyId" class="form-label">Clockify ID</label>
-                        <select class="form-select" id="clockifyId" required></select>
+                        <label for="clockifyId" class="form-label">Clockify ID <span class="text-danger">*</span></label>
+                        <select class="form-select" id="clockifyId" required
+                            data-placeholder="Selecciona un proyecto de Clockify"></select>
+                        <div class="invalid-feedback" id="clockifyId-error">
+                            Selecciona un proyecto de Clockify.
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label for="gitlabId" class="form-label">Gitlab ID</label>
-                        <select class="form-select" id="gitlabId" required></select>
+                        <label for="gitlabId" class="form-label">Gitlab ID <span class="text-danger">*</span></label>
+                        <select class="form-select" id="gitlabId" required
+                            data-placeholder="Selecciona un proyecto de GitLab"></select>
+                        <div class="invalid-feedback" id="gitlabId-error">
+                            Selecciona un proyecto de GitLab.
+                        </div>
                     </div>
 
                     <div class="col-md-6">
