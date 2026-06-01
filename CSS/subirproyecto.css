@@ -97,6 +97,15 @@
             color: white;
         }
 
+        .btn-guardar:disabled,
+        .btn-guardar.disabled {
+            background-color: var(--brand-primary) !important;
+            color: #fff !important;
+            border: none;
+            opacity: 1;
+            cursor: not-allowed;
+        }
+
         .btn-cancelar {
             background-color: var(--brand-dark);
             color: white;
@@ -109,4 +118,11 @@
         .btn-cancelar:hover {
             background-color: var(--brand-dark);
             color: white;
+        }
+
+        .btn-cancelar:disabled {
+            background-color: var(--brand-dark);
+            color: white;
+            opacity: 0.85;
+            cursor: wait;
         }
