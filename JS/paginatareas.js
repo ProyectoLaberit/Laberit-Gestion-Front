@@ -699,11 +699,6 @@ function irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartament
 
 // Guarda el contexto de GitLab y abre la pantalla de control de issues del proyecto.
 function irAVisualizarTareasGitlab(idTareaProyecto, numeroGit) {
-    if (typeof esEmpleado === "function" && esEmpleado()) {
-        alert("No tienes permisos para acceder a esta seccion.");
-        return;
-    }
-
     localStorage.setItem("idTareaProyectoGitlabVis", idTareaProyecto || "");
     localStorage.setItem("numeroGitlabVis", numeroGit || "");
     window.location.href = "visualizartareasgitlab.html";

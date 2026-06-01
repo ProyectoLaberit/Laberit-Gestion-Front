@@ -11,18 +11,6 @@ window.onload = async function () {
         return;
     }
 
-    if (typeof esEmpleado === "function" && esEmpleado()) {
-        document.body.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                        height:100vh;background:#f8f9fa;font-family:sans-serif;">
-                <h2 style="color:#1f2937;font-weight:800;margin:0 0 0.5rem;">Acceso no permitido</h2>
-                <p style="color:#6c757d;margin:0 0 1.5rem;">Los usuarios con rol Empleado no pueden visualizar tareas de GitLab.</p>
-                <a href="proyectos.html" style="background:#C01717;color:white;padding:10px 24px;
-                    border-radius:6px;text-decoration:none;font-weight:600;">Volver a Proyectos</a>
-            </div>`;
-        return;
-    }
-
     cargarBreadcrumbGitlab();
     await cargarTareasGitlab();
     setFiltroGitlab("validas");

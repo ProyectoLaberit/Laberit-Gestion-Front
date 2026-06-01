@@ -9,7 +9,7 @@ const NAV_ITEMS = [
     {
         href: "subirproyecto.html",
         label: "Subir Proyecto",
-        roles: ["SuperAdministrador", "Administrador", "Empleado"]
+        roles: ["SuperAdministrador", "Administrador"]
     },
     {
         href: "gestionusuarios.html",
@@ -37,6 +37,16 @@ const NAV_ITEMS = [
         roles: ["SuperAdministrador", "Administrador", "Empleado"]
     }
 ];
+
+const PAGINAS_PERMITIDAS_EMPLEADO = new Set([
+    "proyectos.html",
+    "detalles.html",
+    "subfase.html",
+    "paginatareas.html",
+    "perfil.html",
+    "visualizartareas.html",
+    "visualizartareasgitlab.html"
+]);
 
 // Realiza peticiones al backend anadiendo el token de sesion,
 // controlando errores comunes y redirigiendo si la sesion expira.
@@ -147,6 +157,21 @@ function obtenerNombrePaginaActual() {
     const ruta = window.location.pathname || "";
     const partes = ruta.split(/[\\/]/);
     return (partes[partes.length - 1] || "").toLowerCase();
+}
+
+// Bloquea el acceso directo de empleados a pantallas fuera de su flujo permitido.
+function redirigirEmpleadoSiPaginaNoPermitida() {
+    if (!localStorage.getItem("token") || !esEmpleado()) {
+        return false;
+    }
+
+    const paginaActual = obtenerNombrePaginaActual();
+    if (PAGINAS_PERMITIDAS_EMPLEADO.has(paginaActual)) {
+        return false;
+    }
+
+    window.location.replace("proyectos.html");
+    return true;
 }
 
 // Comprueba si un elemento del menu debe mostrarse para el rol indicado.
@@ -295,6 +320,10 @@ window.refrescarSelect2 = refrescarSelect2;
 
 // Inicializa la navegacion, permisos visibles y desplegables con busqueda al cargar la pagina.
 document.addEventListener("DOMContentLoaded", () => {
+    if (redirigirEmpleadoSiPaginaNoPermitida()) {
+        return;
+    }
+
     aplicarPermisosDom();
     inicializarSelect2();
 });
