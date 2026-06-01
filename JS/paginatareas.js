@@ -205,7 +205,7 @@ function renderizarTablaEspecifica() {
         return;
     }
 
-    const puedeVisualizarTareas = typeof esEmpleado === "function" ? !esEmpleado() : true;
+    const puedeVisualizarTareas = true;
 
     const colDeptos = detallesTareaActuales.map((p, index) => {
         const clave = obtenerClaveDetalle(p, index);
@@ -563,6 +563,10 @@ function renderizarContenidoGitlab(p) {
 
 // Pinta el desplegable con issues pendientes para vincularlas rapidamente a esta tarea.
 function renderizarDesplegableIssuesInvalidas(idTareaProyecto, placeholder = "Vincular issue pendiente...") {
+    if (typeof esEmpleado === "function" && esEmpleado()) {
+        return "";
+    }
+
     if (!idTareaProyecto) {
         return "";
     }
@@ -686,11 +690,6 @@ function obtenerClaveDetalle(detalle, index) {
 
 // Guarda el contexto del departamento actual y abre la pantalla de visualizacion de imputaciones.
 function irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartamento, nombreDepartamento) {
-    if (typeof esEmpleado === "function" && esEmpleado()) {
-        alert("No tienes permisos para acceder a esta seccion.");
-        return;
-    }
-
     localStorage.setItem("idTareaProyectoVis", idTareaProyecto);
     localStorage.setItem("idDetalleEstimacionVis", idDetalleEstimacion);
     localStorage.setItem("idDepartamentoVis", idDepartamento);

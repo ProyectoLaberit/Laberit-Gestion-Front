@@ -6,30 +6,16 @@ let idImputacionEditando = null;
 let subfasesPorFaseEdit = {};
 let nombresFaseEdit = {};
 
+// Centraliza el permiso de escritura sobre imputaciones para mantener empleados en solo lectura.
+function puedeGestionarImputaciones() {
+    return typeof esAdmin === "function" && esAdmin();
+}
+
 // Inicializa la pantalla, valida la sesion activa y carga el contexto
 // principal necesario antes de que el usuario empiece a interactuar.
 window.onload = async function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
-        return;
-    }
-
-    if (typeof esEmpleado === "function" && esEmpleado()) {
-        document.body.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                        height:100vh;background:#f8f9fa;font-family:sans-serif;">
-                <div style="width:80px;height:80px;background:#fee2e2;border-radius:50%;
-                            display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
-                    <svg width="40" height="40" fill="none" stroke="#dc2626" stroke-width="2.5" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
-                    </svg>
-                </div>
-                <h2 style="color:#1f2937;font-weight:800;margin:0 0 0.5rem;">Acceso no permitido</h2>
-                <p style="color:#6c757d;margin:0 0 1.5rem;">Los usuarios con rol Empleado no pueden visualizar tareas.</p>
-                <a href="proyectos.html" style="background:#C01717;color:white;padding:10px 24px;
-                    border-radius:6px;text-decoration:none;font-weight:600;">Volver a Proyectos</a>
-            </div>`;
         return;
     }
 
@@ -138,7 +124,7 @@ async function cargarImputaciones() {
 
     // solo mostramos el botón a los admins
     const btnSincronizar = document.getElementById("btn-sincronizar");
-    if (btnSincronizar && !esAdmin()) {
+    if (btnSincronizar && !puedeGestionarImputaciones()) {
         btnSincronizar.style.display = "none";
     }
 
@@ -452,16 +438,18 @@ function renderTabla(filas, inicio, total) {
                 </div>
             `;
 
-        const botonValidacion = esValida
-            ? `<button class="btn btn-sm btn-outline-warning" onclick="desvincularImputacion(${imputacion.idImputacionClockify}, this)">Desvincular</button>`
-            : `<button class="btn btn-sm btn-outline-success" onclick="marcarValida(${imputacion.idImputacionClockify}, this)">Vincular</button>`;
+        const botonValidacion = puedeGestionarImputaciones()
+            ? (esValida
+                ? `<button class="btn btn-sm btn-outline-warning" onclick="desvincularImputacion(${imputacion.idImputacionClockify}, this)">Desvincular</button>`
+                : `<button class="btn btn-sm btn-outline-success" onclick="marcarValida(${imputacion.idImputacionClockify}, this)">Vincular</button>`)
+            : "";
 
         // Comprobación de seguridad individual para cada botón
-        const botonEditar = esAdmin() 
+        const botonEditar = puedeGestionarImputaciones()
             ? `<button class="btn btn-sm btn-outline-secondary" onclick="editarImputacion(${imputacion.idImputacionClockify})">Editar</button>` 
             : '';
 
-        const botonBorrar = esSuperAdmin() 
+        const botonBorrar = typeof esSuperAdmin === "function" && esSuperAdmin()
             ? `<button class="btn btn-sm btn-outline-danger" onclick="eliminarImputacion(${imputacion.idImputacionClockify}, this)">Borrar</button>` 
             : '';
 
@@ -559,6 +547,11 @@ function perPageChange() {
 
 // Lanza la sincronizacion de imputaciones desde Clockify y recarga la tabla.
 async function sincronizarImputaciones() {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para sincronizar imputaciones.");
+        return;
+    }
+
     const { proyectoId } = obtenerContextoVista();
     const btn = document.getElementById("btn-sincronizar");
     const estado = document.getElementById("estado-filtro");
@@ -593,6 +586,11 @@ async function sincronizarImputaciones() {
 
 // Marca una imputacion como vinculada a la tarea actual y actualiza la tabla.
 async function marcarValida(id, btn) {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para vincular imputaciones.");
+        return;
+    }
+
     btn.disabled = true;
     btn.textContent = "Vinculando...";
 
@@ -621,6 +619,11 @@ async function marcarValida(id, btn) {
 
 // Desvincula una imputacion de la tarea actual tras confirmacion del usuario.
 async function desvincularImputacion(id, btn) {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para desvincular imputaciones.");
+        return;
+    }
+
     if (!confirm("Seguro que quieres desvincular esta imputacion?")) {
         return;
     }
@@ -653,6 +656,11 @@ async function desvincularImputacion(id, btn) {
 
 // Borra una imputacion concreta y actualiza la vista si la operacion termina bien.
 async function eliminarImputacion(id, btn) {
+    if (typeof esSuperAdmin !== "function" || !esSuperAdmin()) {
+        alert("No tienes permisos para borrar imputaciones.");
+        return;
+    }
+
     if (!confirm("Seguro que quieres borrar esta imputacion?")) {
         return;
     }
@@ -678,6 +686,11 @@ async function eliminarImputacion(id, btn) {
 
 // Abre el modal de edicion cargando la tarea actual de la imputacion elegida.
 function editarImputacion(id) {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para editar imputaciones.");
+        return;
+    }
+
     const imputacion = todasLasImputaciones.find(i => i.idImputacionClockify === id);
     if (!imputacion) {
         alert("No se encontro la imputacion.");
@@ -735,6 +748,12 @@ function cerrarModalEdicion(event) {
 
 // Guarda los cambios hechos sobre una imputacion y actualiza la fila en pantalla.
 async function guardarEdicionImputacion() {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para editar imputaciones.");
+        cerrarModalEdicion();
+        return;
+    }
+
     if (!idImputacionEditando) {
         return;
     }
