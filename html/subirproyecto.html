@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SISTEMA DE SEGUIMIENTO - Subir Proyecto</title>
+    <link rel="icon" type="image/png" href="../img/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/subirproyecto.css">
 <<<<<<< HEAD
     <link rel="stylesheet" href="../CSS/nav.css">
@@ -35,6 +38,7 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
+<<<<<<< HEAD
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
                     <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
                     <li class="nav-item"><a class="nav-link" href="altausuarios.html">Alta Usuarios</a></li>
@@ -56,6 +60,9 @@
 >>>>>>> ff9020db0f16e66347e138435b297e4126c88b75
                     </li>
                 </ul>
+=======
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3"></ul>
+>>>>>>> main
             </div>
         </div>
     </nav>
@@ -74,12 +81,20 @@
 
 
                     <div class="col-md-6">
-                        <label for="clockifyId" class="form-label">Clockify ID</label>
-                        <select class="form-select" id="clockifyId"></select>
+                        <label for="clockifyId" class="form-label">Clockify ID <span class="text-danger">*</span></label>
+                        <select class="form-select" id="clockifyId" required
+                            data-placeholder="Selecciona un proyecto de Clockify"></select>
+                        <div class="invalid-feedback" id="clockifyId-error">
+                            Selecciona un proyecto de Clockify.
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label for="gitlabId" class="form-label">Gitlab ID</label>
-                        <select class="form-select" id="gitlabId"></select>
+                        <label for="gitlabId" class="form-label">Gitlab ID <span class="text-danger">*</span></label>
+                        <select class="form-select" id="gitlabId" required
+                            data-placeholder="Selecciona un proyecto de GitLab"></select>
+                        <div class="invalid-feedback" id="gitlabId-error">
+                            Selecciona un proyecto de GitLab.
+                        </div>
                     </div>
 
                     <div class="col-md-6">
@@ -121,6 +136,8 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/subirproyecto.js"></script>
 

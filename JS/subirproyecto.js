@@ -1,15 +1,19 @@
 // const URL_BASE = "http://localhost:8080/api";
 
+// Inicializa la pantalla, valida la sesion activa y carga el contexto
+// principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
     // if (!localStorage.getItem("sesionActiva")) {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
     } else {
+        configurarValidacionSelectsObligatorios();
         cargarClockify();
         cargarGitlab();
     }
 };
 
+// Refleja en la interfaz el nombre del archivo que acaba de seleccionar el usuario.
 function mostrarNombre(input) {
     const label = document.getElementById('labelArchivo');
     if (input.files.length > 0) {
@@ -18,32 +22,38 @@ function mostrarNombre(input) {
     }
 }
 
+// Guarda el proyecto actual en el backend y, si corresponde, sube tambien su Excel.
 async function guardarProyecto() {
+    const formulario = document.getElementById('form-subir-proyecto');
     const feedback = document.getElementById('msg-feedback');
-    // Recopilar archivo
-    /*const fileInput = document.getElementById('archivoInput');
-    if (fileInput.files[0]) {
-        formData.append('archivo', fileInput.files[0]);
-    }*/
+    const selectsValidos = validarSelectsObligatorios();
 
-    console.log(document.getElementById('gitlabId').value);
+    if (!selectsValidos) {
+        feedback.className = "mt-3 text-center text-danger";
+        feedback.innerText = "Selecciona un proyecto de Clockify y otro de GitLab antes de guardar.";
+        enfocarPrimerSelectInvalido();
+        return;
+    }
 
-    // Recopilar campos
+    if (!formulario.checkValidity()) {
+        formulario.reportValidity();
+        return;
+    }
+
+    // Comprobar si hay un archivo seleccionado en el input
+    const fileInput = document.getElementById('archivoInput');
+    const tieneExcel = fileInput.files.length > 0;
+
+    // Recopilar campos incluyendo la bandera 'excels'
     const formData = {
         nombre: document.getElementById('nombre').value,
         descripcion: document.getElementById('descripcion').value,
-        fechaInicio: document.getElementById('fechaInicio').value, // Se envía como string "YYYY-MM-DD"
+        fechaInicio: document.getElementById('fechaInicio').value,
         activo: true,
         gitlabId: document.getElementById('gitlabId').value,
-        clockifyId: document.getElementById('clockifyId').value
+        clockifyId: document.getElementById('clockifyId').value,
+        excels: tieneExcel // Añadimos esta línea
     };
-    /*formData.append('nombre', document.getElementById('nombre').value);
-    formData.append('fechaInicio', document.getElementById('fechaInicio').value);
-    formData.append('clockifyId', document.getElementById('clockifyId').value);
-    formData.append('gitlabId', document.getElementById('gitlabId').value);
-    formData.append('activo', true);
-    formData.append('descripcion', document.getElementById('descripcion').value);
-    formData.append('fechaFin', null);*/
 
     try {
         feedback.innerText = "Subiendo proyecto...";
@@ -83,11 +93,11 @@ async function guardarProyecto() {
                 // 4. CAMBIO CLAVE: Quitamos los headers para que el navegador gestione el Multipart
                 const excelResponse = await fetch(`${URL_BASE}/estimaciones/importar`, {
                     method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${token}` 
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                         // IMPORTANTE: No poner 'Content-Type' aquí, el navegador lo pone solo al ver FormData
                     },
-                    body: excelData 
+                    body: excelData
                 });
 
                 const excelResult = await excelResponse.json();
@@ -121,13 +131,83 @@ async function guardarProyecto() {
     }
 }
 
+// Conecta la validacion visible de los selects obligatorios usados con Select2.
+function configurarValidacionSelectsObligatorios() {
+    ["clockifyId", "gitlabId"].forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) {
+            return;
+        }
+
+        select.addEventListener("change", () => validarSelectObligatorio(select));
+
+        if (window.jQuery) {
+            window.jQuery(select).on("select2:select select2:clear", () => validarSelectObligatorio(select));
+        }
+    });
+}
+
+// Valida todos los selects obligatorios de integraciones antes de enviar el proyecto.
+function validarSelectsObligatorios() {
+    return ["clockifyId", "gitlabId"]
+        .map(id => document.getElementById(id))
+        .filter(Boolean)
+        .every(select => validarSelectObligatorio(select));
+}
+
+// Marca como invalido el select y su contenedor Select2 cuando no tiene valor.
+function validarSelectObligatorio(select) {
+    const esValido = Boolean(select.value);
+    const select2Container = obtenerContenedorSelect2(select);
+    const error = document.getElementById(`${select.id}-error`);
+
+    select.classList.toggle("is-invalid", !esValido);
+    select.setCustomValidity(esValido ? "" : "Selecciona una opcion.");
+
+    if (select2Container) {
+        select2Container.classList.toggle("is-invalid", !esValido);
+    }
+
+    if (error) {
+        error.style.display = esValido ? "" : "block";
+    }
+
+    return esValido;
+}
+
+// Localiza el contenedor visual que Select2 anade justo despues del select original.
+function obtenerContenedorSelect2(select) {
+    const siguiente = select.nextElementSibling;
+    return siguiente && siguiente.classList.contains("select2-container") ? siguiente : null;
+}
+
+// Lleva el foco al primer desplegable obligatorio pendiente.
+function enfocarPrimerSelectInvalido() {
+    const select = ["clockifyId", "gitlabId"]
+        .map(id => document.getElementById(id))
+        .find(campo => campo && !campo.value);
+
+    if (!select) {
+        return;
+    }
+
+    if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+        window.jQuery(select).select2("open");
+        return;
+    }
+
+    select.focus();
+}
+
+// Elimina la sesion local y redirige al usuario a la pantalla de login.
 function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
 }
 
+// Carga las opciones de Clockify disponibles y las inserta en el selector correspondiente.
 async function cargarClockify() {
-        const feedback = document.getElementById('msg-feedback');
+    const feedback = document.getElementById('msg-feedback');
 
 
     try {
@@ -137,10 +217,10 @@ async function cargarClockify() {
 
         const result = await peticionSegura("/clockify/externos");
 
-        if(result && result.success){
+        if (result && result.success) {
             const select = document.getElementById("clockifyId");
 
-            select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+            select.innerHTML = '<option value="" disabled selected>Selecciona un proyecto</option>';
 
             result.data.forEach(item => {
                 const option = document.createElement("option");
@@ -148,6 +228,10 @@ async function cargarClockify() {
                 option.textContent = item.nombre;
                 select.appendChild(option);
             });
+
+            if (typeof refrescarSelect2 === "function") {
+                refrescarSelect2(select);
+            }
 
         }
     } catch (error) {
@@ -157,8 +241,9 @@ async function cargarClockify() {
 
 }
 
+// Carga las opciones de GitLab disponibles y las inserta en el selector correspondiente.
 async function cargarGitlab() {
-        const feedback = document.getElementById('msg-feedback');
+    const feedback = document.getElementById('msg-feedback');
 
 
     try {
@@ -172,7 +257,7 @@ async function cargarGitlab() {
 
             const select = document.getElementById("gitlabId");
 
-            select.innerHTML = '<option disabled selected>Selecciona un proyecto</option>';
+            select.innerHTML = '<option value="" disabled selected>Selecciona un proyecto</option>';
 
             result.data.forEach(item => {
                 const option = document.createElement("option");
@@ -180,6 +265,10 @@ async function cargarGitlab() {
                 option.textContent = item.nombre;
                 select.appendChild(option);
             });
+
+            if (typeof refrescarSelect2 === "function") {
+                refrescarSelect2(select);
+            }
 
         }
     } catch (error) {

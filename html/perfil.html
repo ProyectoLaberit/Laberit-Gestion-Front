@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LABERIT - Mi Perfil</title>
+    <link rel="icon" type="image/png" href="../img/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/proyectos.css">
     <link rel="stylesheet" href="../CSS/nav.css">
@@ -45,6 +46,11 @@
             border: 1px solid #dee2e6;
             margin-bottom: 1rem;
         }
+
+        .selector-avatar.active {
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
+        }
     </style>
 </head>
 
@@ -66,15 +72,7 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
-                    <li class="nav-item"><a class="nav-link" href="subirproyecto.html">Subir Proyecto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="altausuarios.html">Alta Usuarios</a></li>
-                    <li class="nav-item border-start border-secondary ps-3 ms-1 d-none d-lg-block"></li>
-                    <li class="nav-item">
-                        <button onclick="cerrarSesion()" class="btn-outline-nav">Salir</button>
-                    </li>
-                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3"></ul>
             </div>
         </div>
     </nav>
@@ -85,67 +83,127 @@
         <div class="row g-5">
             <div class="col-md-4 text-center">
                 <div class="profile-pic-container">
-                    <img id="profile-img" src="../img/logo.png" alt="Foto de perfil">
+                    <img id="profile-img" src="../img/avatar_masculino.png" alt="Foto de perfil">
                 </div>
-                <button class="btn btn-outline-secondary btn-sm w-100 mb-3">Cambiar Foto</button>
+                <button class="btn btn-outline-secondary btn-sm w-100 mb-3" onclick="abrirModalFoto()">Cambiar
+                    Foto</button>
                 <div class="badge bg-dark p-2 w-100" id="user-role-display">Rol: Usuario</div>
             </div>
-
             <div class="col-md-8">
                 <div class="field-group d-flex justify-content-between align-items-center">
                     <div>
-                        <label class="small text-muted d-block">Nombre Completo</label>
+                        <label class="small text-muted d-block">Nombre de Usuario</label>
                         <span class="fw-bold fs-5" id="user-fullname">Nombre del Usuario</span>
                     </div>
-                    <button class="btn btn-sm btn-link text-brand fw-bold">Modificar</button>
+                    <button class="btn btn-sm btn-link text-brand fw-bold"
+                        onclick="abrirModal('nombre')">Modificar</button>
                 </div>
-
-                <h3 class="section-title h5 mb-4">Seguridad</h3>
 
                 <div class="field-group d-flex justify-content-between align-items-center">
                     <div>
-                        <label class="small text-muted d-block">Correo Electrónico</label>
+                        <label class="small text-muted d-block">Email</label>
                         <span id="user-email">usuario@laberit.com</span>
                     </div>
-                    <button class="btn btn-sm btn-link text-brand fw-bold">Modificar</button>
+                    <button class="btn btn-sm btn-link text-brand fw-bold"
+                        onclick="abrirModal('email')">Modificar</button>
                 </div>
 
                 <div class="field-group d-flex justify-content-between align-items-center">
                     <div>
                         <label class="small text-muted d-block">Contraseña</label>
-                        <span>••••••••••••</span>
+                        <span></span>
                     </div>
-                    <button class="btn btn-sm btn-link text-brand fw-bold">Modificar</button>
-                </div>
-
-                <div class="d-flex gap-3 mt-5">
-                    <button class="btn btn-brand flex-grow-1 py-2 shadow-sm">Guardar Cambios</button>
-                    <button class="btn btn-outline-secondary px-4 py-2">Descartar Cambios</button>
+                    <button class="btn btn-sm btn-link text-brand fw-bold"
+                        onclick="abrirModal('password')">Modificar</button>
                 </div>
             </div>
         </div>
     </main>
 
-<footer class="custom-footer py-3">
-    <div class="container text-center">
-        <div class="footer-logo mb-2">L</div>
-        <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
-        <p class="text-muted mb-0" style="font-size: 0.7rem;">Todos los derechos reservados.</p>
-    </div>
-</footer>
+    <!-- Modal Edición campos -->
+    <div class="modal fade" id="modalEdicionMini" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold" id="tituloModal">Editar</h6>
+                    <button type="button" class="btn-close text-xs" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pb-2">
+                    <input type="hidden" id="campoAEditar">
 
-    <script src="../js/api.js"></script>
-    <script src="../js/perfil.js"></script>
+                    <div class="mb-2" id="divPasswordVieja" style="display: none;">
+                        <input type="password" id="inputPasswordVieja" class="form-control form-control-sm"
+                            placeholder="Contraseña actual...">
+                    </div>
+
+                    <div class="mb-1">
+                        <input type="text" id="inputNuevoValor" class="form-control form-control-sm"
+                            placeholder="Nuevo valor...">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 flex-column align-items-center">
+                    <button type="button" class="btn btn-brand w-100 py-1" onclick="guardarEdicion()">Guardar</button>
+
+                    <div id="mensajeExito" class="text-success small fw-bold text-center mt-2 w-100"
+                        style="display: none;">
+                        Guardado correctamente
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal cambio foto -->
+    <div class="modal fade" id="modalEdicionFoto" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold">Elige tu Avatar</h6>
+                    <button type="button" class="btn-close text-xs" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center pb-2">
+                    <div class="d-flex gap-3 justify-content-center mb-2">
+
+                        <div class="avatar-option text-center"
+                            onclick="seleccionarAvatar('avatar_masculino.png', this)">
+                            <img src="../img/avatar_masculino.png" alt="Masc"
+                                class="rounded-circle img-thumbnail selector-avatar active" id="opt-masc"
+                                style="width: 70px; height: 70px; cursor: pointer; border: 3px solid transparent;">
+                            <div class="small mt-1">El</div>
+                        </div>
+
+                        <div class="avatar-option text-center" onclick="seleccionarAvatar('avatar_femenino.png', this)">
+                            <img src="../img/avatar_femenino.png" alt="Fem"
+                                class="rounded-circle img-thumbnail selector-avatar" id="opt-fem"
+                                style="width: 70px; height: 70px; cursor: pointer; border: 3px solid transparent;">
+                            <div class="small mt-1">Ella</div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 flex-column align-items-center">
+                    <button type="button" class="btn btn-brand w-100 py-1" onclick="guardarFoto()">Guardar Foto</button>
+                    <div id="mensajeExitoFoto" class="text-success small fw-bold text-center mt-2 w-100"
+                        style="display: none;">
+                        Guardado correctamente
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="custom-footer py-3">
+        <div class="container text-center">
+            <div class="footer-logo mb-2">L</div>
+            <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
+            <p class="text-muted mb-0" style="font-size: 0.7rem;">Todos los derechos reservados.</p>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- <script>
-        function cerrarSesion() {
-            sessionStorage.clear();
-            window.location.href = 'login.html';
-        }
-    </script> -->
-
+    <script src="../JS/api.js"></script>
+    <script src="../JS/perfil.js"></script>
 </body>
 
 </html>
+

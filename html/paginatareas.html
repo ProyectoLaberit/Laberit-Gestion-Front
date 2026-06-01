@@ -5,12 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LABERIT - Gestión de Detalles</title>
+    <link rel="icon" type="image/png" href="../img/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/proyectos.css">
     <link rel="stylesheet" href="../CSS/nav.css">
     <link rel="stylesheet" href="../CSS/paginatareas.css">
     <style>
-
+        a {
+            color: #c01717;
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -32,31 +36,53 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
-                    <li class="nav-item"><a class="nav-link" href="subirproyecto.html">Subir Proyecto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="proyectos.html">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="altausuarios.html">Alta Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
-                    <li class="nav-item border-start border-secondary ps-3 ms-1 d-none d-lg-block"></li>
-                    <li class="nav-item">
-                        <button onclick="cerrarSesion()" class="btn-outline-nav">Salir</button>
-                    </li>
-                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3"></ul>
             </div>
         </div>
     </nav>
 
     <!-- Main -->
     <main class="container py-5">
- 
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="proyectos.html">Proyectos</a></li>
+                <li class="breadcrumb-item"><a href="detalles.html" id="bc-proyecto"></a></li>
+                <li class="breadcrumb-item"><a href="subfase.html" id="bc-fase"></a></li>
+                <li class="breadcrumb-item"><a href="subfase.html" id="bc-subfase"></a></li>
+                <li class="breadcrumb-item active" id="bc-tarea"></li>
+            </ol>
+        </nav>
+
         <!-- Task header -->
-<div class="d-flex align-items-center gap-3 mb-4">
-    <div class="task-name mb-0">Nombre de la Tarea</div>
-    <a href="editarestimaciones.html" class="btn btn-sm btn-outline-dark">
-        Editar Tiempos
-    </a>
-</div>
- 
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+            <div class="task-name mb-0" id="tarea-nombre-display">Cargando Tarea...</div>
+            <div class="d-flex flex-wrap align-items-center gap-2 justify-content-lg-end">
+                <a href="editarestimaciones.html" id="btn-editar-estimaciones" class="btn btn-sm btn-outline-dark">
+                    Editar
+                </a>
+                <button id="btn-activar-eliminacion" type="button" onclick="activarModoEliminacion()" class="btn btn-sm btn-danger">
+                    Eliminar
+                </button>
+                <div class="d-flex flex-wrap align-items-center gap-2 d-none" id="acciones-modo-eliminacion">
+                    <button id="btn-cancelar-eliminacion" type="button" onclick="cancelarModoEliminacion()" class="btn btn-sm btn-outline-secondary">
+                        Cancelar
+                    </button>
+                    <button id="btn-confirmar-eliminacion" type="button" onclick="eliminarEstimacionesSeleccionadas()" class="btn btn-sm btn-danger" disabled>
+                        Eliminar seleccionadas
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="selection-toolbar mb-3 d-none" id="selection-toolbar">
+            <div class="selection-toolbar-title">Modo eliminacion</div>
+            <div class="selection-toolbar-text" id="texto-seleccion-estimaciones">
+                Haz clic en los departamentos que quieras borrar y confirma la eliminacion.
+            </div>
+        </div>
+
         <!-- Board -->
         <div class="board">
             <!-- Header -->
@@ -64,6 +90,14 @@
                 <div class="bh-cell">
                     <span class="bh-dot" style="background:#888780;"></span>
                     Departamento
+                </div>
+                <div class="bh-cell">
+                    <span class="bh-dot" style="background:#f39c12;"></span>
+                    GitLab
+                </div>
+                <div class="bh-cell">
+                    <span class="bh-dot" style="background:#3498db;"></span>
+                    Tiempo Real
                 </div>
                 <div class="bh-cell">
                     <span class="bh-dot" style="background:#1D9E75;"></span>
@@ -74,66 +108,78 @@
                     Tiempo Máximo
                 </div>
             </div>
- 
+
             <!-- Body -->
             <div class="board-body" id="tablaEspec">
                 <!-- Col: Departamento -->
                 <div class="b-col">
                     <div class="item">
-                        <div class="item-name">Desarrollo</div>
-                    </div>
-                    <div class="item">
-                        <div class="item-name">Diseño</div>
-                    </div>
-                    <div class="item">
-                        <div class="item-name">QA</div>
+                        <div class="item-name"></div>
                     </div>
                 </div>
- 
+
+                <!-- Col: GitLab -->
+                <div class="b-col">
+                    <div class="gitlab-item">
+                        <div class="gitlab-title"></div>
+                        <div class="gitlab-meta"></div>
+                    </div>
+                </div>
+
+                <!-- Col: Tiempo Real -->
+                <div class="b-col">
+                    <div class="time-item">
+                        <div class="time-val time-min"></div>
+                        <div class="time-lbl"></div>
+                    </div>
+                </div>
+
                 <!-- Col: Tiempo Mínimo -->
                 <div class="b-col">
                     <div class="time-item">
-                        <div class="time-val time-min">2h</div>
-                        <div class="time-lbl">Desarrollo</div>
-                    </div>
-                    <div class="time-item">
-                        <div class="time-val time-min">1h</div>
-                        <div class="time-lbl">Diseño</div>
-                    </div>
-                    <div class="time-item">
-                        <div class="time-val time-min">30m</div>
-                        <div class="time-lbl">QA</div>
+                        <div class="time-val time-min"></div>
+                        <div class="time-lbl"></div>
                     </div>
                 </div>
- 
+
                 <!-- Col: Tiempo Máximo -->
                 <div class="b-col">
                     <div class="time-item">
-                        <div class="time-val time-max">5h</div>
-                        <div class="time-lbl">Desarrollo</div>
-                    </div>
-                    <div class="time-item">
-                        <div class="time-val time-max">3h</div>
-                        <div class="time-lbl">Diseño</div>
-                    </div>
-                    <div class="time-item">
-                        <div class="time-val time-max">2h</div>
-                        <div class="time-lbl">QA</div>
+                        <div class="time-val time-max"></div>
+                        <div class="time-lbl"></div>
                     </div>
                 </div>
             </div>
         </div>
- 
-    </main>
- 
 
-<footer class="custom-footer py-3">
-    <div class="container text-center">
-        <div class="footer-logo mb-2">L</div>
-        <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
-        <p class="text-muted mb-0" style="font-size: 0.7rem;">Todos los derechos reservados.</p>
-    </div>
-</footer>
+        <div class="delete-confirm-overlay d-none" id="delete-confirm-overlay">
+            <div class="delete-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+                <div class="delete-confirm-badge">Confirmacion</div>
+                <h2 class="delete-confirm-title" id="delete-confirm-title">Eliminar estimaciones</h2>
+                <p class="delete-confirm-text" id="delete-confirm-text">
+                    Seguro que quieres eliminar las estimaciones seleccionadas?
+                </p>
+                <div class="delete-confirm-actions">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cerrarConfirmacionEliminacion()">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" id="btn-modal-confirmar-eliminacion" onclick="confirmarEliminacionEstimaciones()">
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+    <footer class="custom-footer py-3">
+        <div class="container text-center">
+            <div class="footer-logo mb-2">L</div>
+            <p class="mb-0 small">© 2026 SISTEMA DE SEGUIMIENTO - LABERIT</p>
+            <p class="text-muted mb-0" style="font-size: 0.7rem;">Todos los derechos reservados.</p>
+        </div>
+    </footer>
     <script src="../js/api.js"></script>
     <script src="../js/paginatareas.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

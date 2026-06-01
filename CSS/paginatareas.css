@@ -13,66 +13,6 @@
             margin: 0;
         }
  
-        /* ── Navbar ── */
-        .navbar {
-            background-color: var(--brand-primary);
-            box-shadow: 0 2px 8px rgba(0,0,0,.15);
-            padding: 14px 24px;
-        }
- 
-        .navbar-brand-custom {
-            font-weight: 700;
-            font-size: 1.05rem;
-            line-height: 1.2;
-            color: #fff !important;
-            letter-spacing: .4px;
-        }
- 
-        .navbar-brand-sub {
-            display: block;
-            font-size: .7rem;
-            font-weight: 400;
-            opacity: .75;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
- 
-        .navbar .nav-link {
-            color: rgba(255,255,255,.85) !important;
-            font-weight: 500;
-            font-size: .9rem;
-        }
-        .navbar .nav-link:hover { color: #fff !important; }
- 
-        .btn-outline-nav {
-            border: 0.5px solid rgba(255,255,255,.5);
-            color: #fff;
-            background: transparent;
-            font-size: .8rem;
-            padding: 5px 16px;
-            border-radius: 6px;
-            transition: background .2s;
-        }
-        .btn-outline-nav:hover {
-            background: rgba(255,255,255,.15);
-            color: #fff;
-        }
- 
-        .logo-box {
-            width: 36px;
-            height: 36px;
-            background: #fff;
-            color: var(--brand-primary);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
- 
         /* ── Main ── */
         main { flex: 1; }
  
@@ -112,6 +52,86 @@
             cursor: pointer;
             margin-left: auto;
         }
+
+        .selection-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #ffffff;
+        }
+
+        .selection-toolbar-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #6b7280;
+        }
+
+        .selection-toolbar-text {
+            flex: 1;
+            font-size: 0.92rem;
+            color: #4b5563;
+        }
+
+        .delete-confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.38);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 1050;
+        }
+
+        .delete-confirm-modal {
+            width: min(100%, 420px);
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+            padding: 24px;
+            border: 1px solid #f0d6d6;
+        }
+
+        .delete-confirm-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: #fff1f1;
+            color: #c01717;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .delete-confirm-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 10px;
+        }
+
+        .delete-confirm-text {
+            font-size: 0.96rem;
+            color: #4b5563;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .delete-confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+        }
  
         /* ── Board ── */
         .board {
@@ -119,13 +139,15 @@
             border-radius: 10px;
             overflow: hidden;
             background: #f1f1f1;
+            overflow-x: auto;
         }
  
         .board-head {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: minmax(210px, 1.15fr) repeat(4, minmax(160px, 1fr));
             background: #fff;
             border-bottom: 1px solid #e0e0e0;
+            min-width: 950px;
         }
  
         .bh-cell {
@@ -152,9 +174,10 @@
  
         .board-body {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: minmax(210px, 1.15fr) repeat(4, minmax(160px, 1fr));
             padding: 16px;
             gap: 12px;
+            min-width: 950px;
         }
  
         .b-col {
@@ -165,7 +188,8 @@
         }
  
         .b-col .item,
-        .b-col .time-item {
+        .b-col .time-item,
+        .b-col .gitlab-item {
             flex: 1;
         }
  
@@ -186,15 +210,180 @@
             border-color: #bbb;
             box-shadow: 0 2px 6px rgba(0,0,0,.06);
         }
+
+        .item.item-selected {
+            border-color: #c01717;
+            background: #fff5f5;
+            box-shadow: 0 0 0 3px rgba(192, 23, 23, 0.12);
+        }
+
         .item-name {
             font-size: .85rem;
             font-weight: 500;
             color: #1a1a1a;
             margin-bottom: 3px;
         }
+
+        .item-solo-texto {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .item-solo-texto .item-name {
+            margin-bottom: 0;
+        }
+
         .item-meta {
             font-size: .75rem;
             color: #6c757d;
+        }
+
+        .gitlab-item {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px 14px;
+            min-height: 72px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .gitlab-item.gitlab-item-selected,
+        .time-item.time-item-selected {
+            border-color: #f0b4b4;
+            background: #fff8f8;
+        }
+
+        .gitlab-title {
+            font-size: .95rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.3;
+        }
+
+        .gitlab-linked-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .gitlab-linked-row .gitlab-title {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .gitlab-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            font-size: .74rem;
+            color: #6c757d;
+            min-width: 0;
+        }
+
+        .gitlab-empty {
+            color: #8b949e;
+            font-style: italic;
+        }
+
+        .gitlab-meta .gitlab-empty {
+            font-size: .88rem;
+            line-height: 1.35;
+        }
+
+        .gitlab-invalid-select {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            display: block;
+            margin-top: 4px;
+            border-color: #f0d0d0;
+            color: #4b5563;
+            font-size: .76rem;
+            background-color: #fffafa;
+            text-overflow: ellipsis;
+        }
+
+        .gitlab-invalid-select option {
+            max-width: 100%;
+        }
+
+        @media (max-width: 1200px) {
+            .gitlab-linked-row {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .gitlab-linked-row .btn-gitlab-view {
+                align-self: flex-start;
+            }
+        }
+
+        .gitlab-invalid-select:focus {
+            border-color: #C01717;
+            box-shadow: 0 0 0 .15rem rgba(192, 23, 23, .12);
+        }
+
+        .gitlab-invalid-empty {
+            margin-top: 2px;
+            color: #9ca3af;
+            font-size: .74rem;
+        }
+
+        .btn-gitlab-view {
+            background: #C01717;
+            border-color: #C01717;
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            white-space: nowrap;
+        }
+
+        .btn-gitlab-view:hover,
+        .btn-gitlab-view:focus {
+            background: #8e1212;
+            border-color: #8e1212;
+            color: #fff;
+        }
+
+        .gitlab-state {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+        }
+
+        .gitlab-state-opened {
+            color: #0f6e56;
+            background: #e5f7f0;
+        }
+
+        .gitlab-state-closed {
+            color: #a32d2d;
+            background: #fdeceb;
+        }
+
+        .gitlab-state-other {
+            color: #8a6d1d;
+            background: #fff4d6;
         }
  
         /* ── Time cards ── */
@@ -255,4 +444,28 @@
         }
         .footer-totals strong {
             color: #1a1a1a;
+        }
+
+        @media (max-width: 768px) {
+            .task-name {
+                font-size: 1.05rem;
+            }
+
+            .board-head,
+            .board-body {
+                min-width: 880px;
+            }
+
+            .selection-toolbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .delete-confirm-actions {
+                flex-direction: column-reverse;
+            }
+
+            .delete-confirm-actions .btn {
+                width: 100%;
+            }
         }
