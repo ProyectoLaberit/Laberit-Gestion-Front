@@ -68,6 +68,12 @@ function cerrarSesion() {
 
 // Carga las estimaciones de la tarea actual y actualiza toda la vista de detalle.
 async function cargarDetallesTar() {
+    const detallesPrevios = Array.isArray(detallesTareaActuales)
+        ? detallesTareaActuales.slice()
+        : [];
+    const issuesPrevias = Array.isArray(issuesGitlabInvalidas)
+        ? issuesGitlabInvalidas.slice()
+        : [];
     const proyectoId = localStorage.getItem("proyectoId");
     const idSub = localStorage.getItem("idSubfase");
     const nombreTar = localStorage.getItem("nombreTarea");
@@ -113,17 +119,17 @@ async function cargarDetallesTar() {
             detallesTareaActuales = result.data;
             console.log("Detalles cargados:", result.data);
         } else {
-            detallesTareaActuales = [];
+            detallesTareaActuales = detallesPrevios.length > 0 ? detallesPrevios : [];
             console.warn("Aviso:", result ? result.message : "Sin respuesta");
         }
 
-        issuesGitlabInvalidas = Array.isArray(gitlabResult) ? gitlabResult : [];
+        issuesGitlabInvalidas = Array.isArray(gitlabResult) ? gitlabResult : issuesPrevias;
         sincronizarSeleccionConDatos();
         renderizarTablaEspecifica();
         actualizarModoEliminacionUI();
     } catch (error) {
-        detallesTareaActuales = [];
-        issuesGitlabInvalidas = [];
+        detallesTareaActuales = detallesPrevios.length > 0 ? detallesPrevios : [];
+        issuesGitlabInvalidas = issuesPrevias;
         renderizarTablaEspecifica();
         console.error("Error en la llamada:", error);
     }
@@ -533,9 +539,10 @@ function obtenerVinculacionGitlab(idTareaProyecto) {
 function renderizarContenidoGitlab(p) {
     const idTareaProyecto = p && p.idTarea != null ? String(p.idTarea) : "";
     const numeroGitActual = p && p.numeroGit != null ? String(p.numeroGit) : "";
+    const nombreDepartamento = p ? (p.nombreDep || p.nombreDepartamento || "") : "";
     const botonVisualizar = `
         <button class="btn btn-sm btn-gitlab-view"
-            onclick="irAVisualizarTareasGitlab('${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}')">
+            onclick="irAVisualizarTareasGitlab('${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(nombreDepartamento)}')">
             Ver GitLab
         </button>
     `;
@@ -616,6 +623,7 @@ async function vincularIssueGitlabDesdeTabla(select, idTareaProyecto) {
             throw new Error((result && result.mensaje) || "No se pudo vincular la issue.");
         }
 
+        actualizarVinculacionGitlabLocal(issueId, idTareaProyecto);
         await cargarDetallesTar();
     } catch (error) {
         console.error("Error al vincular issue de GitLab:", error);
@@ -626,6 +634,30 @@ async function vincularIssueGitlabDesdeTabla(select, idTareaProyecto) {
         }
         select.value = "";
     }
+}
+
+// Refleja la nueva vinculacion al instante para que la tabla no se vacie si la recarga tarda o falla.
+function actualizarVinculacionGitlabLocal(issueId, idTareaProyecto) {
+    const issue = issuesGitlabInvalidas.find(item => String(item.issueId) === String(issueId));
+
+    if (!issue) {
+        return;
+    }
+
+    detallesTareaActuales = detallesTareaActuales.map(detalle => {
+        if (String(detalle.idTarea) !== String(idTareaProyecto)) {
+            return detalle;
+        }
+
+        return {
+            ...detalle,
+            numeroGit: issue.numeroGitLab,
+            nombreTareaGit: issue.titulo
+        };
+    });
+
+    issuesGitlabInvalidas = issuesGitlabInvalidas.filter(item => String(item.issueId) !== String(issueId));
+    renderizarTablaEspecifica();
 }
 
 // Traduce el estado de GitLab a una clase CSS usada para colorear el badge.
@@ -698,9 +730,10 @@ function irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartament
 }
 
 // Guarda el contexto de GitLab y abre la pantalla de control de issues del proyecto.
-function irAVisualizarTareasGitlab(idTareaProyecto, numeroGit) {
+function irAVisualizarTareasGitlab(idTareaProyecto, numeroGit, nombreDepartamento) {
     localStorage.setItem("idTareaProyectoGitlabVis", idTareaProyecto || "");
     localStorage.setItem("numeroGitlabVis", numeroGit || "");
+    localStorage.setItem("nombreDepartamentoGitlabVis", nombreDepartamento || "");
     window.location.href = "visualizartareasgitlab.html";
 }
 
