@@ -5,6 +5,7 @@ let porPagina = 10;
 let idImputacionEditando = null;
 let subfasesPorFaseEdit = {};
 let nombresFaseEdit = {};
+let imputacionAEliminar = null;
 
 // Centraliza el permiso de escritura sobre imputaciones para mantener empleados en solo lectura.
 function puedeGestionarImputaciones() {
@@ -26,6 +27,7 @@ window.onload = async function () {
     await cargarImputaciones();
     setFiltro('todas');
 
+    configurarModalEliminarImputacion();
     document.addEventListener("keydown", manejarTeclasModalEdicion);
 };
 
@@ -655,33 +657,136 @@ async function desvincularImputacion(id, btn) {
 }
 
 // Borra una imputacion concreta y actualiza la vista si la operacion termina bien.
-async function eliminarImputacion(id, btn) {
+function eliminarImputacion(id, btn) {
     if (typeof esSuperAdmin !== "function" || !esSuperAdmin()) {
         alert("No tienes permisos para borrar imputaciones.");
         return;
     }
 
-    if (!confirm("Seguro que quieres borrar esta imputacion?")) {
+    abrirModalEliminarImputacion(id, btn);
+}
+
+// Abre una confirmacion reforzada antes de borrar definitivamente una imputacion.
+function abrirModalEliminarImputacion(id, btn) {
+    const imputacion = todasLasImputaciones.find(i => Number(i.idImputacionClockify) === Number(id));
+
+    if (!imputacion) {
+        alert("No se encontro la imputacion.");
         return;
     }
 
-    btn.disabled = true;
-    btn.textContent = "Borrando...";
+    const nombreTarea = obtenerNombreConfirmacionImputacion(imputacion);
+    imputacionAEliminar = { id, nombreTarea, btn };
 
-    const result = await peticionSegura(`/imputaciones/borrar/${id}`, {
+    const texto = document.getElementById("modal-eliminar-imputacion-texto");
+    const input = document.getElementById("input-confirmacion-imputacion");
+    const error = document.getElementById("error-confirmacion-imputacion");
+    const boton = document.getElementById("btn-confirmar-eliminar-imputacion");
+
+    if (!texto || !input || !error || !boton) {
+        alert("No se pudo abrir la confirmacion de borrado.");
+        return;
+    }
+
+    texto.textContent = `Se eliminara permanentemente la imputacion de la tarea "${nombreTarea}". Esta accion no se puede deshacer.`;
+    input.value = "";
+    input.placeholder = "Nombre de la tarea";
+    error.textContent = "El nombre no coincide.";
+    error.classList.add("d-none");
+    boton.disabled = true;
+    boton.textContent = "Eliminar";
+
+    const modalElemento = document.getElementById("modalEliminarImputacion");
+    const modal = bootstrap.Modal.getInstance(modalElemento) || new bootstrap.Modal(modalElemento);
+    modal.show();
+
+    setTimeout(() => input.focus(), 200);
+}
+
+// Configura la validacion del modal de borrado y ejecuta la accion al confirmar.
+function configurarModalEliminarImputacion() {
+    const input = document.getElementById("input-confirmacion-imputacion");
+    const boton = document.getElementById("btn-confirmar-eliminar-imputacion");
+    const error = document.getElementById("error-confirmacion-imputacion");
+    const modalElemento = document.getElementById("modalEliminarImputacion");
+
+    if (!input || !boton || !error || !modalElemento) {
+        return;
+    }
+
+    input.addEventListener("input", () => {
+        const coincide = imputacionAEliminar && input.value.trim() === imputacionAEliminar.nombreTarea;
+        boton.disabled = !coincide;
+
+        if (input.value.trim() === "" || coincide) {
+            error.textContent = "El nombre no coincide.";
+            error.classList.add("d-none");
+            return;
+        }
+
+        error.textContent = "El nombre no coincide.";
+        error.classList.remove("d-none");
+    });
+
+    modalElemento.addEventListener("hidden.bs.modal", () => {
+        imputacionAEliminar = null;
+        input.value = "";
+        boton.disabled = true;
+        boton.textContent = "Eliminar";
+        error.textContent = "El nombre no coincide.";
+        error.classList.add("d-none");
+    });
+
+    boton.addEventListener("click", ejecutarEliminacionImputacionConfirmada);
+}
+
+// Ejecuta el borrado despues de que el usuario haya escrito el nombre correcto.
+async function ejecutarEliminacionImputacionConfirmada() {
+    const input = document.getElementById("input-confirmacion-imputacion");
+    const boton = document.getElementById("btn-confirmar-eliminar-imputacion");
+    const error = document.getElementById("error-confirmacion-imputacion");
+    const modalElemento = document.getElementById("modalEliminarImputacion");
+
+    if (!imputacionAEliminar || input.value.trim() !== imputacionAEliminar.nombreTarea) {
+        error.classList.remove("d-none");
+        return;
+    }
+
+    const btnTabla = imputacionAEliminar.btn;
+    if (btnTabla) {
+        btnTabla.disabled = true;
+        btnTabla.textContent = "Borrando...";
+    }
+    boton.disabled = true;
+    boton.textContent = "Eliminando...";
+
+    const result = await peticionSegura(`/imputaciones/borrar/${imputacionAEliminar.id}`, {
         method: "DELETE"
     });
 
     if (result && result.success) {
-        todasLasImputaciones = todasLasImputaciones.filter(i => i.idImputacionClockify !== id);
+        todasLasImputaciones = todasLasImputaciones
+            .filter(i => Number(i.idImputacionClockify) !== Number(imputacionAEliminar.id));
         actualizarEstadisticas();
         renderPagina();
+        bootstrap.Modal.getInstance(modalElemento).hide();
         return;
     }
 
-    btn.disabled = false;
-    btn.textContent = "Borrar";
-    alert((result && result.mensaje) || "Error al borrar.");
+    if (btnTabla) {
+        btnTabla.disabled = false;
+        btnTabla.textContent = "Borrar";
+    }
+    boton.disabled = false;
+    boton.textContent = "Eliminar";
+    error.textContent = (result && result.mensaje) || "Error al borrar.";
+    error.classList.remove("d-none");
+}
+
+// Obtiene el texto exacto que el usuario debe escribir para confirmar el borrado.
+function obtenerNombreConfirmacionImputacion(imputacion) {
+    return String(imputacion.tareaExtraida || localStorage.getItem("nombreTarea") || imputacion.descripcionOriginal || "Tarea")
+        .trim();
 }
 
 // Abre el modal de edicion cargando la tarea actual de la imputacion elegida.
