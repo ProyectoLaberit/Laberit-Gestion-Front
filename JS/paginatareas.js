@@ -10,6 +10,7 @@ let filtroGitlabModalActual = "todas";
 let paginaGitlabModalActual = 1;
 let contextoGitlabModalActual = null;
 let issueGitlabSeleccionadaModal = null;
+let issueGitlabEditandoModal = null;
 const gitlabModalPorPagina = 8;
 
 function setVinculacionesActuales(data){
@@ -851,7 +852,7 @@ function renderTablaGitlabModal(filas, inicio, total) {
     tbody.innerHTML = filas.map(issue => {
         const esActual = esIssueActualGitlabModal(issue);
         const esSeleccionada = issueGitlabSeleccionadaModal && String(issueGitlabSeleccionadaModal.issueId) === String(issue.issueId);
-        const puedeSeleccionar = puedeGestionarEstimacionesActual && !esActual && contextoGitlabModalActual?.idTareaProyecto && issue.issueId;
+        const puedeSeleccionar = puedeGestionarEstimacionesActual && contextoGitlabModalActual?.idTareaProyecto && issue.issueId;
         const estadoDot = issue.valida ? renderEstadoDotGitlabModal(true) : renderEstadoDotGitlabModal(false);
         const numeroIssue = issue.numeroGitLab ? `#${escaparHtml(issue.numeroGitLab)}` : escaparHtml(issue.issueId || "-");
         const claseEstado = obtenerClaseEstadoGitlab(issue.estado);
@@ -896,7 +897,7 @@ function esIssueActualGitlabModal(issue) {
 function seleccionarIssueGitlabModal(issueId) {
     const issue = issuesGitlabModal.find(item => String(item.issueId) === String(issueId));
 
-    if (!issue || esIssueActualGitlabModal(issue) || !puedeGestionarEstimacionesActual) {
+    if (!issue || !puedeGestionarEstimacionesActual) {
         return;
     }
 
@@ -926,7 +927,10 @@ function limpiarSeleccionIssueGitlabModal() {
 function actualizarSeleccionIssueGitlabModal() {
     const contenedor = document.getElementById("gitlab-modal-selection");
     const titulo = document.getElementById("gitlab-modal-selection-title");
-    const confirmar = document.getElementById("gitlab-modal-selection-confirm");
+    const btnEditar = document.getElementById("gitlab-modal-selection-edit");
+    const btnBorrar = document.getElementById("gitlab-modal-selection-delete");
+    const btnDesvincular = document.getElementById("gitlab-modal-selection-unlink");
+    const btnVincular = document.getElementById("gitlab-modal-selection-link");
 
     if (!contenedor) {
         return;
@@ -934,31 +938,53 @@ function actualizarSeleccionIssueGitlabModal() {
 
     if (!issueGitlabSeleccionadaModal) {
         contenedor.classList.add("d-none");
-        if (confirmar) {
-            confirmar.disabled = false;
-        }
+        [btnEditar, btnBorrar, btnDesvincular, btnVincular].forEach(restaurarBotonAccionGitlabModal);
         return;
     }
 
+    const esActual = esIssueActualGitlabModal(issueGitlabSeleccionadaModal);
     const numero = issueGitlabSeleccionadaModal.numeroGitLab
         ? `#${issueGitlabSeleccionadaModal.numeroGitLab}`
         : issueGitlabSeleccionadaModal.issueId;
-    const accion = contextoGitlabModalActual?.numeroGit ? "Reemplazar por" : "Vincular";
+    const accion = esActual
+        ? "Issue actual"
+        : contextoGitlabModalActual?.numeroGit
+            ? "Seleccionada para reemplazar"
+            : "Seleccionada para vincular";
 
     contenedor.classList.remove("d-none");
 
     if (titulo) {
-        titulo.textContent = `${accion} ${numero} - ${issueGitlabSeleccionadaModal.titulo}`;
+        titulo.textContent = `${accion}: ${numero} - ${issueGitlabSeleccionadaModal.titulo}`;
     }
 
-    if (confirmar) {
-        confirmar.disabled = false;
-        confirmar.textContent = contextoGitlabModalActual?.numeroGit ? "Confirmar reemplazo" : "Confirmar vinculacion";
+    [btnEditar, btnBorrar, btnDesvincular, btnVincular].forEach(restaurarBotonAccionGitlabModal);
+
+    if (btnDesvincular) {
+        btnDesvincular.classList.toggle("d-none", !issueGitlabSeleccionadaModal.valida);
+    }
+
+    if (btnVincular) {
+        btnVincular.classList.toggle("d-none", esActual);
+        btnVincular.textContent = contextoGitlabModalActual?.numeroGit ? "Reemplazar actual" : "Vincular";
     }
 }
 
-// Confirma la vinculacion o reemplazo de la issue seleccionada.
-async function confirmarSeleccionIssueGitlabModal(boton) {
+// Restaura el estado visual de un boton de accion del modal.
+function restaurarBotonAccionGitlabModal(boton) {
+    if (!boton) {
+        return;
+    }
+
+    boton.disabled = false;
+    if (boton.dataset.textoOriginal) {
+        boton.textContent = boton.dataset.textoOriginal;
+    }
+    delete boton.dataset.confirmarBorrado;
+}
+
+// Vincula o reemplaza la issue seleccionada con la tarea actual.
+async function vincularIssueSeleccionadaGitlabModal(boton) {
     if (!issueGitlabSeleccionadaModal) {
         return;
     }
@@ -975,32 +1001,214 @@ async function reemplazarIssueGitlabDesdeModal(issueId, boton) {
         return;
     }
 
+    await ejecutarAccionIssueGitlabModal({
+        boton,
+        textoCargando: contextoGitlabModalActual?.numeroGit ? "Reemplazando..." : "Vinculando...",
+        accion: () => vincularIssueGitlab(issueId, idTareaProyecto),
+        despues: () => {
+            actualizarVinculacionGitlabLocal(issueId, idTareaProyecto, issuesGitlabModal);
+            contextoGitlabModalActual.numeroGit = issue.numeroGitLab ? String(issue.numeroGitLab) : "";
+            contextoGitlabModalActual.nombreIssueActual = issue.titulo || "";
+        }
+    });
+}
+
+// Desvincula la issue seleccionada sin borrarla de la base local.
+async function desvincularIssueSeleccionadaGitlabModal(boton) {
+    if (!issueGitlabSeleccionadaModal) {
+        return;
+    }
+
+    await ejecutarAccionIssueGitlabModal({
+        boton,
+        textoCargando: "Desvinculando...",
+        accion: () => peticionSegura(`/gitlab/desvincular/${encodeURIComponent(issueGitlabSeleccionadaModal.issueId)}`, {
+            method: "PUT"
+        }),
+        despues: () => {
+            if (esIssueActualGitlabModal(issueGitlabSeleccionadaModal)) {
+                contextoGitlabModalActual.numeroGit = "";
+                contextoGitlabModalActual.nombreIssueActual = "";
+            }
+        }
+    });
+}
+
+// Borra definitivamente la issue seleccionada de la base local.
+async function borrarIssueSeleccionadaGitlabModal(boton) {
+    if (!issueGitlabSeleccionadaModal) {
+        return;
+    }
+
+    if (boton && boton.dataset.confirmarBorrado !== "true") {
+        boton.dataset.textoOriginal = boton.textContent;
+        boton.dataset.confirmarBorrado = "true";
+        boton.textContent = "Confirmar borrado";
+        return;
+    }
+
+    await ejecutarAccionIssueGitlabModal({
+        boton,
+        textoCargando: "Borrando...",
+        accion: () => peticionSegura(`/gitlab/borrar/${encodeURIComponent(issueGitlabSeleccionadaModal.issueId)}`, {
+            method: "DELETE"
+        }),
+        despues: () => {
+            if (esIssueActualGitlabModal(issueGitlabSeleccionadaModal)) {
+                contextoGitlabModalActual.numeroGit = "";
+                contextoGitlabModalActual.nombreIssueActual = "";
+            }
+        }
+    });
+}
+
+// Abre una ventana propia para editar el titulo local de una issue GitLab.
+function editarIssueSeleccionadaGitlabModal() {
+    if (!issueGitlabSeleccionadaModal) {
+        return;
+    }
+
+    issueGitlabEditandoModal = issueGitlabSeleccionadaModal;
+
+    const modal = document.getElementById("gitlab-edit-issue-modal");
+    const inputIssue = document.getElementById("gitlab-edit-issue-number");
+    const inputTitulo = document.getElementById("gitlab-edit-issue-title-input");
+
+    if (!modal || !inputTitulo) {
+        return;
+    }
+
+    const numero = issueGitlabEditandoModal.numeroGitLab
+        ? `#${issueGitlabEditandoModal.numeroGitLab}`
+        : issueGitlabEditandoModal.issueId;
+
+    if (inputIssue) {
+        inputIssue.value = numero || "";
+    }
+
+    inputTitulo.value = issueGitlabEditandoModal.titulo || "";
+    modal.classList.remove("d-none");
+
+    setTimeout(() => {
+        inputTitulo.focus();
+        inputTitulo.select();
+    }, 0);
+}
+
+// Cierra la ventana de edicion de issue y limpia su estado temporal.
+function cerrarModalEdicionIssueGitlab() {
+    const modal = document.getElementById("gitlab-edit-issue-modal");
+    const guardar = document.getElementById("gitlab-edit-issue-save");
+
+    if (modal) {
+        modal.classList.add("d-none");
+    }
+
+    if (guardar) {
+        guardar.disabled = false;
+        guardar.textContent = "Guardar";
+    }
+
+    issueGitlabEditandoModal = null;
+}
+
+// Guarda el titulo editado usando el endpoint de GitLab.
+async function guardarEdicionIssueGitlabModal(boton) {
+    const inputTitulo = document.getElementById("gitlab-edit-issue-title-input");
+
+    if (!issueGitlabEditandoModal || !inputTitulo) {
+        return;
+    }
+
+    const tituloActual = issueGitlabEditandoModal.titulo || "";
+    const nuevoTitulo = inputTitulo.value.trim();
+
+    if (!nuevoTitulo) {
+        alert("El titulo de la issue no puede estar vacio.");
+        inputTitulo.focus();
+        return;
+    }
+
+    if (nuevoTitulo === tituloActual) {
+        cerrarModalEdicionIssueGitlab();
+        return;
+    }
+
     const textoOriginal = boton ? boton.textContent : "";
     if (boton) {
         boton.disabled = true;
-        boton.textContent = contextoGitlabModalActual?.numeroGit ? "Reemplazando..." : "Vinculando...";
+        boton.textContent = "Guardando...";
     }
 
     try {
-        await vincularIssueGitlab(issueId, idTareaProyecto);
-        actualizarVinculacionGitlabLocal(issueId, idTareaProyecto, issuesGitlabModal);
+        const issueEditada = issueGitlabEditandoModal;
+        const result = await peticionSegura(`/gitlab/issue/${encodeURIComponent(issueEditada.issueId)}/titulo`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ titulo: nuevoTitulo.trim() })
+        });
 
-        contextoGitlabModalActual.numeroGit = issue.numeroGitLab ? String(issue.numeroGitLab) : "";
-        contextoGitlabModalActual.nombreIssueActual = issue.titulo || "";
-        issueGitlabSeleccionadaModal = null;
+        if (!result || result.success === false) {
+            throw new Error((result && (result.mensaje || result.message)) || "No se pudo actualizar el titulo.");
+        }
+
+        issueEditada.titulo = nuevoTitulo;
+        if (issueGitlabSeleccionadaModal && String(issueGitlabSeleccionadaModal.issueId) === String(issueEditada.issueId)) {
+            issueGitlabSeleccionadaModal.titulo = nuevoTitulo;
+        }
+
+        if (esIssueActualGitlabModal(issueEditada)) {
+            contextoGitlabModalActual.nombreIssueActual = nuevoTitulo;
+        }
+
+        cerrarModalEdicionIssueGitlab();
         actualizarIssueActualModalGitlab();
         actualizarSeleccionIssueGitlabModal();
-
         await cargarDetallesTar();
         await cargarIssuesGitlabModal();
     } catch (error) {
-        console.error("Error al reemplazar issue de GitLab:", error);
-        alert(error.message || "No se pudo reemplazar la issue de GitLab.");
+        console.error("Error al editar titulo de issue GitLab:", error);
+        alert(error.message || "No se pudo actualizar el titulo de la issue.");
 
         if (boton) {
             boton.disabled = false;
-            boton.textContent = textoOriginal || "Reemplazar";
+            boton.textContent = textoOriginal || "Guardar";
         }
+    }
+}
+
+// Ejecuta una accion contra GitLab y refresca tabla, modal y contexto.
+async function ejecutarAccionIssueGitlabModal({ boton, textoCargando, accion, despues }) {
+    const textoOriginal = boton ? boton.textContent : "";
+
+    if (boton) {
+        boton.dataset.textoOriginal = textoOriginal;
+        boton.disabled = true;
+        boton.textContent = textoCargando;
+    }
+
+    try {
+        const result = await accion();
+
+        if (!result || result.success === false) {
+            throw new Error((result && (result.mensaje || result.message)) || "No se pudo completar la accion.");
+        }
+
+        if (typeof despues === "function") {
+            despues(result);
+        }
+
+        issueGitlabSeleccionadaModal = null;
+        actualizarIssueActualModalGitlab();
+        actualizarSeleccionIssueGitlabModal();
+        await cargarDetallesTar();
+        await cargarIssuesGitlabModal();
+    } catch (error) {
+        console.error("Error en accion de GitLab:", error);
+        alert(error.message || "No se pudo completar la accion de GitLab.");
+        restaurarBotonAccionGitlabModal(boton);
     }
 }
 

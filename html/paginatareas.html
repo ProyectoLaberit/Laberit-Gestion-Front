@@ -194,11 +194,20 @@
                                 <div class="gitlab-modal-selection-title" id="gitlab-modal-selection-title"></div>
                             </div>
                             <div class="gitlab-modal-selection-actions">
+                                <button type="button" class="gitlab-modal-selection-action gitlab-modal-selection-edit" id="gitlab-modal-selection-edit" onclick="editarIssueSeleccionadaGitlabModal(this)">
+                                    Editar titulo
+                                </button>
+                                <button type="button" class="gitlab-modal-selection-action gitlab-modal-selection-unlink" id="gitlab-modal-selection-unlink" onclick="desvincularIssueSeleccionadaGitlabModal(this)">
+                                    Desvincular
+                                </button>
+                                <button type="button" class="gitlab-modal-selection-action gitlab-modal-selection-delete" id="gitlab-modal-selection-delete" onclick="borrarIssueSeleccionadaGitlabModal(this)">
+                                    Borrar
+                                </button>
+                                <button type="button" class="gitlab-modal-selection-action gitlab-modal-selection-link" id="gitlab-modal-selection-link" onclick="vincularIssueSeleccionadaGitlabModal(this)">
+                                    Vincular
+                                </button>
                                 <button type="button" class="gitlab-modal-selection-cancel" onclick="limpiarSeleccionIssueGitlabModal()">
                                     Cancelar
-                                </button>
-                                <button type="button" class="gitlab-modal-selection-confirm" id="gitlab-modal-selection-confirm" onclick="confirmarSeleccionIssueGitlabModal(this)">
-                                    Confirmar cambio
                                 </button>
                             </div>
                         </div>
@@ -255,6 +264,36 @@
                         <div class="gitlab-modal-pagination">
                             <span id="gitlab-modal-pag-info">Sin resultados</span>
                             <div class="gitlab-modal-pag-btns" id="gitlab-modal-pag-btns"></div>
+                        </div>
+                    </div>
+
+                    <div class="gitlab-edit-overlay d-none" id="gitlab-edit-issue-modal"
+                        onclick="if (event.target === this) cerrarModalEdicionIssueGitlab()">
+                        <div class="gitlab-edit-card" role="dialog" aria-modal="true" aria-labelledby="gitlab-edit-title-heading">
+                            <h2 id="gitlab-edit-title-heading">Editar issue de GitLab</h2>
+                            <p>Actualiza el titulo local de la issue y guarda los cambios.</p>
+
+                            <div class="gitlab-edit-field">
+                                <label for="gitlab-edit-issue-number">Issue</label>
+                                <input type="text" id="gitlab-edit-issue-number" readonly>
+                            </div>
+
+                            <div class="gitlab-edit-field">
+                                <label for="gitlab-edit-issue-title-input">Nombre de la issue</label>
+                                <input type="text" id="gitlab-edit-issue-title-input" maxlength="255"
+                                    placeholder="Nombre de la issue..."
+                                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); guardarEdicionIssueGitlabModal(document.getElementById('gitlab-edit-issue-save')); }">
+                            </div>
+
+                            <div class="gitlab-edit-actions">
+                                <button type="button" class="gitlab-edit-cancel" onclick="cerrarModalEdicionIssueGitlab()">
+                                    Cancelar
+                                </button>
+                                <button type="button" class="gitlab-edit-save" id="gitlab-edit-issue-save"
+                                    onclick="guardarEdicionIssueGitlabModal(this)">
+                                    Guardar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

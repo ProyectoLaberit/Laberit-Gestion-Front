@@ -548,7 +548,7 @@
         }
 
         .gitlab-modal-selection-cancel,
-        .gitlab-modal-selection-confirm {
+        .gitlab-modal-selection-action {
             border-radius: 9px;
             padding: 7px 12px;
             font-size: .76rem;
@@ -562,14 +562,140 @@
             color: #4b5563;
         }
 
-        .gitlab-modal-selection-confirm {
+        .gitlab-modal-selection-action {
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #374151;
+        }
+
+        .gitlab-modal-selection-edit:hover:not(:disabled) {
+            background: #f3f4f6;
+        }
+
+        .gitlab-modal-selection-unlink {
+            border-color: #f59e0b;
+            background: #fff7ed;
+            color: #b45309;
+        }
+
+        .gitlab-modal-selection-delete {
+            border-color: #fecdd3;
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        .gitlab-modal-selection-link {
             border: 1px solid #C01717;
             background: #C01717;
             color: #ffffff;
         }
 
-        .gitlab-modal-selection-confirm:disabled {
+        .gitlab-modal-selection-action:disabled {
             opacity: .65;
+            cursor: default;
+        }
+
+        .gitlab-edit-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1090;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(17, 24, 39, 0.58);
+        }
+
+        .gitlab-edit-overlay.d-none {
+            display: none !important;
+        }
+
+        .gitlab-edit-card {
+            width: min(520px, calc(100vw - 32px));
+            border-radius: 18px;
+            background: #ffffff;
+            padding: 28px 30px;
+            box-shadow: 0 28px 80px rgba(15, 23, 42, 0.32);
+        }
+
+        .gitlab-edit-card h2 {
+            margin: 0 0 8px;
+            color: #111827;
+            font-size: 1.25rem;
+            font-weight: 850;
+        }
+
+        .gitlab-edit-card p {
+            margin: 0 0 22px;
+            color: #6b7280;
+            font-size: .95rem;
+        }
+
+        .gitlab-edit-field {
+            margin-bottom: 18px;
+        }
+
+        .gitlab-edit-field label {
+            display: block;
+            color: #374151;
+            font-size: .88rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .gitlab-edit-field input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #111827;
+            font-size: .95rem;
+            outline: none;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .gitlab-edit-field input:focus {
+            border-color: #C01717;
+            box-shadow: 0 0 0 3px rgba(192, 23, 23, 0.12);
+        }
+
+        .gitlab-edit-field input:disabled,
+        .gitlab-edit-field input[readonly] {
+            background: #f9fafb;
+            color: #6b7280;
+        }
+
+        .gitlab-edit-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .gitlab-edit-cancel,
+        .gitlab-edit-save {
+            min-width: 100px;
+            border-radius: 999px;
+            padding: 11px 20px;
+            font-size: .88rem;
+            font-weight: 850;
+        }
+
+        .gitlab-edit-cancel {
+            border: 1px solid #fecdd3;
+            background: #fffafa;
+            color: #C01717;
+        }
+
+        .gitlab-edit-save {
+            border: 1px solid #C01717;
+            background: #C01717;
+            color: #ffffff;
+        }
+
+        .gitlab-edit-save:disabled {
+            opacity: .7;
             cursor: default;
         }
 
@@ -852,5 +978,18 @@
             .gitlab-modal-selection-actions {
                 align-items: flex-start;
                 flex-direction: column;
+            }
+
+            .gitlab-edit-card {
+                padding: 24px 20px;
+            }
+
+            .gitlab-edit-actions {
+                flex-direction: column-reverse;
+            }
+
+            .gitlab-edit-cancel,
+            .gitlab-edit-save {
+                width: 100%;
             }
         }
