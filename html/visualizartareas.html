@@ -265,6 +265,45 @@
         </div>
     </div>
 
+    <div class="modal fade modal-confirm" id="modalEliminarImputacion" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center px-4 pb-4">
+                    <div class="icon-danger">
+                        <svg width="24" height="24" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                            <path d="M9 6V4h6v2" />
+                        </svg>
+                    </div>
+                    <h6 class="fw-bold mb-1">Eliminar imputacion</h6>
+                    <p class="text-muted small mb-2" id="modal-eliminar-imputacion-texto">
+                        Esta accion eliminara permanentemente la imputacion seleccionada.
+                    </p>
+                    <p class="text-muted small mb-3">
+                        Escribe el nombre de la tarea para confirmar el borrado.
+                    </p>
+                    <input type="text" class="form-control mb-3" id="input-confirmacion-imputacion"
+                        placeholder="Nombre de la tarea">
+                    <div class="small text-danger text-start mb-3 d-none" id="error-confirmacion-imputacion">
+                        El nombre no coincide.
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-danger flex-fill" id="btn-confirmar-eliminar-imputacion" disabled>
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="custom-footer py-3">
         <div class="container text-center">
             <div class="footer-logo mb-2">L</div>

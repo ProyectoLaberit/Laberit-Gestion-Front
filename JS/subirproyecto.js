@@ -1,5 +1,12 @@
 // const URL_BASE = "http://localhost:8080/api";
 
+let subidaEnCurso = false;
+let cancelacionSubidaSolicitada = false;
+let subidaAbortController = null;
+let proyectoCreadoDuranteSubidaId = null;
+let limpiezaCancelacionEnCurso = false;
+let redireccionSubidaTimeout = null;
+
 // Inicializa la pantalla, valida la sesion activa y carga el contexto
 // principal necesario antes de que el usuario empiece a interactuar.
 window.onload = function () {
@@ -26,7 +33,12 @@ function mostrarNombre(input) {
 async function guardarProyecto() {
     const formulario = document.getElementById('form-subir-proyecto');
     const feedback = document.getElementById('msg-feedback');
+    const botonGuardar = formulario.querySelector('button[type="submit"]');
     const selectsValidos = validarSelectsObligatorios();
+
+    if (subidaEnCurso) {
+        return;
+    }
 
     if (!selectsValidos) {
         feedback.className = "mt-3 text-center text-danger";
@@ -55,7 +67,18 @@ async function guardarProyecto() {
         excels: tieneExcel // Añadimos esta línea
     };
 
+    subidaEnCurso = true;
+    cancelacionSubidaSolicitada = false;
+    proyectoCreadoDuranteSubidaId = null;
+    subidaAbortController = new AbortController();
+    const signal = subidaAbortController.signal;
+
     try {
+        if (botonGuardar) {
+            botonGuardar.disabled = true;
+            botonGuardar.innerText = "Guardando...";
+        }
+
         feedback.innerText = "Subiendo proyecto...";
         // const response = await fetch(`${URL_BASE}/proyectos`, {
         //     method: 'POST',
@@ -67,7 +90,8 @@ async function guardarProyecto() {
 
         const result = await peticionSegura("/proyectos", {
             method: 'POST',
-            body: JSON.stringify(formData)
+            body: JSON.stringify(formData),
+            signal
         });
 
         if (result && result.success) {
@@ -76,6 +100,7 @@ async function guardarProyecto() {
 
             // 1. Recogemos el ID (Esto lo estabais haciendo perfecto)
             const idPro = result.data.id;
+            proyectoCreadoDuranteSubidaId = idPro;
 
             const fileInput = document.getElementById('archivoInput');
 
@@ -97,7 +122,8 @@ async function guardarProyecto() {
                         'Authorization': `Bearer ${token}`
                         // IMPORTANTE: No poner 'Content-Type' aquí, el navegador lo pone solo al ver FormData
                     },
-                    body: excelData
+                    body: excelData,
+                    signal
                 });
 
                 const excelResult = await excelResponse.json();
@@ -109,26 +135,190 @@ async function guardarProyecto() {
                 // });
 
                 if (excelResult && excelResult.success) {
-                    feedback.innerText = "Proyecto y Excel subidos correctamente.";
-                    setTimeout(() => window.location.href = "proyectos.html", 1500);
+                    feedback.innerText = "Proyecto y Excel subidos correctamente. Sincronizando integraciones...";
+                    await sincronizarProyectoCreado(idPro, feedback, signal);
+                    finalizarSubidaCorrecta();
                 } else {
                     feedback.className = "mt-3 text-center text-danger";
                     feedback.innerText = "Proyecto creado, pero error en Excel: " + excelResult.mensaje;
+                    restaurarBotonGuardar(botonGuardar);
+                    limpiarEstadoSubida();
                 }
             } else {
-                feedback.innerText = "Proyecto creado sin Excel adjunto.";
-                setTimeout(() => window.location.href = "proyectos.html", 1500);
+                feedback.innerText = "Proyecto creado sin Excel adjunto. Sincronizando integraciones...";
+                await sincronizarProyectoCreado(idPro, feedback, signal);
+                finalizarSubidaCorrecta();
             }
 
         } else {
             feedback.className = "mt-3 text-center text-danger";
             feedback.innerText = "Error: " + result.mensaje;
+            restaurarBotonGuardar(botonGuardar);
+            limpiarEstadoSubida();
         }
     } catch (error) {
         console.error("Detalle del error exacto:", error);
+
+        if (cancelacionSubidaSolicitada || error.name === "AbortError") {
+            await finalizarCancelacionSubida(feedback, botonGuardar);
+            return;
+        }
+
         feedback.className = "mt-3 text-center text-danger";
-        feedback.innerText = "Error de conexión con el servidor.";
+        feedback.innerText = error.message || "Error de conexion con el servidor.";
+        restaurarBotonGuardar(botonGuardar);
+        limpiarEstadoSubida();
     }
+}
+
+// Replica la sincronizacion global de detalles: primero GitLab y despues Clockify.
+async function sincronizarProyectoCreado(proyectoId, feedback, signal) {
+    feedback.className = "mt-3 text-center text-success";
+    feedback.innerText = "Proyecto creado. Sincronizando GitLab...";
+
+    const resultadoGitLab = await peticionSegura(`/gitlab/sincronizar/${proyectoId}`, {
+        method: "GET",
+        signal
+    });
+
+    if (!resultadoGitLab || !resultadoGitLab.success) {
+        throw new Error((resultadoGitLab && resultadoGitLab.mensaje) || "Proyecto creado, pero no se pudo sincronizar GitLab.");
+    }
+
+    feedback.innerText = "GitLab sincronizado. Sincronizando Clockify...";
+
+    const resultadoClockify = await peticionSegura(`/clockify/sincronizar/${proyectoId}`, {
+        method: "POST",
+        signal
+    });
+
+    if (!resultadoClockify || !resultadoClockify.success) {
+        throw new Error((resultadoClockify && resultadoClockify.mensaje) || "Proyecto creado, pero no se pudo sincronizar Clockify.");
+    }
+
+    localStorage.setItem(`ultima-sync-${proyectoId}`, new Date().toISOString());
+    feedback.innerText = "Proyecto creado y sincronizado correctamente.";
+}
+
+// Programa la salida de la pantalla tras completar todo el alta correctamente.
+function finalizarSubidaCorrecta() {
+    limpiarEstadoSubida();
+    redireccionSubidaTimeout = setTimeout(() => window.location.href = "proyectos.html", 1500);
+}
+
+// Cancela la subida activa y delega la limpieza al flujo que estaba esperando la peticion.
+function cancelarSubidaProyecto() {
+    const feedback = document.getElementById('msg-feedback');
+    const botonCancelar = document.getElementById('btn-cancelar-subida');
+
+    if (redireccionSubidaTimeout) {
+        clearTimeout(redireccionSubidaTimeout);
+        redireccionSubidaTimeout = null;
+    }
+
+    if (!subidaEnCurso) {
+        window.location.href = "proyectos.html";
+        return;
+    }
+
+    cancelacionSubidaSolicitada = true;
+
+    if (botonCancelar) {
+        botonCancelar.disabled = true;
+        botonCancelar.innerText = "Cancelando...";
+    }
+
+    if (feedback) {
+        feedback.className = "mt-3 text-center text-warning";
+        feedback.innerText = "Cancelando subida...";
+    }
+
+    if (subidaAbortController) {
+        subidaAbortController.abort();
+    }
+}
+
+// Limpia el proyecto recien creado cuando el usuario cancela durante el alta.
+async function finalizarCancelacionSubida(feedback, botonGuardar) {
+    const eliminado = await eliminarProyectoCreadoSiExiste(feedback);
+    const botonCancelar = document.getElementById('btn-cancelar-subida');
+
+    if (eliminado === false) {
+        restaurarBotonGuardar(botonGuardar);
+        if (botonCancelar) {
+            botonCancelar.disabled = false;
+            botonCancelar.innerText = "Cancelar";
+        }
+        limpiarEstadoSubida();
+        return;
+    }
+
+    limpiarEstadoSubida();
+    window.location.href = "proyectos.html";
+}
+
+// Borra en backend el proyecto que ya fue creado antes de cancelar.
+async function eliminarProyectoCreadoSiExiste(feedback) {
+    if (!proyectoCreadoDuranteSubidaId) {
+        return true;
+    }
+
+    if (limpiezaCancelacionEnCurso) {
+        return true;
+    }
+
+    limpiezaCancelacionEnCurso = true;
+
+    if (feedback) {
+        feedback.className = "mt-3 text-center text-warning";
+        feedback.innerText = "Cancelando y eliminando el proyecto creado...";
+    }
+
+    try {
+        const result = await peticionSegura(`/proyectos/${proyectoCreadoDuranteSubidaId}`, {
+            method: "DELETE"
+        });
+
+        if (!result || !result.success) {
+            if (feedback) {
+                feedback.className = "mt-3 text-center text-danger";
+                feedback.innerText = (result && result.mensaje)
+                    || "La subida se cancelo, pero no se pudo eliminar el proyecto creado.";
+            }
+            return false;
+        }
+
+        proyectoCreadoDuranteSubidaId = null;
+        return true;
+    } catch (error) {
+        console.error("No se pudo eliminar el proyecto cancelado:", error);
+        if (feedback) {
+            feedback.className = "mt-3 text-center text-danger";
+            feedback.innerText = "La subida se cancelo, pero no se pudo eliminar el proyecto creado.";
+        }
+        return false;
+    } finally {
+        limpiezaCancelacionEnCurso = false;
+    }
+}
+
+// Resetea las banderas internas de la subida actual.
+function limpiarEstadoSubida() {
+    subidaEnCurso = false;
+    cancelacionSubidaSolicitada = false;
+    subidaAbortController = null;
+    limpiezaCancelacionEnCurso = false;
+    proyectoCreadoDuranteSubidaId = null;
+}
+
+// Restaura el boton principal cuando la creacion o la sincronizacion no termina bien.
+function restaurarBotonGuardar(botonGuardar) {
+    if (!botonGuardar) {
+        return;
+    }
+
+    botonGuardar.disabled = false;
+    botonGuardar.innerText = "Guardar";
 }
 
 // Conecta la validacion visible de los selects obligatorios usados con Select2.

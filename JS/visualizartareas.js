@@ -5,31 +5,18 @@ let porPagina = 10;
 let idImputacionEditando = null;
 let subfasesPorFaseEdit = {};
 let nombresFaseEdit = {};
+let imputacionAEliminar = null;
+
+// Centraliza el permiso de escritura sobre imputaciones para mantener empleados en solo lectura.
+function puedeGestionarImputaciones() {
+    return typeof esAdmin === "function" && esAdmin();
+}
 
 // Inicializa la pantalla, valida la sesion activa y carga el contexto
 // principal necesario antes de que el usuario empiece a interactuar.
 window.onload = async function () {
     if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
-        return;
-    }
-
-    if (typeof esEmpleado === "function" && esEmpleado()) {
-        document.body.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                        height:100vh;background:#f8f9fa;font-family:sans-serif;">
-                <div style="width:80px;height:80px;background:#fee2e2;border-radius:50%;
-                            display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;">
-                    <svg width="40" height="40" fill="none" stroke="#dc2626" stroke-width="2.5" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
-                    </svg>
-                </div>
-                <h2 style="color:#1f2937;font-weight:800;margin:0 0 0.5rem;">Acceso no permitido</h2>
-                <p style="color:#6c757d;margin:0 0 1.5rem;">Los usuarios con rol Empleado no pueden visualizar tareas.</p>
-                <a href="proyectos.html" style="background:#C01717;color:white;padding:10px 24px;
-                    border-radius:6px;text-decoration:none;font-weight:600;">Volver a Proyectos</a>
-            </div>`;
         return;
     }
 
@@ -40,6 +27,7 @@ window.onload = async function () {
     await cargarImputaciones();
     setFiltro('todas');
 
+    configurarModalEliminarImputacion();
     document.addEventListener("keydown", manejarTeclasModalEdicion);
 };
 
@@ -138,7 +126,7 @@ async function cargarImputaciones() {
 
     // solo mostramos el botón a los admins
     const btnSincronizar = document.getElementById("btn-sincronizar");
-    if (btnSincronizar && !esAdmin()) {
+    if (btnSincronizar && !puedeGestionarImputaciones()) {
         btnSincronizar.style.display = "none";
     }
 
@@ -452,16 +440,18 @@ function renderTabla(filas, inicio, total) {
                 </div>
             `;
 
-        const botonValidacion = esValida
-            ? `<button class="btn btn-sm btn-outline-warning" onclick="desvincularImputacion(${imputacion.idImputacionClockify}, this)">Desvincular</button>`
-            : `<button class="btn btn-sm btn-outline-success" onclick="marcarValida(${imputacion.idImputacionClockify}, this)">Vincular</button>`;
+        const botonValidacion = puedeGestionarImputaciones()
+            ? (esValida
+                ? `<button class="btn btn-sm btn-outline-warning" onclick="desvincularImputacion(${imputacion.idImputacionClockify}, this)">Desvincular</button>`
+                : `<button class="btn btn-sm btn-outline-success" onclick="marcarValida(${imputacion.idImputacionClockify}, this)">Vincular</button>`)
+            : "";
 
         // Comprobación de seguridad individual para cada botón
-        const botonEditar = esAdmin() 
+        const botonEditar = puedeGestionarImputaciones()
             ? `<button class="btn btn-sm btn-outline-secondary" onclick="editarImputacion(${imputacion.idImputacionClockify})">Editar</button>` 
             : '';
 
-        const botonBorrar = esSuperAdmin() 
+        const botonBorrar = typeof esSuperAdmin === "function" && esSuperAdmin()
             ? `<button class="btn btn-sm btn-outline-danger" onclick="eliminarImputacion(${imputacion.idImputacionClockify}, this)">Borrar</button>` 
             : '';
 
@@ -559,6 +549,11 @@ function perPageChange() {
 
 // Lanza la sincronizacion de imputaciones desde Clockify y recarga la tabla.
 async function sincronizarImputaciones() {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para sincronizar imputaciones.");
+        return;
+    }
+
     const { proyectoId } = obtenerContextoVista();
     const btn = document.getElementById("btn-sincronizar");
     const estado = document.getElementById("estado-filtro");
@@ -593,6 +588,11 @@ async function sincronizarImputaciones() {
 
 // Marca una imputacion como vinculada a la tarea actual y actualiza la tabla.
 async function marcarValida(id, btn) {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para vincular imputaciones.");
+        return;
+    }
+
     btn.disabled = true;
     btn.textContent = "Vinculando...";
 
@@ -621,6 +621,11 @@ async function marcarValida(id, btn) {
 
 // Desvincula una imputacion de la tarea actual tras confirmacion del usuario.
 async function desvincularImputacion(id, btn) {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para desvincular imputaciones.");
+        return;
+    }
+
     if (!confirm("Seguro que quieres desvincular esta imputacion?")) {
         return;
     }
@@ -652,32 +657,145 @@ async function desvincularImputacion(id, btn) {
 }
 
 // Borra una imputacion concreta y actualiza la vista si la operacion termina bien.
-async function eliminarImputacion(id, btn) {
-    if (!confirm("Seguro que quieres borrar esta imputacion?")) {
+function eliminarImputacion(id, btn) {
+    if (typeof esSuperAdmin !== "function" || !esSuperAdmin()) {
+        alert("No tienes permisos para borrar imputaciones.");
         return;
     }
 
-    btn.disabled = true;
-    btn.textContent = "Borrando...";
+    abrirModalEliminarImputacion(id, btn);
+}
 
-    const result = await peticionSegura(`/imputaciones/borrar/${id}`, {
+// Abre una confirmacion reforzada antes de borrar definitivamente una imputacion.
+function abrirModalEliminarImputacion(id, btn) {
+    const imputacion = todasLasImputaciones.find(i => Number(i.idImputacionClockify) === Number(id));
+
+    if (!imputacion) {
+        alert("No se encontro la imputacion.");
+        return;
+    }
+
+    const nombreTarea = obtenerNombreConfirmacionImputacion(imputacion);
+    imputacionAEliminar = { id, nombreTarea, btn };
+
+    const texto = document.getElementById("modal-eliminar-imputacion-texto");
+    const input = document.getElementById("input-confirmacion-imputacion");
+    const error = document.getElementById("error-confirmacion-imputacion");
+    const boton = document.getElementById("btn-confirmar-eliminar-imputacion");
+
+    if (!texto || !input || !error || !boton) {
+        alert("No se pudo abrir la confirmacion de borrado.");
+        return;
+    }
+
+    texto.textContent = `Se eliminara permanentemente la imputacion de la tarea "${nombreTarea}". Esta accion no se puede deshacer.`;
+    input.value = "";
+    input.placeholder = "Nombre de la tarea";
+    error.textContent = "El nombre no coincide.";
+    error.classList.add("d-none");
+    boton.disabled = true;
+    boton.textContent = "Eliminar";
+
+    const modalElemento = document.getElementById("modalEliminarImputacion");
+    const modal = bootstrap.Modal.getInstance(modalElemento) || new bootstrap.Modal(modalElemento);
+    modal.show();
+
+    setTimeout(() => input.focus(), 200);
+}
+
+// Configura la validacion del modal de borrado y ejecuta la accion al confirmar.
+function configurarModalEliminarImputacion() {
+    const input = document.getElementById("input-confirmacion-imputacion");
+    const boton = document.getElementById("btn-confirmar-eliminar-imputacion");
+    const error = document.getElementById("error-confirmacion-imputacion");
+    const modalElemento = document.getElementById("modalEliminarImputacion");
+
+    if (!input || !boton || !error || !modalElemento) {
+        return;
+    }
+
+    input.addEventListener("input", () => {
+        const coincide = imputacionAEliminar && input.value.trim() === imputacionAEliminar.nombreTarea;
+        boton.disabled = !coincide;
+
+        if (input.value.trim() === "" || coincide) {
+            error.textContent = "El nombre no coincide.";
+            error.classList.add("d-none");
+            return;
+        }
+
+        error.textContent = "El nombre no coincide.";
+        error.classList.remove("d-none");
+    });
+
+    modalElemento.addEventListener("hidden.bs.modal", () => {
+        imputacionAEliminar = null;
+        input.value = "";
+        boton.disabled = true;
+        boton.textContent = "Eliminar";
+        error.textContent = "El nombre no coincide.";
+        error.classList.add("d-none");
+    });
+
+    boton.addEventListener("click", ejecutarEliminacionImputacionConfirmada);
+}
+
+// Ejecuta el borrado despues de que el usuario haya escrito el nombre correcto.
+async function ejecutarEliminacionImputacionConfirmada() {
+    const input = document.getElementById("input-confirmacion-imputacion");
+    const boton = document.getElementById("btn-confirmar-eliminar-imputacion");
+    const error = document.getElementById("error-confirmacion-imputacion");
+    const modalElemento = document.getElementById("modalEliminarImputacion");
+
+    if (!imputacionAEliminar || input.value.trim() !== imputacionAEliminar.nombreTarea) {
+        error.classList.remove("d-none");
+        return;
+    }
+
+    const btnTabla = imputacionAEliminar.btn;
+    if (btnTabla) {
+        btnTabla.disabled = true;
+        btnTabla.textContent = "Borrando...";
+    }
+    boton.disabled = true;
+    boton.textContent = "Eliminando...";
+
+    const result = await peticionSegura(`/imputaciones/borrar/${imputacionAEliminar.id}`, {
         method: "DELETE"
     });
 
     if (result && result.success) {
-        todasLasImputaciones = todasLasImputaciones.filter(i => i.idImputacionClockify !== id);
+        todasLasImputaciones = todasLasImputaciones
+            .filter(i => Number(i.idImputacionClockify) !== Number(imputacionAEliminar.id));
         actualizarEstadisticas();
         renderPagina();
+        bootstrap.Modal.getInstance(modalElemento).hide();
         return;
     }
 
-    btn.disabled = false;
-    btn.textContent = "Borrar";
-    alert((result && result.mensaje) || "Error al borrar.");
+    if (btnTabla) {
+        btnTabla.disabled = false;
+        btnTabla.textContent = "Borrar";
+    }
+    boton.disabled = false;
+    boton.textContent = "Eliminar";
+    error.textContent = (result && result.mensaje) || "Error al borrar.";
+    error.classList.remove("d-none");
+}
+
+// Obtiene el texto exacto que el usuario debe escribir para confirmar el borrado.
+function obtenerNombreConfirmacionImputacion(imputacion) {
+    return String(imputacion.tareaExtraida || localStorage.getItem("nombreTarea") || imputacion.descripcionOriginal || "Tarea")
+        .trim();
 }
 
 // Abre el modal de edicion cargando la tarea actual de la imputacion elegida.
 function editarImputacion(id) {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para editar imputaciones.");
+        return;
+    }
+
     const imputacion = todasLasImputaciones.find(i => i.idImputacionClockify === id);
     if (!imputacion) {
         alert("No se encontro la imputacion.");
@@ -735,6 +853,12 @@ function cerrarModalEdicion(event) {
 
 // Guarda los cambios hechos sobre una imputacion y actualiza la fila en pantalla.
 async function guardarEdicionImputacion() {
+    if (!puedeGestionarImputaciones()) {
+        alert("No tienes permisos para editar imputaciones.");
+        cerrarModalEdicion();
+        return;
+    }
+
     if (!idImputacionEditando) {
         return;
     }

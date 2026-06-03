@@ -165,42 +165,65 @@ function obtenerNombreArchivoDesdeCabecera(contentDisposition) {
     return matchNormal && matchNormal[1] ? matchNormal[1].trim() : "";
 }
 
-// Lanza la sincronizacion del proyecto actual y actualiza la vista cuando termina.
+// Sincroniza primero GitLab y despues Clockify para que las imputaciones puedan
+// aprovechar las vinculaciones por numero de issue antes de refrescar la vista.
 async function sincronizar() {
     const proyectoId = localStorage.getItem("proyectoId");
     const btn = document.getElementById("btn-sincronizar");
     const icon = document.getElementById("icon-sync");
     const texto = document.getElementById("texto-sincronizar");
 
-    btn.disabled = true;
-    texto.textContent = "Sincronizando...";
-    icon.style.animation = "spin 1s linear infinite";
-    icon.style.transformOrigin = "center";
+    if (!proyectoId) {
+        mostrarToast("No se encontro el proyecto actual.", "error");
+        return;
+    }
 
-    const result = await peticionSegura(`/clockify/sincronizar/${proyectoId}`, {
-        method: "POST"
-    });
+    try {
+        btn.disabled = true;
+        texto.textContent = "Sincronizando GitLab...";
+        icon.style.animation = "spin 1s linear infinite";
+        icon.style.transformOrigin = "center";
 
-    const result2 = await peticionSegura(`/gitlab/sincronizar/${proyectoId}`, {
+        const resultadoGitLab = await peticionSegura(`/gitlab/sincronizar/${proyectoId}`, {
             method: "GET"
-    });
+        });
 
-    btn.disabled = false;
-    texto.textContent = "Sincronizar";
-    icon.style.animation = "";
+        if (!resultadoGitLab || !resultadoGitLab.success) {
+            mostrarToast((resultadoGitLab && resultadoGitLab.mensaje) || "Error al sincronizar GitLab.", "error");
+            return;
+        }
 
-    if (result && result.success && result2 && result2.success) {
+        texto.textContent = "Sincronizando Clockify...";
+
+        const resultadoClockify = await peticionSegura(`/clockify/sincronizar/${proyectoId}`, {
+            method: "POST"
+        });
+
+        if (!resultadoClockify || !resultadoClockify.success) {
+            mostrarToast((resultadoClockify && resultadoClockify.mensaje) || "Error al sincronizar Clockify.", "error");
+            return;
+        }
+
+        texto.textContent = "Actualizando...";
         const ahora = new Date().toISOString();
         localStorage.setItem(`ultima-sync-${proyectoId}`, ahora);
         await refrescarDetallesActuales(true);
         mostrarUltimaSync(ahora);
-        mostrarToast("Sincronizacion completada correctamente.", "success");
+        mostrarToast(
+            `${resultadoGitLab.mensaje || "GitLab sincronizado."} ${resultadoClockify.mensaje || "Clockify sincronizado."}`,
+            "success"
+        );
 
         if (typeof auditService !== "undefined" && auditService && auditService.registrar) {
-            auditService.registrar("SINCRONIZACION", `Proyecto ${proyectoId} sincronizado.`, parseInt(proyectoId, 10));
+            auditService.registrar("SINCRONIZACION", `Proyecto ${proyectoId} sincronizado con GitLab y Clockify.`, parseInt(proyectoId, 10));
         }
-    } else {
-        mostrarToast((result && result.mensaje) || "Error al sincronizar.", "error");
+    } catch (error) {
+        console.error("Error al sincronizar el proyecto:", error);
+        mostrarToast("No se pudo completar la sincronizacion.", "error");
+    } finally {
+        btn.disabled = false;
+        texto.textContent = "Sincronizar";
+        icon.style.animation = "";
     }
 }
 

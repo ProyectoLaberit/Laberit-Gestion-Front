@@ -170,6 +170,136 @@
             </div>
         </div>
 
+        <div class="modal fade gitlab-issues-modal" id="modalIssuesGitlab" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="gitlab-modal-heading">
+                            <div class="gitlab-modal-eyebrow">GitLab</div>
+                            <div class="gitlab-modal-department-hero">
+                                <span>Departamento</span>
+                                <strong id="gitlab-modal-departamento">Departamento</strong>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="gitlab-modal-current-issue" id="gitlab-modal-current-issue">
+                            <span class="gitlab-modal-current-empty">Selecciona un recuadro de GitLab para ver la issue actual.</span>
+                        </div>
+
+                        <div class="gitlab-modal-selection d-none" id="gitlab-modal-selection">
+                            <div>
+                                <div class="gitlab-modal-selection-label">Issue seleccionada</div>
+                                <div class="gitlab-modal-selection-title" id="gitlab-modal-selection-title"></div>
+                            </div>
+                            <div class="gitlab-modal-selection-actions">
+                                <button type="button" class="gitlab-modal-selection-action gitlab-modal-selection-edit" id="gitlab-modal-selection-edit" onclick="editarIssueSeleccionadaGitlabModal(this)">
+                                    Editar titulo
+                                </button>
+                                <button type="button" class="gitlab-modal-selection-action gitlab-modal-selection-unlink" id="gitlab-modal-selection-unlink" onclick="desvincularIssueSeleccionadaGitlabModal(this)">
+                                    Desvincular
+                                </button>
+                                <button type="button" class="gitlab-modal-selection-action gitlab-modal-selection-delete" id="gitlab-modal-selection-delete" onclick="borrarIssueSeleccionadaGitlabModal(this)">
+                                    Borrar
+                                </button>
+                                <button type="button" class="gitlab-modal-selection-action gitlab-modal-selection-link" id="gitlab-modal-selection-link" onclick="vincularIssueSeleccionadaGitlabModal(this)">
+                                    Vincular
+                                </button>
+                                <button type="button" class="gitlab-modal-selection-cancel" onclick="limpiarSeleccionIssueGitlabModal()">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="gitlab-modal-toolbar">
+                            <div class="gitlab-modal-tabs">
+                                <button type="button" class="gitlab-modal-tab" id="gitlab-modal-tab-validas"
+                                    onclick="setFiltroGitlabModal('validas')">
+                                    Validas (<span id="gitlab-modal-cnt-validas">0</span>)
+                                </button>
+                                <button type="button" class="gitlab-modal-tab" id="gitlab-modal-tab-invalidas"
+                                    onclick="setFiltroGitlabModal('invalidas')">
+                                    Pendientes (<span id="gitlab-modal-cnt-invalidas">0</span>)
+                                </button>
+                                <button type="button" class="gitlab-modal-tab active" id="gitlab-modal-tab-todas"
+                                    onclick="setFiltroGitlabModal('todas')">
+                                    Todas (<span id="gitlab-modal-cnt-todas">0</span>)
+                                </button>
+                            </div>
+                            <div class="input-group gitlab-modal-search">
+                                <span class="input-group-text bg-white border-end-0 text-muted">
+                                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                    </svg>
+                                </span>
+                                <input type="text" class="form-control border-start-0" id="gitlab-modal-busqueda"
+                                    placeholder="Buscar issue..." oninput="renderPaginaGitlabModal()">
+                            </div>
+                        </div>
+
+                        <div class="gitlab-modal-table">
+                            <table class="table table-borderless mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width:44px;">Estado</th>
+                                        <th style="width:120px;">Tarea</th>
+                                        <th>Titulo</th>
+                                        <th style="width:150px;">Estado GitLab</th>
+                                        <th style="width:150px;">Vinculacion</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gitlab-modal-tabla">
+                                    <tr>
+                                        <td colspan="5" class="gitlab-modal-empty">
+                                            Selecciona un recuadro de GitLab para cargar Tarea.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="gitlab-modal-pagination">
+                            <span id="gitlab-modal-pag-info">Sin resultados</span>
+                            <div class="gitlab-modal-pag-btns" id="gitlab-modal-pag-btns"></div>
+                        </div>
+                    </div>
+
+                    <div class="gitlab-edit-overlay d-none" id="gitlab-edit-issue-modal"
+                        onclick="if (event.target === this) cerrarModalEdicionIssueGitlab()">
+                        <div class="gitlab-edit-card" role="dialog" aria-modal="true" aria-labelledby="gitlab-edit-title-heading">
+                            <h2 id="gitlab-edit-title-heading">Editar issue de GitLab</h2>
+                            <p>Actualiza el titulo local de la issue y guarda los cambios.</p>
+
+                            <div class="gitlab-edit-field">
+                                <label for="gitlab-edit-issue-number">Issue</label>
+                                <input type="text" id="gitlab-edit-issue-number" readonly>
+                            </div>
+
+                            <div class="gitlab-edit-field">
+                                <label for="gitlab-edit-issue-title-input">Nombre de la issue</label>
+                                <input type="text" id="gitlab-edit-issue-title-input" maxlength="255"
+                                    placeholder="Nombre de la issue..."
+                                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); guardarEdicionIssueGitlabModal(document.getElementById('gitlab-edit-issue-save')); }">
+                            </div>
+
+                            <div class="gitlab-edit-actions">
+                                <button type="button" class="gitlab-edit-cancel" onclick="cerrarModalEdicionIssueGitlab()">
+                                    Cancelar
+                                </button>
+                                <button type="button" class="gitlab-edit-save" id="gitlab-edit-issue-save"
+                                    onclick="guardarEdicionIssueGitlabModal(this)">
+                                    Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
 

@@ -11,18 +11,6 @@ window.onload = async function () {
         return;
     }
 
-    if (typeof esEmpleado === "function" && esEmpleado()) {
-        document.body.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                        height:100vh;background:#f8f9fa;font-family:sans-serif;">
-                <h2 style="color:#1f2937;font-weight:800;margin:0 0 0.5rem;">Acceso no permitido</h2>
-                <p style="color:#6c757d;margin:0 0 1.5rem;">Los usuarios con rol Empleado no pueden visualizar tareas de GitLab.</p>
-                <a href="proyectos.html" style="background:#C01717;color:white;padding:10px 24px;
-                    border-radius:6px;text-decoration:none;font-weight:600;">Volver a Proyectos</a>
-            </div>`;
-        return;
-    }
-
     cargarBreadcrumbGitlab();
     await cargarTareasGitlab();
     setFiltroGitlab("validas");
@@ -34,6 +22,7 @@ window.onload = async function () {
 function cargarBreadcrumbGitlab() {
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoId = localStorage.getItem("proyectoId");
+    const departamento = obtenerDepartamentoGitlabActual();
     const proyecto = proyectos.find(p => String(p.id) === String(proyectoId));
     const nombreProyecto = proyecto ? proyecto.nombre : "Proyecto";
 
@@ -41,12 +30,15 @@ function cargarBreadcrumbGitlab() {
     document.getElementById("bc-fase").innerText = localStorage.getItem("faseSeleccionada") || "Fase";
     document.getElementById("bc-subfase").innerText = localStorage.getItem("subfaseSeleccionada") || "Subfase";
     document.getElementById("bc-tarea").innerText = localStorage.getItem("nombreTarea") || "Tarea";
-    document.getElementById("gitlab-proyecto").innerText = nombreProyecto;
+    document.getElementById("gitlab-proyecto").innerText = departamento
+        ? `${nombreProyecto} / ${departamento}`
+        : nombreProyecto;
 }
 
 // Carga todas las tareas registradas de GitLab para el proyecto actual.
 async function cargarTareasGitlab() {
     const proyectoId = localStorage.getItem("proyectoId");
+    const departamento = obtenerDepartamentoGitlabActual();
 
     if (!proyectoId) {
         mostrarErrorGitlab("Falta el proyecto actual. Vuelve atras y entra de nuevo.");
@@ -60,20 +52,44 @@ async function cargarTareasGitlab() {
 
     setEstadoCargaGitlab("Cargando tareas de GitLab...");
 
-    const result = await peticionSegura(`/gitlab/vinculadas/todas/${proyectoId}`);
+    const endpoint = departamento
+        ? `/gitlab/vinculadas/departamento/${encodeURIComponent(proyectoId)}/${encodeURIComponent(departamento)}`
+        : `/gitlab/vinculadas/todas/${encodeURIComponent(proyectoId)}`;
+    const result = await peticionSegura(endpoint);
+    const listaTareas = extraerListaTareasGitlab(result);
 
-    if (!result || !result.success || !Array.isArray(result.data)) {
+    if (!Array.isArray(listaTareas)) {
         tareasGitlab = [];
         actualizarEstadisticasGitlab();
         mostrarErrorGitlab((result && result.mensaje) || "No se pudieron cargar las tareas de GitLab.");
         return;
     }
 
-    tareasGitlab = result.data.map(normalizarTareaGitlab);
+    tareasGitlab = listaTareas.map(normalizarTareaGitlab);
     paginaGitlabActual = 1;
     actualizarEstadisticasGitlab();
-    actualizarEstadoFiltroGitlab("Mostrando tareas registradas en GitLab.");
+    actualizarEstadoFiltroGitlab(departamento
+        ? `Mostrando tareas de GitLab del departamento ${departamento}.`
+        : "Mostrando tareas registradas en GitLab.");
     renderPaginaGitlab();
+}
+
+// Recupera el departamento enviado desde paginatareas para filtrar la consulta.
+function obtenerDepartamentoGitlabActual() {
+    return (localStorage.getItem("nombreDepartamentoGitlabVis") || "").trim();
+}
+
+// Soporta tanto ApiResponse como la lista directa que devuelve el endpoint por departamento.
+function extraerListaTareasGitlab(result) {
+    if (Array.isArray(result)) {
+        return result;
+    }
+
+    if (result && result.success && Array.isArray(result.data)) {
+        return result.data;
+    }
+
+    return null;
 }
 
 // Lanza la sincronizacion contra GitLab y recarga la tabla local al terminar.
