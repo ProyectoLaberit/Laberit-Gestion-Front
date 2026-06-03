@@ -171,7 +171,7 @@ async function cargarIssuesGitlabInvalidas(proyectoId) {
     }
 
     try {
-        const result = await peticionSegura(`/gitlab/vinculadas/todas/${proyectoId}`);
+        const result = await peticionSegura(`/gitlab/vinculadas/invalidas/${proyectoId}`);
 
         if (!result || !result.success || !Array.isArray(result.data)) {
             return [];
@@ -179,7 +179,7 @@ async function cargarIssuesGitlabInvalidas(proyectoId) {
 
         return result.data
             .map(normalizarIssueGitlab)
-            .filter(issue => issue.issueId && !issue.valida);
+            .filter(issue => issue.issueId);
     } catch (error) {
         console.error("No se pudieron cargar las issues invalidas de GitLab:", error);
         return [];
@@ -283,6 +283,7 @@ function renderizarTablaEspecifica() {
         const numeroGitActual = p && p.numeroGit != null ? String(p.numeroGit) : "";
         const nombreIssueActual = p ? (p.nombreTareaGit || "") : "";
         const nombreDepartamento = p ? (p.nombreDep || p.nombreDepartamento || "") : "";
+        const idDepartamento = p && p.idDepartamento != null ? String(p.idDepartamento) : "";
         const claseGitlab = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
             ? "gitlab-item gitlab-item-selected"
             : "gitlab-item";
@@ -290,9 +291,8 @@ function renderizarTablaEspecifica() {
         const atributosClick = modoEliminacion
             ? ""
             : `role="button" tabindex="0"
-                onclick="abrirModalIssuesGitlab('${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}')"
-                onkeydown="abrirModalIssuesGitlabConTeclado(event, '${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}')"`;
-
+                onclick="abrirModalIssuesGitlab('${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(idDepartamento)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}')"
+                onkeydown="abrirModalIssuesGitlabConTeclado(event, '${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(idDepartamento)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}')"`
         return `
             <div class="${claseClickable}" ${atributosClick}>
                 ${renderizarContenidoGitlab(p)}
@@ -640,29 +640,27 @@ function actualizarVinculacionGitlabLocal(issueId, idTareaProyecto, listaOrigen 
 }
 
 // Permite abrir el modal de GitLab con teclado cuando el recuadro tiene el foco.
-function abrirModalIssuesGitlabConTeclado(event, idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual = "") {
+function abrirModalIssuesGitlabConTeclado(event, idTareaProyecto, numeroGit, idDepartamento, nombreDepartamento, nombreIssueActual = "") {
     if (event.key !== "Enter" && event.key !== " ") {
         return;
     }
-
     event.preventDefault();
-    abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual);
+    abrirModalIssuesGitlab(idTareaProyecto, numeroGit, idDepartamento, nombreDepartamento, nombreIssueActual);
 }
 
 // Abre la vista rapida de issues de GitLab sin salir de paginatareas.
-async function abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual = "") {
+async function abrirModalIssuesGitlab(idTareaProyecto, numeroGit, idDepartamento, nombreDepartamento, nombreIssueActual = "") {
     if (modoEliminacion) {
         return;
     }
-
     const modalElemento = document.getElementById("modalIssuesGitlab");
     if (!modalElemento) {
         return;
     }
-
     contextoGitlabModalActual = {
         idTareaProyecto: idTareaProyecto || "",
         numeroGit: numeroGit || "",
+        idDepartamento: idDepartamento || "",
         nombreDepartamento: nombreDepartamento || "",
         nombreIssueActual: nombreIssueActual || ""
     };
@@ -670,17 +668,14 @@ async function abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartam
     issueGitlabSeleccionadaModal = null;
     filtroGitlabModalActual = "invalidas";
     paginaGitlabModalActual = 1;
-
     actualizarCabeceraModalGitlab();
     actualizarIssueActualModalGitlab();
     actualizarSeleccionIssueGitlabModal();
     limpiarBusquedaModalGitlab();
     setEstadoCargaGitlabModal("Cargando issues de GitLab...");
     actualizarTabsGitlabModal();
-
     const modal = bootstrap.Modal.getInstance(modalElemento) || new bootstrap.Modal(modalElemento);
     modal.show();
-
     await cargarIssuesGitlabModal();
 }
 
@@ -747,26 +742,21 @@ function limpiarBusquedaModalGitlab() {
 // Carga las issues visibles en el modal usando el mismo backend que visualizartareasgitlab.
 async function cargarIssuesGitlabModal() {
     const proyectoId = localStorage.getItem("proyectoId");
-    const departamento = contextoGitlabModalActual?.nombreDepartamento || "";
-
+    const idDepartamento = contextoGitlabModalActual?.idDepartamento || "";
     if (!proyectoId) {
         mostrarErrorGitlabModal("Falta el proyecto actual.");
         return;
     }
-
-    const endpoint = departamento
-        ? `/gitlab/vinculadas/departamento/${encodeURIComponent(proyectoId)}/${encodeURIComponent(departamento)}`
+    const endpoint = idDepartamento
+        ? `/gitlab/vinculadas/departamento/${encodeURIComponent(proyectoId)}/${encodeURIComponent(idDepartamento)}`
         : `/gitlab/vinculadas/todas/${encodeURIComponent(proyectoId)}`;
-
     try {
         const result = await peticionSegura(endpoint);
         const listaIssues = extraerListaIssuesGitlabModal(result);
-
         if (!Array.isArray(listaIssues)) {
             mostrarErrorGitlabModal((result && result.mensaje) || "No se pudieron cargar las issues de GitLab.");
             return;
         }
-
         issuesGitlabModal = listaIssues.map(normalizarIssueGitlab);
         paginaGitlabModalActual = 1;
         actualizarIssueActualModalGitlab();
