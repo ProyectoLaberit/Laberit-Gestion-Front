@@ -181,11 +181,15 @@ async function sincronizar() {
         method: "POST"
     });
 
+    const result2 = await peticionSegura(`/gitlab/sincronizar/${proyectoId}`, {
+            method: "GET"
+    });
+
     btn.disabled = false;
     texto.textContent = "Sincronizar";
     icon.style.animation = "";
 
-    if (result && result.success) {
+    if (result && result.success && result2 && result2.success) {
         const ahora = new Date().toISOString();
         localStorage.setItem(`ultima-sync-${proyectoId}`, ahora);
         await refrescarDetallesActuales(true);
