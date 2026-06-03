@@ -58,10 +58,13 @@ async function cargarDatosSubfase() {
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoActual = proyectos.find((p) => String(p.id) === String(proyectoId));
     const nombreProyecto = proyectoActual ? proyectoActual.nombre : "Proyecto";
-    const nombreFase = localStorage.getItem("faseSeleccionada") || "Fase";
+    const faseGuardada = localStorage.getItem("faseSeleccionada") || "";
+    const nombreFase = faseGuardada && faseGuardada !== "Fase"
+        ? faseGuardada
+        : nombreSub || "Fase";
 
     document.getElementById("bc-proyecto").innerText = nombreProyecto;
-    document.getElementById("bc-fase").innerText = nombreFase;
+    document.getElementById("bc-fase").innerText = `Fase: ${nombreFase}`;
 
     if (!proyectoId || !idSub) {
         console.error("Error: Falta el ID del proyecto o la subfase en el localStorage");

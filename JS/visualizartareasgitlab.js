@@ -26,13 +26,35 @@ function cargarBreadcrumbGitlab() {
     const proyecto = proyectos.find(p => String(p.id) === String(proyectoId));
     const nombreProyecto = proyecto ? proyecto.nombre : "Proyecto";
 
+    const { faseBreadcrumb, subfaseBreadcrumb } = obtenerNivelesBreadcrumbGitlab();
+
     document.getElementById("bc-proyecto").innerText = nombreProyecto;
-    document.getElementById("bc-fase").innerText = localStorage.getItem("faseSeleccionada") || "Fase";
-    document.getElementById("bc-subfase").innerText = localStorage.getItem("subfaseSeleccionada") || "Subfase";
-    document.getElementById("bc-tarea").innerText = localStorage.getItem("nombreTarea") || "Tarea";
+    document.getElementById("bc-fase").innerText = `Fase: ${faseBreadcrumb}`;
+    document.getElementById("bc-subfase").innerText = `Subfase: ${subfaseBreadcrumb}`;
+    ocultarBreadcrumbDuplicadoGitlab("bc-tarea");
     document.getElementById("gitlab-proyecto").innerText = departamento
         ? `${nombreProyecto} / ${departamento}`
         : nombreProyecto;
+}
+
+// Resuelve los nombres reales que se muestran en la ruta superior de esta vista.
+function obtenerNivelesBreadcrumbGitlab() {
+    const faseGuardada = localStorage.getItem("faseSeleccionada") || "";
+    const subfaseGuardada = localStorage.getItem("subfaseSeleccionada") || "";
+    const faseBreadcrumb = faseGuardada && faseGuardada !== "Fase"
+        ? faseGuardada
+        : subfaseGuardada || "Fase";
+    const subfaseBreadcrumb = localStorage.getItem("nombreTarea") || "Subfase";
+
+    return { faseBreadcrumb, subfaseBreadcrumb };
+}
+
+// Oculta el nivel de tarea cuando ya aparece como "Subfase: ...".
+function ocultarBreadcrumbDuplicadoGitlab(idElemento) {
+    const elemento = document.getElementById(idElemento);
+    if (elemento && elemento.parentElement) {
+        elemento.parentElement.style.display = "none";
+    }
 }
 
 // Carga todas las tareas registradas de GitLab para el proyecto actual.

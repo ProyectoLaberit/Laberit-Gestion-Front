@@ -47,13 +47,34 @@ function cargarBreadcrumb() {
     const proyecto = proyectos.find(p => String(p.id) === String(proyectoId));
 
     const nombreDept = localStorage.getItem("nombreDepartamentoVis") || "Departamento";
+    const { faseBreadcrumb, subfaseBreadcrumb } = obtenerNivelesBreadcrumbVisualizacion();
 
     document.getElementById("bc-proyecto").innerText = proyecto ? proyecto.nombre : "Proyecto";
-    document.getElementById("bc-fase").innerText = localStorage.getItem("faseSeleccionada") || "Fase";
-    document.getElementById("bc-subfase").innerText = localStorage.getItem("subfaseSeleccionada") || "Subfase";
-    document.getElementById("bc-tarea").innerText = localStorage.getItem("nombreTarea") || "Tarea";
+    document.getElementById("bc-fase").innerText = `Fase: ${faseBreadcrumb}`;
+    document.getElementById("bc-subfase").innerText = `Subfase: ${subfaseBreadcrumb}`;
+    ocultarBreadcrumbDuplicado("bc-tarea");
     document.getElementById("bc-dept").innerText = nombreDept;
     document.getElementById("dept-nombre").innerText = nombreDept;
+}
+
+// Resuelve los nombres reales que se muestran en la ruta superior de esta vista.
+function obtenerNivelesBreadcrumbVisualizacion() {
+    const faseGuardada = localStorage.getItem("faseSeleccionada") || "";
+    const subfaseGuardada = localStorage.getItem("subfaseSeleccionada") || "";
+    const faseBreadcrumb = faseGuardada && faseGuardada !== "Fase"
+        ? faseGuardada
+        : subfaseGuardada || "Fase";
+    const subfaseBreadcrumb = localStorage.getItem("nombreTarea") || "Subfase";
+
+    return { faseBreadcrumb, subfaseBreadcrumb };
+}
+
+// Oculta el nivel de tarea cuando ya aparece como "Subfase: ...".
+function ocultarBreadcrumbDuplicado(idElemento) {
+    const elemento = document.getElementById(idElemento);
+    if (elemento && elemento.parentElement) {
+        elemento.parentElement.style.display = "none";
+    }
 }
 
 // Inicializa el filtro de fechas con un rango por defecto de los ultimos 30 dias.

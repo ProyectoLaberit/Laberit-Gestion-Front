@@ -6,7 +6,7 @@ let detallesPendientesEliminacion = [];
 let puedeGestionarEstimacionesActual = false;
 let modoEliminacion = false;
 let issuesGitlabModal = [];
-let filtroGitlabModalActual = "todas";
+let filtroGitlabModalActual = "invalidas";
 let paginaGitlabModalActual = 1;
 let contextoGitlabModalActual = null;
 let issueGitlabSeleccionadaModal = null;
@@ -93,10 +93,11 @@ async function cargarDetallesTar() {
 
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoActual = proyectos.find((p) => String(p.id) === String(proyectoId));
+    const { faseBreadcrumb, subfaseBreadcrumb } = obtenerNivelesBreadcrumbTarea(nombreTar);
     document.getElementById("bc-proyecto").innerText = proyectoActual ? proyectoActual.nombre : "Proyecto";
-    document.getElementById("bc-fase").innerText = localStorage.getItem("faseSeleccionada") || "Fase";
-    document.getElementById("bc-subfase").innerText = localStorage.getItem("subfaseSeleccionada") || "Subfase";
-    document.getElementById("bc-tarea").innerText = nombreTar || "Tarea";
+    document.getElementById("bc-fase").innerText = `Fase: ${faseBreadcrumb}`;
+    document.getElementById("bc-subfase").innerText = `Subfase: ${subfaseBreadcrumb}`;
+    ocultarBreadcrumbDuplicado("bc-tarea");
 
     if (!proyectoId || !idSub) {
         console.error("Error: Falta el ID del proyecto o la subfase en el localStorage");
@@ -139,6 +140,27 @@ async function cargarDetallesTar() {
         issuesGitlabInvalidas = issuesPrevias;
         renderizarTablaEspecifica();
         console.error("Error en la llamada:", error);
+    }
+}
+
+// Resuelve los nombres reales que se muestran en la ruta superior de esta vista.
+function obtenerNivelesBreadcrumbTarea(nombreTar) {
+    const faseGuardada = localStorage.getItem("faseSeleccionada") || "";
+    const subfaseGuardada = localStorage.getItem("subfaseSeleccionada") || "";
+    const faseBreadcrumb = faseGuardada && faseGuardada !== "Fase"
+        ? faseGuardada
+        : subfaseGuardada || "Fase";
+    const subfaseBreadcrumb = nombreTar || localStorage.getItem("nombreTarea") || "Subfase";
+
+    return { faseBreadcrumb, subfaseBreadcrumb };
+}
+
+// Oculta el ultimo nivel cuando el nombre ya aparece como "Subfase: ...".
+function ocultarBreadcrumbDuplicado(idElemento) {
+    const elemento = document.getElementById(idElemento);
+    if (elemento) {
+        elemento.textContent = "";
+        elemento.style.display = "none";
     }
 }
 
@@ -646,7 +668,7 @@ async function abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartam
     };
     issuesGitlabModal = [];
     issueGitlabSeleccionadaModal = null;
-    filtroGitlabModalActual = "todas";
+    filtroGitlabModalActual = "invalidas";
     paginaGitlabModalActual = 1;
 
     actualizarCabeceraModalGitlab();
@@ -898,6 +920,11 @@ function seleccionarIssueGitlabModal(issueId) {
     const issue = issuesGitlabModal.find(item => String(item.issueId) === String(issueId));
 
     if (!issue || !puedeGestionarEstimacionesActual) {
+        return;
+    }
+
+    if (issueGitlabSeleccionadaModal && String(issueGitlabSeleccionadaModal.issueId) === String(issue.issueId)) {
+        limpiarSeleccionIssueGitlabModal();
         return;
     }
 
