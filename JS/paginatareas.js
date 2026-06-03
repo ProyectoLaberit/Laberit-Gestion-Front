@@ -240,18 +240,18 @@ function renderizarTablaEspecifica() {
         }
 
         const claseNormal = puedeVisualizarTareas
-            ? "item d-flex align-items-center justify-content-between gap-2"
+            ? "item item-clickable item-department-card"
             : "item item-solo-texto";
+        const atributosClick = puedeVisualizarTareas
+            ? `role="button" tabindex="0"
+                onclick="irAVisualizarTareas(${Number(p.idTarea)}, ${Number(p.idTarea)}, ${idDepartamento}, '${nombreDepartamentoEscapado}')"
+                onkeydown="irAVisualizarTareasConTeclado(event, ${Number(p.idTarea)}, ${Number(p.idTarea)}, ${idDepartamento}, '${nombreDepartamentoEscapado}')"`
+            : "";
 
         return `
-            <div class="${claseNormal}">
+            <div class="${claseNormal}" ${atributosClick}>
                 <div class="item-name">${nombreDepartamento}</div>
-                ${puedeVisualizarTareas ? `
-                <button class="btn btn-sm btn-outline-secondary" style="font-size:0.72rem;white-space:nowrap;"
-                    onclick="irAVisualizarTareas(${Number(p.idTarea)}, ${Number(p.idTarea)}, ${idDepartamento}, '${nombreDepartamentoEscapado}')">  
-                    Visualizar tareas
-                </button>
-                ` : ""}
+                ${puedeVisualizarTareas ? `<div class="item-card-hint">Visualizar imputaciones de Clockify</div>` : ""}
             </div>
         `;
     }).join("");
@@ -561,7 +561,7 @@ function renderizarContenidoGitlab(p) {
             <div class="gitlab-meta">
                 <span class="gitlab-empty">No hay una vinculación válida en GitLab</span>
             </div>
-            <div class="gitlab-card-hint">Haz clic para elegir una issue del departamento</div>
+            <div class="gitlab-card-hint">Haz clic para elegir una tarea del departamento</div>
         `;
     }
 
@@ -572,7 +572,7 @@ function renderizarContenidoGitlab(p) {
         <div class="gitlab-linked-row">
             <div class="gitlab-title">${escaparHtml(numero)} - ${escaparHtml(titulo)}</div>
         </div>
-        <div class="gitlab-card-hint">Haz clic para ver issues del departamento</div>
+        <div class="gitlab-card-hint">Visualizar las tareas de Gitlab</div>
     `;
 }
 
@@ -1389,6 +1389,16 @@ function irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartament
     localStorage.setItem("idDepartamentoVis", idDepartamento);
     localStorage.setItem("nombreDepartamentoVis", nombreDepartamento);
     window.location.href = "visualizartareas.html";
+}
+
+// Permite abrir visualizartareas.html con Enter o espacio desde la tarjeta del departamento.
+function irAVisualizarTareasConTeclado(event, idDetalleEstimacion, idTareaProyecto, idDepartamento, nombreDepartamento) {
+    if (event.key !== "Enter" && event.key !== " ") {
+        return;
+    }
+
+    event.preventDefault();
+    irAVisualizarTareas(idDetalleEstimacion, idTareaProyecto, idDepartamento, nombreDepartamento);
 }
 
 // Convierte horas decimales a un formato mas legible para mostrarlo en pantalla.
