@@ -504,11 +504,11 @@
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            border: 1px solid #eadada;
+            border: 1px solid #e5e7eb;
             border-radius: 14px;
             padding: 12px 14px;
             margin: 0 0 14px;
-            background: #fffafa;
+            background: #ffffff;
         }
 
         .gitlab-modal-current-label {
@@ -544,12 +544,12 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            border: 1px solid #f0b4b4;
+            border: 1px solid #e5e7eb;
             border-radius: 14px;
             padding: 12px 14px;
             margin: -4px 0 14px;
-            background: linear-gradient(135deg, #fffafa 0%, #ffffff 100%);
-            box-shadow: 0 10px 24px rgba(192, 23, 23, 0.08);
+            background: #ffffff;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
         }
 
         .gitlab-modal-selection-label {
@@ -802,16 +802,16 @@
 
         .gitlab-modal-row-selectable:hover td,
         .gitlab-modal-row-selectable:focus td {
-            background: #fff7f7;
+            background: #f9fafb;
         }
 
         .gitlab-modal-row-selected td {
-            background: #fff1f2;
-            box-shadow: inset 0 1px 0 #fecdd3, inset 0 -1px 0 #fecdd3;
+            background: #f9fafb;
+            box-shadow: inset 0 1px 0 #e5e7eb, inset 0 -1px 0 #e5e7eb;
         }
 
         .gitlab-modal-row-selected td:first-child {
-            box-shadow: inset 4px 0 0 #C01717, inset 0 1px 0 #fecdd3, inset 0 -1px 0 #fecdd3;
+            box-shadow: inset 4px 0 0 #6b7280, inset 0 1px 0 #e5e7eb, inset 0 -1px 0 #e5e7eb;
         }
 
         .gitlab-modal-issue-title {
