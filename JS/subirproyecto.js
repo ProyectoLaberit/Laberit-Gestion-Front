@@ -135,6 +135,9 @@ async function guardarProyecto() {
                 // });
 
                 if (excelResult && excelResult.success) {
+                    // Al subir el Excel por primera vez, borramos cualquier preferencia vieja (por si acaso)
+                    localStorage.removeItem(`idExcelHistorialSeleccionado-${idPro}`);
+
                     feedback.innerText = "Proyecto y Excel subidos correctamente. Sincronizando integraciones...";
                     await sincronizarProyectoCreado(idPro, feedback, signal);
                     finalizarSubidaCorrecta();

@@ -179,6 +179,10 @@ async function guardarProyecto() {
                 return;
             }
 
+            // Al subir un Excel nuevo, borramos la preferencia guardada
+            // para que al entrar a detalles se seleccione automáticamente el nuevo (vigente).
+            localStorage.removeItem(`idExcelHistorialSeleccionado-${id}`);
+
             feedback.className = "mt-3 text-center text-success";
             feedback.innerText = "Proyecto actualizado y Excel importado correctamente.";
         } else {
