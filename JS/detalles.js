@@ -431,13 +431,17 @@ async function cargarEstadosSubfasesCompletadas() {
 
     const promesas = Object.entries(idsActuales).map(([subfaseNombre, idSubfase]) => {
         return subfaseCompletada(idSubfase)
-            .then((completada) => ({ idSubfase, completada: Boolean(completada) }))
-            .catch(() => ({ idSubfase, completada: false }));
+            .then((res) => {
+                const completada = Boolean(res && res.success);
+                const datos = Array.isArray(res && res.data) ? res.data : null;
+                return { idSubfase, completada, datos };
+            })
+            .catch(() => ({ idSubfase, completada: false, datos: null }));
     });
 
     const resultados = await Promise.all(promesas);
-    resultados.forEach(({ idSubfase, completada }) => {
-        tareasSubfasesCompletadas.set(String(idSubfase), completada);
+    resultados.forEach(({ idSubfase, completada, datos }) => {
+        tareasSubfasesCompletadas.set(String(idSubfase), { completada, datos });
     });
 }
 
@@ -473,7 +477,10 @@ function renderizarTodo(filtro = "", estr, ids) {
             const displayReal = formatoHoras(parseFloat(tiempos.tiempoRealTotal));
             const displayMin = formatoHoras(parseFloat(tiempos.tiempoEstimadoMin));
             const displayMax = formatoHoras(parseFloat(tiempos.tiempoEstimadoMax));
-            const completada = tareasSubfasesCompletadas.get(String(idSub)) === true;
+            const estado = tareasSubfasesCompletadas.get(String(idSub)) || { completada: false, datos: null };
+            const completada = estado.completada === true;
+            const datos = estado.datos;
+            const conteoTexto = Array.isArray(datos) && datos.length >= 2 ? `${datos[0]}/${datos[1]}` : "";
 
             if (completada) {
                 htmlContent += `
@@ -483,11 +490,12 @@ function renderizarTodo(filtro = "", estr, ids) {
                         <div class="text-primary mt-2 fw-bold" style="font-size: 0.95rem;">
                             ${displayReal} / ${displayMin} - ${displayMax}
                         </div>
+                        <div class="text-secondary small mt-1 fw-bold">TAREAS COMPLETADAS: ${conteoTexto}</div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
                 </div>
             `;
-            }else{
+            } else {
                 htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}')">
@@ -495,6 +503,7 @@ function renderizarTodo(filtro = "", estr, ids) {
                         <div class="text-primary mt-2 fw-bold" style="font-size: 0.95rem;">
                             ${displayReal} / ${displayMin} - ${displayMax}
                         </div>
+                        <div class="text-secondary small mt-1 fw-bold">TAREAS COMPLETADAS: ${conteoTexto}</div>
                         <div class="text-muted small mt-2">Haga clic para ver tareas</div>
                     </div>
                 </div>
@@ -563,11 +572,11 @@ function formatoHoras(decimal) {
 
 async function subfaseCompletada(idSubfase) {
     const proyectoId = localStorage.getItem("proyectoId");
-    const resultCompletada = await peticionSegura(`/fases/completa/${proyectoId}/${idSubfase}`);
-    
-    if(resultCompletada.success){
-        return true;
-    }else{
-        return false;
-    } 
+    try {
+        const resultCompletada = await peticionSegura(`/fases/completa/${proyectoId}/${idSubfase}`);
+        return resultCompletada || { success: false, data: null };
+    } catch (e) {
+        console.error("Error comprobando subfase completada:", e);
+        return { success: false, data: null };
+    }
 }
