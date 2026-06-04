@@ -488,7 +488,7 @@ function abrirConfirmacionEliminacion(detallesAEliminar) {
     }
 
     texto.textContent = detallesPendientesEliminacion.length === 1
-        ? `Seguro que quieres eliminar la estimacion del departamento "${detallesPendientesEliminacion[0].nombreDepartamento}"?`
+        ? `Seguro que quieres eliminar la estimacion del departamento "${obtenerNombreDepartamentoDetalle(detallesPendientesEliminacion[0])}"?`
         : `Seguro que quieres eliminar estas ${detallesPendientesEliminacion.length} estimaciones?`;
 
     overlay.classList.remove("d-none");
@@ -533,10 +533,19 @@ async function confirmarEliminacionEstimaciones() {
     }
 
     const errores = [];
+    const idsEliminados = new Set();
     for (const detalle of detallesPendientesEliminacion) {
-        const resultado = await eliminarUnaEstimacion(detalle.id);
+        const resultado = await eliminarUnaEstimacion(detalle);
         if (!resultado.success) {
-            errores.push(detalle.nombreDepartamento || `ID ${detalle.id}`);
+            const idTareaProyecto = obtenerIdTareaProyectoDetalle(detalle);
+            const nombre = obtenerNombreDepartamentoDetalle(detalle) || `ID ${idTareaProyecto || "desconocido"}`;
+            const motivo = resultado.mensaje ? ` (${resultado.mensaje})` : "";
+            errores.push(`${nombre}${motivo}`);
+        } else {
+            const idTareaProyecto = obtenerIdTareaProyectoDetalle(detalle);
+            if (idTareaProyecto) {
+                idsEliminados.add(String(idTareaProyecto));
+            }
         }
     }
 
@@ -551,25 +560,51 @@ async function confirmarEliminacionEstimaciones() {
         alert(`No se pudieron eliminar estas estimaciones: ${errores.join(", ")}`);
     }
 
+    if (idsEliminados.size > 0) {
+        quitarEstimacionesEliminadasDeLaVista(idsEliminados);
+    }
+
     cerrarConfirmacionEliminacion();
     cancelarModoEliminacion();
     await cargarDetallesTar();
 }
 
 // Elimina una estimacion concreta y devuelve un resumen del resultado.
-async function eliminarUnaEstimacion(idDetalleEstimacion) {
-    if (!idDetalleEstimacion) {
+async function eliminarUnaEstimacion(detalle) {
+    const idTareaProyecto = obtenerIdTareaProyectoDetalle(detalle);
+
+    if (!idTareaProyecto) {
         return { success: false };
     }
 
-    const result = await peticionSegura(`/estimaciones/${idDetalleEstimacion}`, {
+    const result = await peticionSegura(`/estimaciones/por-tarea-proyecto/${encodeURIComponent(idTareaProyecto)}`, {
         method: "DELETE"
     });
 
     return {
         success: Boolean(result && result.success),
+        mensaje: result && (result.mensaje || result.message),
         result
     };
+}
+
+function obtenerIdTareaProyectoDetalle(detalle) {
+    return detalle?.idTareaProyecto ?? detalle?.idTarea ?? detalle?.id ?? null;
+}
+
+function obtenerNombreDepartamentoDetalle(detalle) {
+    return detalle?.nombreDep || detalle?.nombreDepartamento || "Departamento";
+}
+
+function quitarEstimacionesEliminadasDeLaVista(idsEliminados) {
+    detallesTareaActuales = detallesTareaActuales.filter((detalle) => {
+        const idTareaProyecto = obtenerIdTareaProyectoDetalle(detalle);
+        return !idsEliminados.has(String(idTareaProyecto));
+    });
+
+    detallesSeleccionados.clear();
+    renderizarTablaEspecifica();
+    actualizarModoEliminacionUI();
 }
 
 // Funciones auxiliares para renderización y utilidades
