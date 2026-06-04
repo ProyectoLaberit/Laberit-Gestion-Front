@@ -171,7 +171,7 @@ async function cargarIssuesGitlabInvalidas(proyectoId) {
     }
 
     try {
-        const result = await peticionSegura(`/gitlab/vinculadas/invalidas/${proyectoId}`);
+        const result = await peticionSegura(`/gitlab/vinculadas/todas/${proyectoId}`);
 
         if (!result || !result.success || !Array.isArray(result.data)) {
             return [];
@@ -179,7 +179,7 @@ async function cargarIssuesGitlabInvalidas(proyectoId) {
 
         return result.data
             .map(normalizarIssueGitlab)
-            .filter(issue => issue.issueId);
+            .filter(issue => issue.issueId && !issue.valida);
     } catch (error) {
         console.error("No se pudieron cargar las issues invalidas de GitLab:", error);
         return [];
@@ -291,8 +291,9 @@ function renderizarTablaEspecifica() {
         const atributosClick = modoEliminacion
             ? ""
             : `role="button" tabindex="0"
-                onclick="abrirModalIssuesGitlab('${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(idDepartamento)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}')"
-                onkeydown="abrirModalIssuesGitlabConTeclado(event, '${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(idDepartamento)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}')"`
+                onclick="abrirModalIssuesGitlab('${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}', '${escaparParaJs(idDepartamento)}')"
+                onkeydown="abrirModalIssuesGitlabConTeclado(event, '${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}', '${escaparParaJs(idDepartamento)}')"`;
+
         return `
             <div class="${claseClickable}" ${atributosClick}>
                 ${renderizarContenidoGitlab(p)}
@@ -483,7 +484,7 @@ function abrirConfirmacionEliminacion(detallesAEliminar) {
     }
 
     texto.textContent = detallesPendientesEliminacion.length === 1
-        ? `Seguro que quieres eliminar la estimacion del departamento "${detallesPendientesEliminacion[0].nombreDepartamento}"?`
+        ? `Seguro que quieres eliminar la estimacion del departamento "${obtenerNombreDepartamentoDetalle(detallesPendientesEliminacion[0])}"?`
         : `Seguro que quieres eliminar estas ${detallesPendientesEliminacion.length} estimaciones?`;
 
     overlay.classList.remove("d-none");
@@ -528,10 +529,19 @@ async function confirmarEliminacionEstimaciones() {
     }
 
     const errores = [];
+    const idsEliminados = new Set();
     for (const detalle of detallesPendientesEliminacion) {
-        const resultado = await eliminarUnaEstimacion(detalle.id);
+        const resultado = await eliminarUnaEstimacion(detalle);
         if (!resultado.success) {
-            errores.push(detalle.nombreDepartamento || `ID ${detalle.id}`);
+            const idTareaProyecto = obtenerIdTareaProyectoDetalle(detalle);
+            const nombre = obtenerNombreDepartamentoDetalle(detalle) || `ID ${idTareaProyecto || "desconocido"}`;
+            const motivo = resultado.mensaje ? ` (${resultado.mensaje})` : "";
+            errores.push(`${nombre}${motivo}`);
+        } else {
+            const idTareaProyecto = obtenerIdTareaProyectoDetalle(detalle);
+            if (idTareaProyecto) {
+                idsEliminados.add(String(idTareaProyecto));
+            }
         }
     }
 
@@ -546,25 +556,51 @@ async function confirmarEliminacionEstimaciones() {
         alert(`No se pudieron eliminar estas estimaciones: ${errores.join(", ")}`);
     }
 
+    if (idsEliminados.size > 0) {
+        quitarEstimacionesEliminadasDeLaVista(idsEliminados);
+    }
+
     cerrarConfirmacionEliminacion();
     cancelarModoEliminacion();
     await cargarDetallesTar();
 }
 
 // Elimina una estimacion concreta y devuelve un resumen del resultado.
-async function eliminarUnaEstimacion(idDetalleEstimacion) {
-    if (!idDetalleEstimacion) {
+async function eliminarUnaEstimacion(detalle) {
+    const idTareaProyecto = obtenerIdTareaProyectoDetalle(detalle);
+
+    if (!idTareaProyecto) {
         return { success: false };
     }
 
-    const result = await peticionSegura(`/estimaciones/${idDetalleEstimacion}`, {
+    const result = await peticionSegura(`/estimaciones/por-tarea-proyecto/${encodeURIComponent(idTareaProyecto)}`, {
         method: "DELETE"
     });
 
     return {
         success: Boolean(result && result.success),
+        mensaje: result && (result.mensaje || result.message),
         result
     };
+}
+
+function obtenerIdTareaProyectoDetalle(detalle) {
+    return detalle?.idTareaProyecto ?? detalle?.idTarea ?? detalle?.id ?? null;
+}
+
+function obtenerNombreDepartamentoDetalle(detalle) {
+    return detalle?.nombreDep || detalle?.nombreDepartamento || "Departamento";
+}
+
+function quitarEstimacionesEliminadasDeLaVista(idsEliminados) {
+    detallesTareaActuales = detallesTareaActuales.filter((detalle) => {
+        const idTareaProyecto = obtenerIdTareaProyectoDetalle(detalle);
+        return !idsEliminados.has(String(idTareaProyecto));
+    });
+
+    detallesSeleccionados.clear();
+    renderizarTablaEspecifica();
+    actualizarModoEliminacionUI();
 }
 
 // Funciones auxiliares para renderización y utilidades
@@ -640,42 +676,48 @@ function actualizarVinculacionGitlabLocal(issueId, idTareaProyecto, listaOrigen 
 }
 
 // Permite abrir el modal de GitLab con teclado cuando el recuadro tiene el foco.
-function abrirModalIssuesGitlabConTeclado(event, idTareaProyecto, numeroGit, idDepartamento, nombreDepartamento, nombreIssueActual = "") {
+function abrirModalIssuesGitlabConTeclado(event, idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual = "", idDepartamento = "") {
     if (event.key !== "Enter" && event.key !== " ") {
         return;
     }
+
     event.preventDefault();
-    abrirModalIssuesGitlab(idTareaProyecto, numeroGit, idDepartamento, nombreDepartamento, nombreIssueActual);
+    abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual, idDepartamento);
 }
 
 // Abre la vista rapida de issues de GitLab sin salir de paginatareas.
-async function abrirModalIssuesGitlab(idTareaProyecto, numeroGit, idDepartamento, nombreDepartamento, nombreIssueActual = "") {
+async function abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual = "", idDepartamento = "") {
     if (modoEliminacion) {
         return;
     }
+
     const modalElemento = document.getElementById("modalIssuesGitlab");
     if (!modalElemento) {
         return;
     }
+
     contextoGitlabModalActual = {
         idTareaProyecto: idTareaProyecto || "",
         numeroGit: numeroGit || "",
-        idDepartamento: idDepartamento || "",
         nombreDepartamento: nombreDepartamento || "",
+        idDepartamento: idDepartamento || "",
         nombreIssueActual: nombreIssueActual || ""
     };
     issuesGitlabModal = [];
     issueGitlabSeleccionadaModal = null;
     filtroGitlabModalActual = "invalidas";
     paginaGitlabModalActual = 1;
+
     actualizarCabeceraModalGitlab();
     actualizarIssueActualModalGitlab();
     actualizarSeleccionIssueGitlabModal();
     limpiarBusquedaModalGitlab();
     setEstadoCargaGitlabModal("Cargando issues de GitLab...");
     actualizarTabsGitlabModal();
+
     const modal = bootstrap.Modal.getInstance(modalElemento) || new bootstrap.Modal(modalElemento);
     modal.show();
+
     await cargarIssuesGitlabModal();
 }
 
@@ -743,20 +785,25 @@ function limpiarBusquedaModalGitlab() {
 async function cargarIssuesGitlabModal() {
     const proyectoId = localStorage.getItem("proyectoId");
     const idDepartamento = contextoGitlabModalActual?.idDepartamento || "";
+
     if (!proyectoId) {
         mostrarErrorGitlabModal("Falta el proyecto actual.");
         return;
     }
+
     const endpoint = idDepartamento
         ? `/gitlab/vinculadas/departamento/${encodeURIComponent(proyectoId)}/${encodeURIComponent(idDepartamento)}`
         : `/gitlab/vinculadas/todas/${encodeURIComponent(proyectoId)}`;
+
     try {
         const result = await peticionSegura(endpoint);
         const listaIssues = extraerListaIssuesGitlabModal(result);
+
         if (!Array.isArray(listaIssues)) {
             mostrarErrorGitlabModal((result && result.mensaje) || "No se pudieron cargar las issues de GitLab.");
             return;
         }
+
         issuesGitlabModal = listaIssues.map(normalizarIssueGitlab);
         paginaGitlabModalActual = 1;
         actualizarIssueActualModalGitlab();
