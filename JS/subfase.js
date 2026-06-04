@@ -1,4 +1,5 @@
 let tareasSubfaseActuales = [];
+let tareasCompletadas = new Map();
 let tareasSeleccionadas = new Set();
 let puedeGestionarTareasActual = false;
 let modoEliminacion = false;
@@ -93,6 +94,7 @@ async function cargarDatosSubfase() {
         }
 
         tareasSubfaseActuales = Array.isArray(result.data) ? result.data : [];
+        await cargarEstadosCompletado();
         sincronizarSeleccionConDatos();
         renderizarTablaTareas();
         actualizarModoEliminacionUI();
@@ -130,6 +132,7 @@ function renderizarTablaTareas() {
 
     tabla.innerHTML = tareasSubfaseActuales.map((tarea, index) => {
         const clave = obtenerClaveTarea(tarea, index);
+        const completada = tareasCompletadas.get(clave) === true;
         const nombreTarea = tarea.nombreTarea || "Sin nombre";
         const nombreTareaEscapado = escaparParaJs(nombreTarea);
         const seleccionada = tareasSeleccionadas.has(clave);
@@ -145,13 +148,19 @@ function renderizarTablaTareas() {
             }
         }
 
+        let textoCompleta = "";
+        if(completada){
+            textoCompleta = " completa";
+        }
+
+
         const accionNombre = modoEliminacion
             ? `onclick="toggleSeleccionTarea('${clave}')"`
             : `onclick="detalleTarea('${nombreTareaEscapado}')"`; 
 
         return `
             <div class="b-col">
-                <div class="${claseItem}" ${accionNombre}>
+                <div class="${claseItem}${textoCompleta}" ${accionNombre}>
                     <div class="item-name">${escaparHtml(nombreTarea)}</div>
                 </div>
             </div>
@@ -204,6 +213,26 @@ function toggleSeleccionTarea(claveTarea) {
 
     renderizarTablaTareas();
     actualizarModoEliminacionUI();
+}
+
+// Carga los estados de completado de las tareas actuales en un mapa sincronizable.
+async function cargarEstadosCompletado() {
+    tareasCompletadas.clear();
+    if (!Array.isArray(tareasSubfaseActuales) || tareasSubfaseActuales.length === 0) {
+        return;
+    }
+
+    const promesas = tareasSubfaseActuales.map((tarea, index) => {
+        const clave = obtenerClaveTarea(tarea, index);
+        return tareaCompleta(tarea.nombreTarea)
+            .then((completada) => ({ clave, completada: Boolean(completada) }))
+            .catch(() => ({ clave, completada: false }));
+    });
+
+    const resultados = await Promise.all(promesas);
+    resultados.forEach(({ clave, completada }) => {
+        tareasCompletadas.set(clave, completada);
+    });
 }
 
 // Sincroniza la interfaz con el estado actual del modo de eliminacion.
@@ -452,4 +481,17 @@ function formatoHoras(decimal) {
     }
 
     return `${horas}:${minutos.toString().padStart(2, "0")}`;
+}
+
+async function tareaCompleta(nombreTarea) {
+
+    const proyectoId = localStorage.getItem("proyectoId");
+    const idSub = localStorage.getItem("idSubfase").trim();
+
+    const resultCompletada = await peticionSegura(`/estimaciones/tarea/completa/${nombreTarea}/${proyectoId}/${idSub}`);
+    if(resultCompletada.success){
+        return true;
+    }else{
+        return false;
+    }    
 }

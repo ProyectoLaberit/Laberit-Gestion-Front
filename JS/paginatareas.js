@@ -261,9 +261,13 @@ function renderizarTablaEspecifica() {
             `;
         }
 
-        const claseNormal = puedeVisualizarTareas
+        let claseNormal = puedeVisualizarTareas
             ? "item item-clickable item-department-card"
             : "item item-solo-texto";
+        
+        if(p.completada){
+            claseNormal += "-completada";
+        }
         const atributosClick = puedeVisualizarTareas
             ? `role="button" tabindex="0"
                 onclick="irAVisualizarTareas(${Number(p.idTarea)}, ${Number(p.idTarea)}, ${idDepartamento}, '${nombreDepartamentoEscapado}')"

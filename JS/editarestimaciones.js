@@ -144,7 +144,7 @@ function pintarFormulario(estimaciones) {
     const contenedor = document.getElementById("contenedor-inputs");
 
     contenedor.innerHTML = estimaciones.map((est, index) => {
-        const nombreDepartamento = est.nombreDepartamento || "Departamento";
+        const nombreDepartamento = est.nombreDep || "Departamento";
         const vinculacionActual = obtenerVinculacionActual(est.idTareaProyecto);
         const opcionesNoAsociadas = obtenerOpcionesNoAsociadas(vinculacionActual ? vinculacionActual.issueId : "");
         const selectDeshabilitado = opcionesNoAsociadas.length === 0 ? "disabled" : "";
@@ -156,44 +156,12 @@ function pintarFormulario(estimaciones) {
                     <span class="badge text-bg-secondary">${escaparHtml(est.tarea || "Tarea")}</span>
                 </div>
 
-                <input type="hidden" name="id-${index}" value="${est.id}">
+                <input type="hidden" name="id-${index}" value="${est.idTarea}">
                 <input type="hidden" name="idSubFase-${index}" value="${est.idSubFase || localStorage.getItem("idSubfase") || ""}">
-                <input type="hidden" name="idTareaProyecto-${index}" value="${est.idTareaProyecto || ""}">
                 <input type="hidden" name="tareaActual-${index}" value="${escaparHtml(est.tarea || "")}">
                 <input type="hidden" name="issueActual-${index}" value="${escaparHtml(vinculacionActual ? vinculacionActual.issueId : "")}">
 
                 <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label small">GitLab asociado</label>
-                        <div class="form-control bg-white d-flex align-items-center" style="min-height: 38px;">
-                            <span id="gitlab-asociado-${index}" class="${vinculacionActual ? "fw-semibold text-dark" : "text-muted"}">
-                                ${vinculacionActual ? escaparHtml(formatearTareaGitlab(vinculacionActual)) : "Sin asociar"}
-                            </span>
-                        </div>
-                        <label class="form-label small mt-3">Nuevo nombre</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="nuevo-nombre-${index}"
-                            value="${vinculacionActual ? escaparHtml(est.tarea || "") : ""}"
-                            placeholder="${vinculacionActual ? "Introduce el nuevo nombre" : "Disponible cuando haya una tarea asociada"}"
-                            ${vinculacionActual ? "" : "disabled"}>
-                        <div class="form-text">
-                            ${vinculacionActual
-                                ? "Si quieres renombrar la tarea asociada, hazlo aqui."
-                                : "Este campo se habilita cuando la tarea ya esta asociada a GitLab."}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small">Tareas GitLab sin asociar</label>
-                        <select class="form-select" id="gitlab-select-${index}" ${selectDeshabilitado}>
-                            <option value="">${opcionesNoAsociadas.length === 0 ? "No hay tareas libres en GitLab" : "Selecciona una tarea libre de GitLab..."}</option>
-                            ${opcionesNoAsociadas.map(tarea => `
-                                <option value="${escaparHtml(tarea.id)}">${escaparHtml(formatearTareaGitlab(tarea))}</option>
-                            `).join("")}
-                        </select>
-                        <div class="form-text">Solo se muestran tareas de GitLab que todavia no estan asociadas.</div>
-                    </div>
                     <div class="col-md-6">
                         <label class="form-label small">Tiempo minimo</label>
                         <input type="text" class="form-control" id="min-${index}" value="${est.tiempoMin ?? ""}">
@@ -203,6 +171,14 @@ function pintarFormulario(estimaciones) {
                         <label class="form-label small">Tiempo maximo</label>
                         <input type="text" class="form-control" id="max-${index}" value="${est.tiempoMax ?? ""}">
                         <div class="invalid-feedback">Introduce un tiempo maximo valido.</div>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="tareaCompletada" ${est.completada ? "checked" : ""}>
+                            <label class="form-check-label fw-medium" for="tareaCompletada">
+                                Tarea completada
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -325,17 +301,15 @@ async function actualizarEstimaciones() {
     }
 
     mostrarFeedback("Guardando...", "muted");
+    const compl = document.getElementById("tareaCompletada");
+
 
     const filas = document.querySelectorAll(".department-edit-row");
     const datosActualizados = Array.from(filas).map((row, index) => ({
         id: Number(document.querySelector(`input[name="id-${index}"]`).value),
-        idSubFase: parseInt(document.querySelector(`input[name="idSubFase-${index}"]`).value, 10),
-        idTareaProyecto: Number(document.querySelector(`input[name="idTareaProyecto-${index}"]`).value),
-        tarea: obtenerNombreFinal(index),
-        issueActualId: document.querySelector(`input[name="issueActual-${index}"]`).value,
-        issueNuevaId: document.getElementById(`gitlab-select-${index}`).value,
         tiempoMin: parsearNumero(document.getElementById(`min-${index}`).value),
-        tiempoMax: parsearNumero(document.getElementById(`max-${index}`).value)
+        tiempoMax: parsearNumero(document.getElementById(`max-${index}`).value),
+        completada: compl.checked
     }));
 
     try {
@@ -346,11 +320,9 @@ async function actualizarEstimaciones() {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    id: dato.id,
-                    idSubFase: dato.idSubFase,
-                    tarea: dato.tarea,
                     tiempoMin: dato.tiempoMin,
-                    tiempoMax: dato.tiempoMax
+                    tiempoMax: dato.tiempoMax,
+                    completada: dato.completada
                 })
             });
         });

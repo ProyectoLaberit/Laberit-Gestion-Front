@@ -11,6 +11,7 @@ window.onload = function () {
 let estructuraActual = {};
 let idsActuales = {};
 let resumenSubfases = {};
+let tareasSubfasesCompletadas = new Map();
 let idExcelSeleccionadoActual = null;
 
 // Inicializa la pantalla de detalles del proyecto y engancha sus eventos principales.
@@ -416,7 +417,28 @@ async function procesarYRenderizar(fases) {
     }
 
     document.getElementById("input-busqueda").value = "";
+    await cargarEstadosSubfasesCompletadas();
     renderizarTodo("", estructura, ids);
+}
+
+// Recorre la estructura de fases y subfases para pintar solo las que cumplen el filtro.
+async function cargarEstadosSubfasesCompletadas() {
+    tareasSubfasesCompletadas.clear();
+    const proyectoId = localStorage.getItem("proyectoId");
+    if (!proyectoId || !idsActuales || Object.keys(idsActuales).length === 0) {
+        return;
+    }
+
+    const promesas = Object.entries(idsActuales).map(([subfaseNombre, idSubfase]) => {
+        return subfaseCompletada(idSubfase)
+            .then((completada) => ({ idSubfase, completada: Boolean(completada) }))
+            .catch(() => ({ idSubfase, completada: false }));
+    });
+
+    const resultados = await Promise.all(promesas);
+    resultados.forEach(({ idSubfase, completada }) => {
+        tareasSubfasesCompletadas.set(String(idSubfase), completada);
+    });
 }
 
 // Recorre la estructura de fases y subfases para pintar solo las que cumplen el filtro.
@@ -451,8 +473,22 @@ function renderizarTodo(filtro = "", estr, ids) {
             const displayReal = formatoHoras(parseFloat(tiempos.tiempoRealTotal));
             const displayMin = formatoHoras(parseFloat(tiempos.tiempoEstimadoMin));
             const displayMax = formatoHoras(parseFloat(tiempos.tiempoEstimadoMax));
+            const completada = tareasSubfasesCompletadas.get(String(idSub)) === true;
 
-            htmlContent += `
+            if (completada) {
+                htmlContent += `
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="card subfase-card-completada p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}')">
+                        <div class="fw-bold text-dark">${sub}</div>
+                        <div class="text-primary mt-2 fw-bold" style="font-size: 0.95rem;">
+                            ${displayReal} / ${displayMin} - ${displayMax}
+                        </div>
+                        <div class="text-muted small mt-2">Haga clic para ver tareas</div>
+                    </div>
+                </div>
+            `;
+            }else{
+                htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}')">
                         <div class="fw-bold text-dark">${sub}</div>
@@ -463,6 +499,8 @@ function renderizarTodo(filtro = "", estr, ids) {
                     </div>
                 </div>
             `;
+            }
+            
         });
 
         htmlContent += "</div>";
@@ -521,4 +559,15 @@ function formatoHoras(decimal) {
     }
 
     return `${horas}h ${minutos}min`;
+}
+
+async function subfaseCompletada(idSubfase) {
+    const proyectoId = localStorage.getItem("proyectoId");
+    const resultCompletada = await peticionSegura(`/fases/completa/${proyectoId}/${idSubfase}`);
+    
+    if(resultCompletada.success){
+        return true;
+    }else{
+        return false;
+    } 
 }
