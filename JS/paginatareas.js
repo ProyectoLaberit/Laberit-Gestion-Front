@@ -283,6 +283,7 @@ function renderizarTablaEspecifica() {
         const numeroGitActual = p && p.numeroGit != null ? String(p.numeroGit) : "";
         const nombreIssueActual = p ? (p.nombreTareaGit || "") : "";
         const nombreDepartamento = p ? (p.nombreDep || p.nombreDepartamento || "") : "";
+        const idDepartamento = p && p.idDepartamento != null ? String(p.idDepartamento) : "";
         const claseGitlab = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
             ? "gitlab-item gitlab-item-selected"
             : "gitlab-item";
@@ -290,8 +291,8 @@ function renderizarTablaEspecifica() {
         const atributosClick = modoEliminacion
             ? ""
             : `role="button" tabindex="0"
-                onclick="abrirModalIssuesGitlab('${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}')"
-                onkeydown="abrirModalIssuesGitlabConTeclado(event, '${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}')"`;
+                onclick="abrirModalIssuesGitlab('${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}', '${escaparParaJs(idDepartamento)}')"
+                onkeydown="abrirModalIssuesGitlabConTeclado(event, '${escaparParaJs(idTareaProyecto)}', '${escaparParaJs(numeroGitActual)}', '${escaparParaJs(nombreDepartamento)}', '${escaparParaJs(nombreIssueActual)}', '${escaparParaJs(idDepartamento)}')"`;
 
         return `
             <div class="${claseClickable}" ${atributosClick}>
@@ -640,17 +641,17 @@ function actualizarVinculacionGitlabLocal(issueId, idTareaProyecto, listaOrigen 
 }
 
 // Permite abrir el modal de GitLab con teclado cuando el recuadro tiene el foco.
-function abrirModalIssuesGitlabConTeclado(event, idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual = "") {
+function abrirModalIssuesGitlabConTeclado(event, idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual = "", idDepartamento = "") {
     if (event.key !== "Enter" && event.key !== " ") {
         return;
     }
 
     event.preventDefault();
-    abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual);
+    abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual, idDepartamento);
 }
 
 // Abre la vista rapida de issues de GitLab sin salir de paginatareas.
-async function abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual = "") {
+async function abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartamento, nombreIssueActual = "", idDepartamento = "") {
     if (modoEliminacion) {
         return;
     }
@@ -664,6 +665,7 @@ async function abrirModalIssuesGitlab(idTareaProyecto, numeroGit, nombreDepartam
         idTareaProyecto: idTareaProyecto || "",
         numeroGit: numeroGit || "",
         nombreDepartamento: nombreDepartamento || "",
+        idDepartamento: idDepartamento || "",
         nombreIssueActual: nombreIssueActual || ""
     };
     issuesGitlabModal = [];
@@ -747,15 +749,15 @@ function limpiarBusquedaModalGitlab() {
 // Carga las issues visibles en el modal usando el mismo backend que visualizartareasgitlab.
 async function cargarIssuesGitlabModal() {
     const proyectoId = localStorage.getItem("proyectoId");
-    const departamento = contextoGitlabModalActual?.nombreDepartamento || "";
+    const idDepartamento = contextoGitlabModalActual?.idDepartamento || "";
 
     if (!proyectoId) {
         mostrarErrorGitlabModal("Falta el proyecto actual.");
         return;
     }
 
-    const endpoint = departamento
-        ? `/gitlab/vinculadas/departamento/${encodeURIComponent(proyectoId)}/${encodeURIComponent(departamento)}`
+    const endpoint = idDepartamento
+        ? `/gitlab/vinculadas/departamento/${encodeURIComponent(proyectoId)}/${encodeURIComponent(idDepartamento)}`
         : `/gitlab/vinculadas/todas/${encodeURIComponent(proyectoId)}`;
 
     try {
