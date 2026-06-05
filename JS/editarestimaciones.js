@@ -174,7 +174,7 @@ function pintarFormulario(estimaciones) {
                     </div>
                     <div class="col-md-6 d-flex align-items-end">
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="tareaCompletada" ${est.completada ? "checked" : ""}>
+                            <input class="form-check-input" type="checkbox" id="tareaCompletada${index}" ${est.completada ? "checked" : ""}>
                             <label class="form-check-label fw-medium" for="tareaCompletada">
                                 Tarea completada
                             </label>
@@ -309,7 +309,7 @@ async function actualizarEstimaciones() {
         id: Number(document.querySelector(`input[name="id-${index}"]`).value),
         tiempoMin: parsearNumero(document.getElementById(`min-${index}`).value),
         tiempoMax: parsearNumero(document.getElementById(`max-${index}`).value),
-        completada: compl.checked
+        completada: document.getElementById(`tareaCompletada${index}`).checked
     }));
 
     try {
