@@ -46,7 +46,7 @@ window.onload = async function () {
     await cargarDepartamentos();
 };
 
-// Carga las fases del proyecto y prepara el selector dependiente de subfases.
+// Carga todas las fases y subfases disponibles y prepara el selector dependiente.
 async function cargarFasesYSubfases() {
     const proyectoId = localStorage.getItem("proyectoId");
     const selectFase = document.getElementById("select-fase");
@@ -65,7 +65,7 @@ async function cargarFasesYSubfases() {
     }
 
     try {
-        const result = await peticionSegura(`/fases/${proyectoId}`);
+        const result = await peticionSegura("/fases/jerarquia/todas");
 
         if (!result || !result.success || !Array.isArray(result.data) || result.data.length === 0) {
             selectFase.innerHTML = '<option value="" selected>No hay fases disponibles</option>';
