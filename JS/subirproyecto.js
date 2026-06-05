@@ -61,7 +61,7 @@ async function guardarProyecto() {
         nombre: document.getElementById('nombre').value,
         descripcion: document.getElementById('descripcion').value,
         fechaInicio: document.getElementById('fechaInicio').value,
-        activo: true,
+        activo: document.getElementById('proyectoActivo').checked,
         gitlabId: document.getElementById('gitlabId').value,
         clockifyId: document.getElementById('clockifyId').value,
         excels: tieneExcel // Añadimos esta línea
