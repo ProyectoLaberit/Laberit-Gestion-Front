@@ -148,7 +148,7 @@ function renderizarTablaTareas() {
             }
         }
 
-        let textoCompleta = "";
+        let textoCompleta = " incompleta";
         if(completada){
             textoCompleta = " completa";
         }
