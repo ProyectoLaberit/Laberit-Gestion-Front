@@ -426,6 +426,17 @@
             margin: 0 auto 1rem;
         }
 
+        .modal-confirm .icon-warning {
+            width: 56px;
+            height: 56px;
+            background: #fef9c3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
         .modal-confirm .form-control:focus {
             border-color: #C01717;
             box-shadow: 0 0 0 0.2rem rgba(192, 23, 23, 0.15);

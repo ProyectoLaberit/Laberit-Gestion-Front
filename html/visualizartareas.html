@@ -251,6 +251,36 @@
         </div>
     </div>
 
+    <div class="modal fade modal-confirm" id="modalDesvincularImputacion" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center px-4 pb-4">
+                    <div class="icon-warning">
+                        <svg width="24" height="24" fill="none" stroke="#ca8a04" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                    </div>
+                    <h6 class="fw-bold mb-1">Desvincular imputacion</h6>
+                    <p class="text-muted small mb-3" id="modal-desvincular-imputacion-texto">
+                        La imputacion dejara de estar asociada a esta tarea.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-warning flex-fill" id="btn-confirmar-desvincular-imputacion"
+                            onclick="confirmarDesvinculacionImputacion()">
+                            Desvincular
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade modal-confirm" id="modalEliminarImputacion" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow">

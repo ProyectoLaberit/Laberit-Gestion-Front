@@ -4,6 +4,7 @@ let paginaActual = 1;
 let porPagina = 10;
 let idImputacionEditando = null;
 let imputacionAEliminar = null;
+let imputacionADesvincular = null;
 
 // Centraliza el permiso de escritura sobre imputaciones para mantener empleados en solo lectura.
 function puedeGestionarImputaciones() {
@@ -635,19 +636,58 @@ async function marcarValida(id, btn) {
     alert((result && result.mensaje) || "Error al vincular.");
 }
 
-// Desvincula una imputacion de la tarea actual tras confirmacion del usuario.
-async function desvincularImputacion(id, btn) {
+// Abre una confirmacion visual antes de desvincular una imputacion.
+function desvincularImputacion(id, btn) {
     if (!puedeGestionarImputaciones()) {
         alert("No tienes permisos para desvincular imputaciones.");
         return;
     }
 
-    if (!confirm("Seguro que quieres desvincular esta imputacion?")) {
+    const imputacion = todasLasImputaciones.find(i => Number(i.idImputacionClockify) === Number(id));
+    if (!imputacion) {
+        alert("No se encontro la imputacion.");
         return;
     }
 
-    btn.disabled = true;
-    btn.textContent = "Desvinculando...";
+    imputacionADesvincular = { id, btn };
+
+    const texto = document.getElementById("modal-desvincular-imputacion-texto");
+    const boton = document.getElementById("btn-confirmar-desvincular-imputacion");
+    const modalElemento = document.getElementById("modalDesvincularImputacion");
+
+    if (!texto || !boton || !modalElemento) {
+        alert("No se pudo abrir la confirmacion de desvinculacion.");
+        return;
+    }
+
+    const nombreTarea = obtenerNombreConfirmacionImputacion(imputacion);
+    texto.textContent = `La imputacion de "${nombreTarea}" dejara de estar asociada a esta tarea.`;
+    boton.disabled = false;
+    boton.textContent = "Desvincular";
+
+    const modal = bootstrap.Modal.getInstance(modalElemento) || new bootstrap.Modal(modalElemento);
+    modal.show();
+}
+
+// Ejecuta la desvinculacion despues de que el usuario la confirme en el modal.
+async function confirmarDesvinculacionImputacion() {
+    if (!imputacionADesvincular) {
+        return;
+    }
+
+    const { id, btn } = imputacionADesvincular;
+    const botonConfirmar = document.getElementById("btn-confirmar-desvincular-imputacion");
+    const modalElemento = document.getElementById("modalDesvincularImputacion");
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Desvinculando...";
+    }
+
+    if (botonConfirmar) {
+        botonConfirmar.disabled = true;
+        botonConfirmar.textContent = "Desvinculando...";
+    }
 
     const { idTareaProyecto } = obtenerContextoVista();
 
@@ -664,11 +704,21 @@ async function desvincularImputacion(id, btn) {
 
         actualizarEstadisticas();
         renderPagina();
+        if (modalElemento) {
+            bootstrap.Modal.getInstance(modalElemento).hide();
+        }
+        imputacionADesvincular = null;
         return;
     }
 
-    btn.disabled = false;
-    btn.textContent = "Desvincular";
+    if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Desvincular";
+    }
+    if (botonConfirmar) {
+        botonConfirmar.disabled = false;
+        botonConfirmar.textContent = "Desvincular";
+    }
     alert((result && result.mensaje) || "Error al desvincular.");
 }
 
@@ -755,6 +805,22 @@ function configurarModalEliminarImputacion() {
 
     boton.addEventListener("click", ejecutarEliminacionImputacionConfirmada);
 }
+
+// Limpia la seleccion pendiente cuando se cancela el modal de desvinculacion.
+document.addEventListener("DOMContentLoaded", () => {
+    const modalElemento = document.getElementById("modalDesvincularImputacion");
+    const boton = document.getElementById("btn-confirmar-desvincular-imputacion");
+
+    if (!modalElemento || !boton) {
+        return;
+    }
+
+    modalElemento.addEventListener("hidden.bs.modal", () => {
+        imputacionADesvincular = null;
+        boton.disabled = false;
+        boton.textContent = "Desvincular";
+    });
+});
 
 // Ejecuta el borrado despues de que el usuario haya escrito el nombre correcto.
 async function ejecutarEliminacionImputacionConfirmada() {
