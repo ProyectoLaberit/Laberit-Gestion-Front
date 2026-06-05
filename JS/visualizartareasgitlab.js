@@ -41,9 +41,7 @@ function cargarBreadcrumbGitlab() {
 function obtenerNivelesBreadcrumbGitlab() {
     const faseGuardada = localStorage.getItem("faseSeleccionada") || "";
     const subfaseGuardada = localStorage.getItem("subfaseSeleccionada") || "";
-    const faseBreadcrumb = faseGuardada && faseGuardada !== "Fase"
-        ? faseGuardada
-        : subfaseGuardada || "Fase";
+    const faseBreadcrumb = resolverFaseBreadcrumb(faseGuardada, subfaseGuardada);
     const subfaseBreadcrumb = localStorage.getItem("nombreTarea") || "Subfase";
 
     return { faseBreadcrumb, subfaseBreadcrumb };

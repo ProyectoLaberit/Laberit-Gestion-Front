@@ -53,16 +53,14 @@ async function cargarDatosSubfase() {
     const nombreSub = localStorage.getItem("subfaseSeleccionada");
     const displayNombre = document.getElementById("subfase-nombre-display");
     if (displayNombre) {
-        displayNombre.innerText = nombreSub ? nombreSub : "Subfase " + idSub;
+        displayNombre.innerText = `Subfase: ${nombreSub || "Subfase " + idSub}`;
     }
 
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoActual = proyectos.find((p) => String(p.id) === String(proyectoId));
     const nombreProyecto = proyectoActual ? proyectoActual.nombre : "Proyecto";
     const faseGuardada = localStorage.getItem("faseSeleccionada") || "";
-    const nombreFase = faseGuardada && faseGuardada !== "Fase"
-        ? faseGuardada
-        : nombreSub || "Fase";
+    const nombreFase = resolverFaseBreadcrumb(faseGuardada, nombreSub);
 
     document.getElementById("bc-proyecto").innerText = nombreProyecto;
     document.getElementById("bc-fase").innerText = `Fase: ${nombreFase}`;

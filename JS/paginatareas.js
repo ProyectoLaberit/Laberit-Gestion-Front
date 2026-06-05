@@ -88,16 +88,15 @@ async function cargarDetallesTar() {
 
     const displayNombre = document.getElementById("tarea-nombre-display");
     if (displayNombre) {
-        displayNombre.innerText = nombreTar ? nombreTar : "Detalle de Tarea";
+        displayNombre.innerText = `Tarea: ${nombreTar || "Detalle de Tarea"}`;
     }
 
     const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
     const proyectoActual = proyectos.find((p) => String(p.id) === String(proyectoId));
-    const { faseBreadcrumb, subfaseBreadcrumb } = obtenerNivelesBreadcrumbTarea(nombreTar);
+    const { faseBreadcrumb, subfaseBreadcrumb } = obtenerBreadcrumbTarea();
     document.getElementById("bc-proyecto").innerText = proyectoActual ? proyectoActual.nombre : "Proyecto";
     document.getElementById("bc-fase").innerText = `Fase: ${faseBreadcrumb}`;
     document.getElementById("bc-subfase").innerText = `Subfase: ${subfaseBreadcrumb}`;
-    ocultarBreadcrumbDuplicado("bc-tarea");
 
     if (!proyectoId || !idSub) {
         console.error("Error: Falta el ID del proyecto o la subfase en el localStorage");
@@ -143,25 +142,14 @@ async function cargarDetallesTar() {
     }
 }
 
-// Resuelve los nombres reales que se muestran en la ruta superior de esta vista.
-function obtenerNivelesBreadcrumbTarea(nombreTar) {
+// Resuelve la fase y subfase reales que se muestran en la ruta superior.
+function obtenerBreadcrumbTarea() {
     const faseGuardada = localStorage.getItem("faseSeleccionada") || "";
     const subfaseGuardada = localStorage.getItem("subfaseSeleccionada") || "";
-    const faseBreadcrumb = faseGuardada && faseGuardada !== "Fase"
-        ? faseGuardada
-        : subfaseGuardada || "Fase";
-    const subfaseBreadcrumb = nombreTar || localStorage.getItem("nombreTarea") || "Subfase";
+    const faseBreadcrumb = resolverFaseBreadcrumb(faseGuardada, subfaseGuardada);
+    const subfaseBreadcrumb = subfaseGuardada || "Subfase";
 
     return { faseBreadcrumb, subfaseBreadcrumb };
-}
-
-// Oculta el ultimo nivel cuando el nombre ya aparece como "Subfase: ...".
-function ocultarBreadcrumbDuplicado(idElemento) {
-    const elemento = document.getElementById(idElemento);
-    if (elemento) {
-        elemento.textContent = "";
-        elemento.style.display = "none";
-    }
 }
 
 // Recupera las issues de GitLab pendientes para mostrarlas en el desplegable de vinculacion.
