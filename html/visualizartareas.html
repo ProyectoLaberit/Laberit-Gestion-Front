@@ -231,22 +231,8 @@
 
     <div class="edit-modal-overlay" id="edit-modal-overlay" onclick="cerrarModalEdicion(event)">
         <div class="edit-modal-box" onclick="event.stopPropagation()">
-            <div class="edit-modal-title">Editar tarea y subfase</div>
-            <div class="edit-modal-text mb-3">Actualiza los datos y guarda los cambios.</div>
-            
-            <div>
-                <label class="form-label fw-semibold mb-1" style="font-size: 0.9rem;">Fase</label>
-                <select id="edit-select-fase" class="form-select" onchange="onCambioFaseEdit()">
-                    <option value="" disabled selected>Cargando fases...</option>
-                </select>
-            </div>
-
-            <div class="mt-3 mb-4">
-                <label class="form-label fw-semibold mb-1" style="font-size: 0.9rem;">Subfase</label>
-                <select id="edit-select-subfase" class="form-select">
-                    <option value="" disabled selected>Primero selecciona una fase...</option>
-                </select>
-            </div>
+            <div class="edit-modal-title">Cambiar nombre</div>
+            <div class="edit-modal-text mb-3">Actualiza el nombre de la tarea y guarda los cambios.</div>
 
             <div>
                 <label class="form-label fw-semibold mb-1" style="font-size: 0.9rem;">Nombre de la tarea</label>
