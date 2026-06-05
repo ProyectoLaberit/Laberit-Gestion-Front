@@ -318,12 +318,9 @@ function renderizarTablaEspecifica() {
             }
         }
 
-        const displayGit = p.numeroGit ? `#${escaparHtml(p.numeroGit)}` : "-";
-
         return `
             <div class="${claseTiempo}">
                 <div class="time-val text-primary fw-bold" style="font-size: 1.1rem;">${tiempoRealDisplay}</div>
-                <div class="time-lbl">${displayGit} - gitlab</div>
             </div>`;
     }).join("");
 
@@ -331,12 +328,10 @@ function renderizarTablaEspecifica() {
         const claseTiempo = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
             ? "time-item time-item-selected"
             : "time-item";
-        const displayGit = p.numeroGit ? `#${escaparHtml(p.numeroGit)}` : "-";
 
         return `
             <div class="${claseTiempo}">
                 <div class="time-val time-min">${escaparHtml(p.tiempoMin)}h</div>
-                <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit} - gitlab</div>
             </div>`;
     }).join("");
 
@@ -344,12 +339,10 @@ function renderizarTablaEspecifica() {
         const claseTiempo = detallesSeleccionados.has(obtenerClaveDetalle(p, index))
             ? "time-item time-item-selected"
             : "time-item";
-        const displayGit = p.numeroGit ? `#${escaparHtml(p.numeroGit)}` : "-";
 
         return `
             <div class="${claseTiempo}">
                 <div class="time-val time-max">${escaparHtml(p.tiempoMax)}h</div>
-                <div class="time-lbl" style="color: #6c757d; font-weight: 600;">${displayGit} - gitlab</div>
             </div>`;
     }).join("");
 
