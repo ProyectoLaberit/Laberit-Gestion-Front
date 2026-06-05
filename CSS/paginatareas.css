@@ -17,6 +17,15 @@
         main { flex: 1; }
  
         /* ── Task header ── */
+        .task-header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
         .task-label {
             font-size: .7rem;
             color: #6c757d;
@@ -30,9 +39,15 @@
             font-weight: 600;
             color: #1a1a1a;
             display: flex;
+            justify-content: center;
             align-items: center;
             gap: 10px;
             margin-bottom: 28px;
+        }
+
+        .task-actions {
+            position: absolute;
+            right: 0;
         }
  
         .task-badge {
@@ -971,8 +986,18 @@
         }
 
         @media (max-width: 768px) {
+            .task-header {
+                flex-direction: column;
+                align-items: center;
+            }
+
             .task-name {
                 font-size: 1.05rem;
+            }
+
+            .task-actions {
+                position: static;
+                justify-content: center !important;
             }
 
             .gitlab-issues-modal .modal-dialog {

@@ -485,7 +485,7 @@ function renderizarTodo(filtro = "", estr, ids) {
             if (completada) {
                 htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card-completada p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}')">
+                    <div class="card subfase-card-completada p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}', '${fase}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-primary mt-2 fw-bold" style="font-size: 0.95rem;">
                             ${displayReal} / ${displayMin} - ${displayMax}
@@ -498,7 +498,7 @@ function renderizarTodo(filtro = "", estr, ids) {
             } else {
                 htmlContent += `
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}')">
+                    <div class="card subfase-card p-3 shadow-sm h-100" onclick="irASubfase('${sub}, ${idSub}', '${fase}')">
                         <div class="fw-bold text-dark">${sub}</div>
                         <div class="text-primary mt-2 fw-bold" style="font-size: 0.95rem;">
                             ${displayReal} / ${displayMin} - ${displayMax}
@@ -529,12 +529,18 @@ function renderizarTodo(filtro = "", estr, ids) {
 }
 
 // Guarda la subfase elegida y navega a la pantalla de sus tareas.
-function irASubfase(nombreSubfase) {
+function irASubfase(nombreSubfase, nombreFase) {
     const partes = nombreSubfase.split(",");
     const proyectoId = localStorage.getItem("proyectoId");
+    const fasePermitida = obtenerFasePermitida(nombreFase);
 
     localStorage.setItem("idSubfase", partes[1]);
     localStorage.setItem("subfaseSeleccionada", partes[0]);
+    if (fasePermitida) {
+        localStorage.setItem("faseSeleccionada", fasePermitida);
+    } else {
+        localStorage.removeItem("faseSeleccionada");
+    }
 
     if (idExcelSeleccionadoActual) {
         localStorage.setItem(obtenerClaveExcelSeleccionado(proyectoId), idExcelSeleccionadoActual);

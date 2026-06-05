@@ -1,5 +1,45 @@
 ﻿const URL_BASE = "http://localhost:8080/api";
 
+const FASES_VALIDAS_PROYECTO = {
+    analisis: "Analisis",
+    desarrollo: "Desarrollo",
+    gestiones: "Gestiones"
+};
+
+function normalizarClaveFase(valor) {
+    return String(valor || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+function obtenerFasePermitida(valor) {
+    return FASES_VALIDAS_PROYECTO[normalizarClaveFase(valor)] || "";
+}
+
+function inferirFasePorSubfase(valor) {
+    const clave = normalizarClaveFase(valor);
+
+    if (["frontend", "front", "backend", "back", "desarrollo", "programacion", "implementacion"].includes(clave)) {
+        return "Desarrollo";
+    }
+
+    if (clave.includes("analisis") || clave.includes("auditoria") || clave.includes("seo")) {
+        return "Analisis";
+    }
+
+    if (clave.includes("gestion")) {
+        return "Gestiones";
+    }
+
+    return "";
+}
+
+function resolverFaseBreadcrumb(faseGuardada, subfaseGuardada) {
+    return obtenerFasePermitida(faseGuardada) || inferirFasePorSubfase(subfaseGuardada) || "Fase";
+}
+
 const NAV_ITEMS = [
     {
         href: "proyectos.html",
