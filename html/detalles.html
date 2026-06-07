@@ -85,6 +85,7 @@
 
         .detalle-header-actions {
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .detalle-header-actions .btn {
@@ -95,9 +96,48 @@
             white-space: nowrap;
         }
 
-        @media (min-width: 992px) {
-            .detalle-header-actions {
-                flex-wrap: nowrap !important;
+        .detalle-header-main {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .detalle-header-tools {
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            min-width: 0;
+        }
+
+        .detalle-search {
+            width: 450px;
+            max-width: 100%;
+        }
+
+        .historial-excel-wrapper {
+            flex: 0 0 255px;
+            min-width: 0;
+        }
+
+        .historial-excel-label {
+            font-size: 0.72rem;
+            line-height: 1;
+            letter-spacing: 0.02em;
+        }
+
+        @media (max-width: 991.98px) {
+            .detalle-header-main,
+            .detalle-header-tools {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .detalle-search,
+            .historial-excel-wrapper {
+                width: 100%;
+                flex: 1 1 auto;
             }
         }
 
@@ -138,61 +178,18 @@
     <main class="container py-5 flex-grow-1">
 
         <div class="bg-white p-4 rounded border shadow-sm mb-5">
-            <div class="row align-items-start">
-                <div class="col-lg-5">
+            <div class="detalle-header-main">
+                <div>
                     <h2 class="h4 mb-1 fw-bold" id="proyecto-nombre-display">Cargando proyecto...</h2>
                     <p class="text-muted mb-0" style="font-size:0.78rem;">
                         Gestión de Fases y Estimaciones
                         <span id="ultima-sincronizacion" class="ms-2" style="display:none;">
                             Ultima sync: <span id="fecha-ultima-sync" class="fw-semibold"></span>
                         </span>
-                        </span>
                     </p>
-                    <!-- Botones solo visibles para SuperAdministrador -->
-                    <div id="botones-admin" class="d-flex gap-2 mt-2 flex-wrap detalle-header-actions" style="display:none!important;">
-                        <a href="editarproyecto.html" class="btn btn-sm btn-brand">Editar</a>
-                        <a href="crearfases.html" class="btn btn-sm btn-outline-secondary">
-                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"
-                                viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
-                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                            Crear Nueva Tarea
-                        </a>
-                        <button class="btn btn-sm btn-outline-secondary" id="btn-sincronizar" onclick="sincronizar()">
-                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" class="me-1" id="icon-sync" style="vertical-align:-1px;">
-                                <polyline points="23 4 23 10 17 10"/>
-                                <polyline points="1 20 1 14 7 14"/>
-                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                            </svg>
-                            <span id="texto-sincronizar">Sincronizar</span>
-                        </button>
-                        <button class="btn btn-sm btn-excel-download" id="btn-descargar-excel" type="button">
-                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
-                                <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/>
-                                <polyline points="14 2 14 7 19 7"/>
-                                <path d="M9 11l6 6"/>
-                                <path d="M15 11l-6 6"/>
-                            </svg>
-                            Descargar excel importado
-                        </button>
-                        <button class="btn btn-sm btn-analytic-download" id="btn-descargar-reporte-analitico" type="button">
-                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
-                                <path d="M3 3v18h18"/>
-                                <path d="M7 15l3-3 3 2 4-5"/>
-                                <circle cx="7" cy="15" r="1"/>
-                                <circle cx="10" cy="12" r="1"/>
-                                <circle cx="13" cy="14" r="1"/>
-                                <circle cx="17" cy="9" r="1"/>
-                            </svg>
-                            Reporte Analitico
-                        </button>
-                    </div>
                 </div>
-                <div class="col-lg-7 d-flex gap-2 justify-content-lg-end mt-3 mt-lg-0 pt-lg-2">
-                    <div class="input-group" style="max-width: 450px;">
+                <div class="detalle-header-tools">
+                    <div class="input-group detalle-search">
                         <span class="input-group-text bg-white border-end-0 text-muted">
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
@@ -204,17 +201,59 @@
                             placeholder="Buscar subfase...">
                     </div>
 
-                    <select class="form-select w-auto" id="select-historial-excel" onchange="onCambioExcel(this)"
-                        title="Selecciona una versión del Excel para ver sus fases y estimaciones">
-                        <option value="">Historial Excels...</option>
-                    </select>
-
-                    <select class="form-select w-auto" data-no-select2>
-                        <option selected>Estado</option>
-                    </select>
+                    <div class="historial-excel-wrapper d-flex flex-column gap-1">
+                        <span class="historial-excel-label text-muted fw-semibold text-uppercase">
+                            Historial de excels
+                        </span>
+                        <select class="form-select" id="select-historial-excel" onchange="onCambioExcel(this)"
+                            title="Selecciona una versión del Excel para ver sus fases y estimaciones">
+                            <option value="">Historial Excels...</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
+            <!-- Botones solo visibles para SuperAdministrador -->
+            <div id="botones-admin" class="d-flex gap-2 mt-3 detalle-header-actions" style="display:none!important;">
+                <a href="editarproyecto.html" class="btn btn-sm btn-brand">Editar</a>
+                <a href="crearfases.html" class="btn btn-sm btn-outline-secondary">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"
+                        viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Crear Nueva Tarea
+                </a>
+                <button class="btn btn-sm btn-outline-secondary" id="btn-sincronizar" onclick="sincronizar()">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24" class="me-1" id="icon-sync" style="vertical-align:-1px;">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <polyline points="1 20 1 14 7 14"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                    <span id="texto-sincronizar">Sincronizar</span>
+                </button>
+                <button class="btn btn-sm btn-excel-download" id="btn-descargar-excel" type="button">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
+                        <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/>
+                        <polyline points="14 2 14 7 19 7"/>
+                        <path d="M9 11l6 6"/>
+                        <path d="M15 11l-6 6"/>
+                    </svg>
+                    Descargar excel importado
+                </button>
+                <button class="btn btn-sm btn-analytic-download" id="btn-descargar-reporte-analitico" type="button">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
+                        <path d="M3 3v18h18"/>
+                        <path d="M7 15l3-3 3 2 4-5"/>
+                        <circle cx="7" cy="15" r="1"/>
+                        <circle cx="10" cy="12" r="1"/>
+                        <circle cx="13" cy="14" r="1"/>
+                        <circle cx="17" cy="9" r="1"/>
+                    </svg>
+                    Reporte Analitico
+                </button>
+            </div>
         </div>
 
         <div id="contenedor-fases"></div>
