@@ -311,9 +311,11 @@ function actualizarEstadisticas() {
     const incorrectas = total - correctas;
     const pct = total > 0 ? Math.round((correctas / total) * 100) : 0;
 
-    const tiempoTotal = todasLasImputaciones.reduce((suma, imputacion) => {
-        return suma + (imputacion.horasTrabajadas || 0);
-    }, 0);
+    const tiempoTotal = todasLasImputaciones
+        .filter(imputacion => imputacion.valida) // <- Filtra solo las válidas
+        .reduce((suma, imputacion) => {
+            return suma + (imputacion.horasTrabajadas || 0);
+        }, 0);
 
     const sinAsociar = todasLasImputaciones
         .filter(i => !i.valida)
