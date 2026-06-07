@@ -42,6 +42,37 @@ function esEdicionAjena() {
 
 const AVATAR_POR_DEFECTO = "avatar_masculino.png";
 const AVATARES_VALIDOS = ["avatar_masculino.png", "avatar_femenino.png"];
+const ROLES_DISPONIBLES = [
+    { id: "1", nombre: "SuperAdministrador", etiqueta: "Super Administrador" },
+    { id: "2", nombre: "Administrador", etiqueta: "Administrador" },
+    { id: "3", nombre: "Empleado", etiqueta: "Empleado" }
+];
+
+// Devuelve el rol mostrado de forma legible en el perfil.
+function formatearRol(rol) {
+    const encontrado = ROLES_DISPONIBLES.find(r => r.nombre === rol || r.id === String(rol));
+    return encontrado ? encontrado.etiqueta : (rol || "USUARIO");
+}
+
+// Convierte el nombre de rol recibido del backend al identificador usado por la tabla rol.
+function obtenerIdRol(rol) {
+    const encontrado = ROLES_DISPONIBLES.find(r => r.nombre === rol || r.id === String(rol));
+    return encontrado ? encontrado.id : "3";
+}
+
+// Convierte el identificador seleccionado al nombre de rol que usa el frontend.
+function obtenerNombreRol(idRol) {
+    const encontrado = ROLES_DISPONIBLES.find(r => r.id === String(idRol));
+    return encontrado ? encontrado.nombre : "Empleado";
+}
+
+// Solo un SuperAdministrador puede cambiar el rol de otro usuario desde Gestion Usuarios.
+function puedeCambiarRol(userData) {
+    return esSuperAdmin()
+        && esEdicionAjena()
+        && userData
+        && String(userData.id) !== String(getIdActual());
+}
 
 // Normaliza el nombre del avatar y aplica uno por defecto si no es valido.
 function normalizarAvatar(nombreArchivo) {
@@ -85,8 +116,16 @@ function cargarDatosPerfil() {
 
     aplicarAvatarPerfil(userData.foto);
 
-    const rolTexto = userData.rol || "USUARIO";
-    document.getElementById('user-role-display').innerText = "Rol: " + rolTexto;
+    const rolDisplay = document.getElementById('user-role-display');
+    const rolTexto = formatearRol(userData.rol);
+    const rolEditable = puedeCambiarRol(userData);
+
+    rolDisplay.innerText = "Rol: " + rolTexto;
+    rolDisplay.disabled = !rolEditable;
+    rolDisplay.classList.toggle("role-clickable", rolEditable);
+    rolDisplay.title = rolEditable
+        ? "Cambiar rol del usuario"
+        : "Solo un SuperAdministrador puede cambiar roles de otros usuarios";
 
     // Si estamos editando a otro usuario, cambiar título y añadir enlace de vuelta
     if (esEdicionAjena()) {
@@ -99,6 +138,54 @@ function cargarDatosPerfil() {
             document.querySelector('h1').insertAdjacentElement('afterend', bc);
         }
     }
+}
+
+// Abre el selector de rol para SuperAdministrador cuando edita a otro usuario.
+function abrirModalRol() {
+    const userData = getDatosActuales();
+    if (!puedeCambiarRol(userData)) {
+        return;
+    }
+
+    document.getElementById("selectNuevoRol").value = obtenerIdRol(userData.rol);
+    document.getElementById("mensajeExitoRol").style.display = "none";
+
+    const modalElement = document.getElementById("modalCambioRol");
+    const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+    modalInstance.show();
+}
+
+// Guarda el nuevo rol del usuario editado y refresca la vista local.
+async function guardarRol() {
+    const userData = getDatosActuales();
+    if (!puedeCambiarRol(userData)) {
+        return;
+    }
+
+    const nuevoRolId = document.getElementById("selectNuevoRol").value;
+    const result = await peticionSegura(`/usuarios/${userData.id}/rol`, {
+        method: "PUT",
+        body: JSON.stringify({ rol: nuevoRolId })
+    });
+
+    if (!result || !result.success) {
+        alert((result && result.mensaje) || "No se pudo cambiar el rol.");
+        return;
+    }
+
+    userData.rol = obtenerNombreRol(nuevoRolId);
+    localStorage.setItem("usuarioEditando", JSON.stringify(userData));
+    cargarDatosPerfil();
+
+    document.getElementById("mensajeExitoRol").style.display = "block";
+
+    setTimeout(() => {
+        const modalElement = document.getElementById("modalCambioRol");
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+    }, 1000);
 }
 
 // Elimina la sesion local y redirige al usuario a la pantalla de login.
