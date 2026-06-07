@@ -132,6 +132,12 @@ function seleccionarValorEnSelect(idSelect, valor) {
 async function guardarProyecto() {
     const feedback = document.getElementById("msg-feedback");
     const fileInput = document.getElementById("archivoInput");
+    const botonGuardar = document.getElementById("btn-guardar-proyecto");
+    const botonCancelar = document.getElementById("btn-cancelar-proyecto");
+
+    if (botonGuardar) botonGuardar.disabled = true;
+    if (botonCancelar) botonCancelar.disabled = true;
+
     const tieneExcel = Boolean(fileInput && fileInput.files && fileInput.files.length > 0);
 
     const nombre = document.getElementById("nombre").value;
@@ -166,6 +172,8 @@ async function guardarProyecto() {
         if (!result || !result.success) {
             feedback.className = "mt-3 text-center text-danger";
             feedback.innerText = "Error: " + ((result && result.mensaje) || "No se pudo guardar el proyecto.");
+            if (botonGuardar) botonGuardar.disabled = false;
+            if (botonCancelar) botonCancelar.disabled = false;
             return;
         }
 
@@ -176,6 +184,8 @@ async function guardarProyecto() {
             if (!excelResult || !excelResult.success) {
                 feedback.className = "mt-3 text-center text-danger";
                 feedback.innerText = "Proyecto guardado, pero hubo un error al importar el Excel.";
+                if (botonGuardar) botonGuardar.disabled = false;
+                if (botonCancelar) botonCancelar.disabled = false;
                 return;
             }
 
@@ -197,6 +207,8 @@ async function guardarProyecto() {
         feedback.className = "mt-3 text-center text-danger";
         feedback.innerText = "Error de conexión con el servidor.";
         console.error("Error:", error);
+        if (botonGuardar) botonGuardar.disabled = false;
+        if (botonCancelar) botonCancelar.disabled = false;
     }
 }
 
