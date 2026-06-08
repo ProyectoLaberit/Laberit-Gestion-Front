@@ -15,10 +15,28 @@ window.onload = function () {
         window.location.href = "login.html";
     } else {
         configurarValidacionSelectsObligatorios();
+        inicializarFechaInicioHoy();
         cargarClockify();
         cargarGitlab();
     }
 };
+
+// Rellena la fecha de inicio con la fecha actual si el usuario no ha indicado otra.
+function inicializarFechaInicioHoy() {
+    const campoFecha = document.getElementById('fechaInicio');
+    if (campoFecha && !campoFecha.value) {
+        campoFecha.value = obtenerFechaHoyInput();
+    }
+}
+
+// Devuelve la fecha local de hoy en el formato que espera un input date.
+function obtenerFechaHoyInput() {
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, "0");
+    const day = String(hoy.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
 
 // Refleja en la interfaz el nombre del archivo que acaba de seleccionar el usuario.
 function mostrarNombre(input) {
@@ -74,6 +92,7 @@ async function guardarProyecto() {
     proyectoCreadoDuranteSubidaId = null;
     subidaAbortController = new AbortController();
     const signal = subidaAbortController.signal;
+    bloquearFormularioSubida(true);
 
     try {
         if (botonGuardar) {
@@ -349,12 +368,42 @@ function limpiarEstadoSubida() {
 
 // Restaura el boton principal cuando la creacion o la sincronizacion no termina bien.
 function restaurarBotonGuardar(botonGuardar) {
+    bloquearFormularioSubida(false);
+
     if (!botonGuardar) {
         return;
     }
 
     botonGuardar.disabled = false;
     botonGuardar.innerText = "Guardar";
+}
+
+// Bloquea los campos durante el guardado para evitar cambios mientras se procesa.
+function bloquearFormularioSubida(bloqueado) {
+    const formulario = document.getElementById('form-subir-proyecto');
+    if (!formulario) {
+        return;
+    }
+
+    formulario.querySelectorAll("input, select, textarea").forEach((campo) => {
+        campo.disabled = bloqueado;
+    });
+
+    formulario.querySelectorAll("select").forEach((select) => {
+        if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+            window.jQuery(select).prop("disabled", bloqueado).trigger("change.select2");
+        }
+    });
+
+    const botonGuardar = document.getElementById('btn-guardar-subida') || formulario.querySelector('button[type="submit"]');
+    if (botonGuardar) {
+        botonGuardar.disabled = bloqueado;
+    }
+
+    const labelArchivo = document.getElementById('labelArchivo');
+    if (labelArchivo) {
+        labelArchivo.classList.toggle("disabled", bloqueado);
+    }
 }
 
 // Conecta la validacion visible de los selects obligatorios usados con Select2.

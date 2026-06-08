@@ -1,4 +1,5 @@
 let proyectoActual = null;
+let guardadoProyectoEnCurso = false;
 
 // Inicializa la pantalla, valida la sesion activa y carga el contexto
 // principal necesario antes de que el usuario empiece a interactuar.
@@ -85,7 +86,7 @@ async function cargarProyectoActual() {
 
     document.getElementById("nombre").value = proyectoActual.nombre || "";
     document.getElementById("descripcion").value = proyectoActual.descripcion || "";
-    document.getElementById("fechaInicio").value = normalizarFechaInput(proyectoActual.fechaInicio);
+    document.getElementById("fechaInicio").value = normalizarFechaInput(proyectoActual.fechaInicio) || obtenerFechaHoyInput();
     document.getElementById("proyectoActivo").checked = proyectoActual.activo === true || proyectoActual.activo === "true";
     document.getElementById("proyectoCompleto").checked = obtenerEstadoCompletoProyecto(proyectoId, proyectoActual);
 
@@ -199,6 +200,15 @@ function normalizarFechaInput(valor) {
     return `${year}-${month}-${day}`;
 }
 
+// Devuelve la fecha local de hoy en el formato que espera un input date.
+function obtenerFechaHoyInput() {
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, "0");
+    const day = String(hoy.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
 // Selecciona en un desplegable el valor recibido si existe entre las opciones cargadas.
 function seleccionarValorEnSelect(idSelect, valor) {
     const select = document.getElementById(idSelect);
@@ -220,12 +230,27 @@ function seleccionarValorEnSelect(idSelect, valor) {
 
 // Guarda el proyecto actual en el backend y, si corresponde, sube tambien su Excel.
 async function guardarProyecto() {
+    if (guardadoProyectoEnCurso) {
+        return;
+    }
+
+    const formulario = document.getElementById("form-editar-proyecto");
+    if (formulario && !formulario.checkValidity()) {
+        formulario.reportValidity();
+        return;
+    }
+
     const feedback = document.getElementById("msg-feedback");
     const fileInput = document.getElementById("archivoInput");
     const botonGuardar = document.getElementById("btn-guardar-proyecto");
     const botonCancelar = document.getElementById("btn-cancelar-proyecto");
 
-    if (botonGuardar) botonGuardar.disabled = true;
+    guardadoProyectoEnCurso = true;
+    bloquearFormularioEdicion(true);
+    if (botonGuardar) {
+        botonGuardar.disabled = true;
+        botonGuardar.innerText = "Guardando...";
+    }
     if (botonCancelar) botonCancelar.disabled = true;
 
     const tieneExcel = Boolean(fileInput && fileInput.files && fileInput.files.length > 0);
@@ -264,8 +289,7 @@ async function guardarProyecto() {
         if (!result || !result.success) {
             feedback.className = "mt-3 text-center text-danger";
             feedback.innerText = "Error: " + ((result && result.mensaje) || "No se pudo guardar el proyecto.");
-            if (botonGuardar) botonGuardar.disabled = false;
-            if (botonCancelar) botonCancelar.disabled = false;
+            restaurarFormularioEdicion();
             return;
         }
 
@@ -273,8 +297,7 @@ async function guardarProyecto() {
         if (!resultCompletado || !resultCompletado.success) {
             feedback.className = "mt-3 text-center text-danger";
             feedback.innerText = "Proyecto guardado, pero no se pudo actualizar el estado completo.";
-            if (botonGuardar) botonGuardar.disabled = false;
-            if (botonCancelar) botonCancelar.disabled = false;
+            restaurarFormularioEdicion();
             return;
         }
 
@@ -301,8 +324,7 @@ async function guardarProyecto() {
             if (!excelResult || !excelResult.success) {
                 feedback.className = "mt-3 text-center text-danger";
                 feedback.innerText = "Proyecto guardado, pero hubo un error al importar el Excel.";
-                if (botonGuardar) botonGuardar.disabled = false;
-                if (botonCancelar) botonCancelar.disabled = false;
+                restaurarFormularioEdicion();
                 return;
             }
 
@@ -324,9 +346,38 @@ async function guardarProyecto() {
         feedback.className = "mt-3 text-center text-danger";
         feedback.innerText = "Error de conexión con el servidor.";
         console.error("Error:", error);
-        if (botonGuardar) botonGuardar.disabled = false;
-        if (botonCancelar) botonCancelar.disabled = false;
+        restaurarFormularioEdicion();
     }
+}
+
+// Bloquea todos los campos mientras se guarda para evitar cambios a mitad de proceso.
+function bloquearFormularioEdicion(bloqueado) {
+    const formulario = document.getElementById("form-editar-proyecto");
+    if (!formulario) {
+        return;
+    }
+
+    formulario.querySelectorAll("input, select, textarea, button").forEach((campo) => {
+        campo.disabled = bloqueado;
+    });
+
+    formulario.querySelectorAll("select").forEach((select) => {
+        if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+            window.jQuery(select).prop("disabled", bloqueado).trigger("change.select2");
+        }
+    });
+
+    const labelArchivo = document.getElementById("labelArchivo");
+    if (labelArchivo) {
+        labelArchivo.classList.toggle("disabled", bloqueado);
+    }
+}
+
+// Restaura la edicion si el guardado no termina correctamente.
+function restaurarFormularioEdicion() {
+    guardadoProyectoEnCurso = false;
+    bloquearFormularioEdicion(false);
+    actualizarModoPantalla();
 }
 
 // Persiste el checkbox de proyecto completo con el endpoint dedicado del backend.

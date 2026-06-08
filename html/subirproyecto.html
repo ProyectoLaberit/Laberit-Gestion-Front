@@ -44,7 +44,7 @@
                 <div class="row g-4">
 
                     <div class="col-md-6">
-                        <label for="nombre" class="form-label">Nombre</label>
+                        <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="nombre" required>
                     </div>
 
@@ -100,7 +100,7 @@
                     </div>
 
                     <div class="col-12 d-flex gap-3 mt-4">
-                        <button type="submit" class="btn btn-guardar">Guardar</button>
+                        <button type="submit" class="btn btn-guardar" id="btn-guardar-subida">Guardar</button>
                         <button type="button" id="btn-cancelar-subida" class="btn btn-cancelar text-center"
                             onclick="cancelarSubidaProyecto()">Cancelar</button>
                     </div>
