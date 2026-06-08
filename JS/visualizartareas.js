@@ -23,7 +23,7 @@ window.onload = async function () {
     inicializarRangoFechas();
     configurarFiltrosAutomaticos();
     await cargarImputaciones();
-    setFiltro('todas');
+    setFiltro('correctas');
 
     configurarModalEliminarImputacion();
     document.addEventListener("keydown", manejarTeclasModalEdicion);
