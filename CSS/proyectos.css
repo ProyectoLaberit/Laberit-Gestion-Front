@@ -78,6 +78,33 @@ body {
     white-space: nowrap;
 }
 
+.project-toolbar {
+    width: 100%;
+}
+
+.project-filters {
+    max-width: 100%;
+    flex-wrap: nowrap;
+}
+
+.project-filter-select {
+    width: 170px;
+    min-width: 170px;
+    flex: 0 0 170px;
+}
+
+.project-filter-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+
+.project-filter-date .form-control {
+    width: 145px;
+    min-width: 145px;
+}
+
 .btn {
     background-color: var(--brand-primary);
     color: var(--bg-light);
@@ -126,4 +153,40 @@ main {
     justify-content: center;
     font-weight: bold;
     font-size: 0.9rem;
+}
+
+@media (max-width: 767.98px) {
+    .project-filters {
+        width: 100%;
+        align-items: stretch !important;
+        flex-direction: column;
+        padding: 0.75rem !important;
+        flex-wrap: nowrap;
+    }
+
+    .project-filter-title {
+        padding-left: 0 !important;
+    }
+
+    .project-filter-select {
+        width: 100%;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .project-filter-date {
+        display: grid;
+        grid-template-columns: 54px minmax(0, 1fr);
+        width: 100%;
+    }
+
+    .project-filter-date .border-start {
+        border-left: 0 !important;
+        padding-left: 0 !important;
+    }
+
+    .project-filter-date .form-control {
+        width: 100%;
+        min-width: 0;
+    }
 }

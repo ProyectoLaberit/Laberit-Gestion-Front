@@ -38,24 +38,26 @@
 
     <main class="container py-5">
 
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3">
-            <div>
-            </div>
-            <div class="d-flex align-items-center gap-2 bg-white p-2 rounded border shadow-sm">
-                <span class="text-muted small fw-medium ps-2 text-nowrap">Filtrar por:</span>
+        <div class="project-toolbar d-flex flex-column flex-md-row justify-content-md-end align-items-md-end mb-4 gap-3">
+            <div class="project-filters d-flex align-items-center gap-2 bg-white p-2 rounded border shadow-sm">
+                <span class="project-filter-title text-muted small fw-medium ps-2 text-nowrap">Filtrar por:</span>
                 
-                 <select id="filtro-estado" onchange="pintarProyectos()" class="form-select form-select-sm border-0 bg-light" data-no-select2>
+                 <select id="filtro-estado" onchange="pintarProyectos()" class="form-select form-select-sm border-0 bg-light project-filter-select" data-no-select2>
                     <option value="">Todos los estados</option>
                     <option value="true">En Proceso</option>
                     <option value="false">Completado</option>
                 </select>
 
-               <span class="text-muted small border-start ps-2">Desde:</span>
+                <div class="project-filter-date">
+                    <span class="text-muted small border-start ps-2">Desde:</span>
                     <input type="date" id="filtro-desde" onchange="pintarProyectos()" class="form-control form-control-sm border-0 bg-light">
+                </div>
                     
+                <div class="project-filter-date">
                     <span class="text-muted small">Hasta:</span>
                     <input type="date" id="filtro-hasta" onchange="pintarProyectos()" class="form-control form-control-sm border-0 bg-light">
                 </div>
+            </div>
         </div>
         <!-- Contenedor dinámico de proyectos -->
         <div class="row g-4" id="lista-proyectos">

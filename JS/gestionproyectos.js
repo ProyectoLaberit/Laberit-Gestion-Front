@@ -93,7 +93,7 @@ function renderizarTabla(proyectos) {
 
         return `
         <tr>
-            <td>
+            <td class="project-main-cell" data-label="Proyecto">
                 <div class="d-flex align-items-center gap-3">
                     <div class="project-icon">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -106,11 +106,11 @@ function renderizarTabla(proyectos) {
                     </div>
                 </div>
             </td>
-            <td class="text-muted">${escaparHtml(descripcion)}</td>
-            <td>${badgeEstado}</td>
-            <td class="text-muted">${escaparHtml(fechaInicio)}</td>
-            <td class="text-end">
-                <div class="d-flex gap-2 justify-content-end">
+            <td class="text-muted" data-label="Descripcion">${escaparHtml(descripcion)}</td>
+            <td data-label="Estado">${badgeEstado}</td>
+            <td class="text-muted" data-label="Fecha inicio">${escaparHtml(fechaInicio)}</td>
+            <td class="text-end project-actions-cell" data-label="Acciones">
+                <div class="d-flex gap-2 justify-content-end project-actions">
                     <button class="btn btn-sm btn-outline-secondary"
                         onclick="irAEditarProyecto(${Number(proyecto.id)})"
                         title="Editar proyecto">

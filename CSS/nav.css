@@ -3,9 +3,28 @@
     --principal-hover:#8e1212;
   }
 
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   .laberit-navbar{
     background-color: var(--principal);
     box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .laberit-navbar .container-fluid{
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .laberit-navbar .navbar-brand{
+    min-width: 0;
+    white-space: normal;
   }
 
   .laberit-navbar .navbar-brand-custom{
@@ -46,6 +65,28 @@
     background: rgba(255,255,255,.15);
     border-color:#fff;
     color:#fff;
+  }
+
+  @media (max-width: 420px) {
+    .laberit-navbar .container-fluid{
+      padding-left: .75rem !important;
+      padding-right: .75rem !important;
+    }
+
+    .laberit-navbar .navbar-brand{
+      gap: .75rem !important;
+      margin-right: .5rem;
+    }
+
+    .laberit-navbar .navbar-brand-custom{
+      font-size: .95rem;
+      letter-spacing: .2px;
+    }
+
+    .laberit-navbar .navbar-brand-sub{
+      font-size: .62rem;
+      letter-spacing: 1px;
+    }
   }
 
 

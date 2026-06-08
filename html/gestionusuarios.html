@@ -64,6 +64,106 @@
         }
 
         .empty-state { padding: 4rem 2rem; text-align: center; color: #9ca3af; }
+
+        @media (max-width: 767.98px) {
+            .page-header {
+                padding: 1rem 0;
+                margin-bottom: 1.25rem;
+            }
+
+            .search-bar {
+                max-width: none;
+                width: 100%;
+            }
+
+            .user-table {
+                background: transparent;
+                border: 0;
+                overflow: visible;
+                box-shadow: none !important;
+            }
+
+            .user-table table,
+            .user-table tbody,
+            .user-table tr,
+            .user-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .user-table thead {
+                display: none;
+            }
+
+            .user-table tbody tr {
+                background: #fff;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                margin-bottom: 0.85rem;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+            }
+
+            .user-table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid #f3f4f6;
+                text-align: right !important;
+            }
+
+            .user-table tbody td:last-child {
+                border-bottom: 0;
+            }
+
+            .user-table tbody td::before {
+                content: attr(data-label);
+                color: #6c757d;
+                font-size: 0.72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                text-align: left;
+            }
+
+            .user-table tbody .user-main-cell {
+                display: block;
+                text-align: left !important;
+            }
+
+            .user-table tbody .user-main-cell::before,
+            .user-table tbody .user-actions-cell::before {
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            .user-table tbody .user-actions-cell {
+                display: block;
+                text-align: left !important;
+            }
+
+            .user-actions {
+                justify-content: stretch !important;
+            }
+
+            .user-actions .btn {
+                flex: 1 1 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .empty-state {
+                background: #fff;
+                border-radius: 12px;
+            }
+
+            .empty-state::before {
+                content: none !important;
+            }
+        }
     </style>
 </head>
 

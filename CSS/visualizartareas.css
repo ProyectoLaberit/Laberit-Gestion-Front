@@ -175,6 +175,52 @@
             }
         }
 
+        @media (max-width: 767.98px) {
+            .filters-toolbar {
+                display: block;
+            }
+
+            .filter-tabs {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .filter-tab {
+                width: 100%;
+                text-align: center;
+            }
+
+            .toolbar-right {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .toolbar-search {
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+
+            .toolbar-date {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .toolbar-date .form-control {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .toolbar-right {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .filter-tab {
             padding: 6px 16px;
             border-radius: 20px;
@@ -210,11 +256,14 @@
             background: #fff;
             border-radius: 10px;
             border: 1px solid #e9ecef;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         .vis-table table {
             margin: 0;
+            min-width: 920px;
         }
 
         .vis-table thead th {
@@ -233,6 +282,15 @@
             vertical-align: middle;
             border-color: #f3f4f6;
             font-size: 0.875rem;
+        }
+
+        .vis-table thead th:last-child,
+        .vis-table tbody td:last-child {
+            min-width: 230px;
+        }
+
+        .vis-table tbody td:last-child .btn {
+            white-space: nowrap;
         }
 
         .vis-table tbody tr:hover {

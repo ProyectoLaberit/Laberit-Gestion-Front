@@ -116,6 +116,103 @@
             text-align: center;
             color: #9ca3af;
         }
+
+        @media (max-width: 767.98px) {
+            .page-header {
+                padding: 1rem 0;
+                margin-bottom: 1.25rem;
+            }
+
+            .search-bar {
+                max-width: none;
+                width: 100%;
+            }
+
+            .project-table {
+                background: transparent;
+                border: 0;
+                overflow: visible;
+                box-shadow: none !important;
+            }
+
+            .project-table table,
+            .project-table tbody,
+            .project-table tr,
+            .project-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .project-table thead {
+                display: none;
+            }
+
+            .project-table tbody tr {
+                background: #fff;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                margin-bottom: 0.85rem;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+            }
+
+            .project-table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid #f3f4f6;
+                text-align: right !important;
+            }
+
+            .project-table tbody td:last-child {
+                border-bottom: 0;
+            }
+
+            .project-table tbody td::before {
+                content: attr(data-label);
+                color: #6c757d;
+                font-size: 0.72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                text-align: left;
+                flex: 0 0 auto;
+            }
+
+            .project-table tbody .project-main-cell,
+            .project-table tbody .project-actions-cell {
+                display: block;
+                text-align: left !important;
+            }
+
+            .project-table tbody .project-main-cell::before,
+            .project-table tbody .project-actions-cell::before {
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            .project-actions {
+                justify-content: stretch !important;
+            }
+
+            .project-actions .btn {
+                flex: 1 1 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .empty-state {
+                background: #fff;
+                border-radius: 12px;
+            }
+
+            .empty-state::before {
+                content: none !important;
+            }
+        }
     </style>
 </head>
 

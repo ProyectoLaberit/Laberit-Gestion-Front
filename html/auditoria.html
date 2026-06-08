@@ -11,6 +11,17 @@
     <link rel="stylesheet" href="../CSS/proyectos.css">
     <link rel="stylesheet" href="../CSS/nav.css">
     <style>
+        html,
+        body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: clip;
+        }
+
+        body > * {
+            min-width: 0;
+        }
+
         .page-header {
             background: #fff;
             border-bottom: 1px solid #e9ecef;
@@ -35,11 +46,22 @@
             background: #fff;
             border-radius: 10px;
             border: 1px solid #e9ecef;
-            overflow: hidden;
+            display: block;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            box-sizing: border-box;
+            contain: inline-size;
         }
 
         .log-table table {
             margin: 0;
+            width: 980px;
+            min-width: 980px;
+            max-width: none;
         }
 
         .log-table thead th {
@@ -145,6 +167,35 @@
         .sort-arrow {
             font-size: 0.72rem;
             line-height: 1;
+        }
+
+        @media (max-width: 767.98px) {
+            main.container,
+            .page-header .container {
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                padding-left: 0.85rem;
+                padding-right: 0.85rem;
+                overflow-x: clip;
+            }
+
+            .filtros-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filtros-bar select,
+            .filtros-bar .input-group,
+            .filtros-bar .btn {
+                width: 100% !important;
+                max-width: none !important;
+                margin-left: 0 !important;
+            }
+
+            #contador-logs {
+                align-self: flex-start !important;
+            }
         }
     </style>
 </head>

@@ -90,7 +90,7 @@ function renderizarTabla(usuarios) {
 
         return `
         <tr>
-            <td>
+            <td class="user-main-cell" data-label="Usuario">
                 <div class="d-flex align-items-center gap-3">
                     <img src="../img/${avatar}" alt="${u.nombre}" class="avatar-sm"
                         onerror="this.src='../img/avatar_masculino.png'">
@@ -100,10 +100,10 @@ function renderizarTabla(usuarios) {
                     </div>
                 </div>
             </td>
-            <td class="text-muted">${u.email || "—"}</td>
-            <td>${rolBadge}</td>
-            <td class="text-end">
-                <div class="d-flex gap-2 justify-content-end">
+            <td class="text-muted" data-label="Correo">${u.email || "—"}</td>
+            <td data-label="Rol">${rolBadge}</td>
+            <td class="text-end user-actions-cell" data-label="Acciones">
+                <div class="d-flex gap-2 justify-content-end user-actions">
                     <button class="btn btn-sm btn-outline-secondary"
                         onclick="irAEditar(${u.id}, '${(u.nombre||'').replace(/'/g,"\\'")}', '${(u.email||'').replace(/'/g,"\\'")}', '${u.rol||''}', '${u.foto||''}')"
                         title="Editar usuario">
