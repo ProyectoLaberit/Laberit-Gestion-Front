@@ -129,7 +129,7 @@ function renderizarTabla(logs) {
                 <div class="text-muted" style="font-size:0.75rem;">ID actor: ${formatearIdUsuario(log.idUsuarioActor ?? log.idUsuario)}</div>
             </td>
             <td>${renderUsuarioObjetivo(log)}</td>
-            <td style="max-width:320px;">${log.descripcion || "-"}</td>
+            <td class="audit-desc">${log.descripcion || "-"}</td>
         </tr>
     `).join("");
 }

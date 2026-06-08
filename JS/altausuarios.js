@@ -130,10 +130,9 @@ async function crearUsuario() {
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const rolSeleccionado = document.querySelector('input[name="rol"]:checked')?.value || 'USER';
-    const excels   = document.getElementById('excels').checked;
 
     // ADMIN puede asignar cualquier rol; el backend lo valida también
-    const payload = { nombre, email, password, rol: rolSeleccionado, excels };
+    const payload = { nombre, email, password, rol: rolSeleccionado };
 
     setBusy(true);
     try {
@@ -200,7 +199,6 @@ function resetForm() {
         el.value = '';
         el.classList.remove('is-valid','is-invalid');
     });
-    document.getElementById('excels').checked = false;
     const rolEmpleado = document.querySelector('input[name="rol"][value="3"]');
     if (rolEmpleado) rolEmpleado.checked = true;
     document.getElementById('strength-bar').style.width = '0%';
