@@ -106,7 +106,7 @@ function renderizarTabla(usuarios) {
                 <div class="d-flex gap-2 justify-content-end user-actions">
                     <button class="btn btn-sm btn-outline-secondary"
                         onclick="irAEditar(${u.id}, '${(u.nombre||'').replace(/'/g,"\\'")}', '${(u.email||'').replace(/'/g,"\\'")}', '${u.rol||''}', '${u.foto||''}')"
-                        data-rol-minimo="SUPERADMIN"
+                        data-rol-minimo="ADMIN"
                         title="Editar usuario">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
