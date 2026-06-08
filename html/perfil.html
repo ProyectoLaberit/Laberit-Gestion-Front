@@ -68,6 +68,15 @@
             box-shadow: 0 4px 10px rgba(192, 23, 23, 0.25);
         }
 
+        .field-group button:disabled,
+        .field-group button.disabled,
+        #btn-cambiar-foto:disabled,
+        #btn-cambiar-foto.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+
         @media (max-width: 575.98px) {
             .profile-container {
                 padding-left: 1rem;
@@ -123,7 +132,7 @@
                 <div class="profile-pic-container">
                     <img id="profile-img" src="../img/avatar_masculino.png" alt="Foto de perfil">
                 </div>
-                <button class="btn btn-outline-secondary btn-sm w-100 mb-3" onclick="abrirModalFoto()">Cambiar
+                <button class="btn btn-outline-secondary btn-sm w-100 mb-3" id="btn-cambiar-foto" onclick="abrirModalFoto()">Cambiar
                     Foto</button>
                 <button type="button" class="badge bg-dark p-2 w-100 border-0 role-display" id="user-role-display"
                     onclick="abrirModalRol()" disabled>

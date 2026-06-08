@@ -66,12 +66,60 @@ function obtenerNombreRol(idRol) {
     return encontrado ? encontrado.nombre : "Empleado";
 }
 
+function normalizarNombreRol(rol) {
+    const encontrado = ROLES_DISPONIBLES.find(r => r.nombre === rol || r.id === String(rol));
+    return encontrado ? encontrado.nombre : (rol || "");
+}
+
+function esRolCuentaProtegida(rol) {
+    const nombreRol = normalizarNombreRol(rol);
+    return nombreRol === "SuperAdministrador" || nombreRol === "Administrador";
+}
+
 // Solo un SuperAdministrador puede cambiar el rol de otro usuario desde Gestion Usuarios.
 function puedeCambiarRol(userData) {
     return esSuperAdmin()
         && esEdicionAjena()
         && userData
         && String(userData.id) !== String(getIdActual());
+}
+
+function puedeEditarPerfil(userData) {
+    if (!userData) {
+        return false;
+    }
+
+    if (!esEdicionAjena() || String(userData.id) === String(getIdActual())) {
+        return true;
+    }
+
+    if (esSuperAdmin()) {
+        return true;
+    }
+
+    if (typeof esAdmin === "function" && esAdmin()) {
+        return !esRolCuentaProtegida(userData.rol);
+    }
+
+    return false;
+}
+
+function actualizarPermisosEdicionPerfil(userData) {
+    const editable = puedeEditarPerfil(userData);
+    const mensaje = "Un Administrador solo puede editar perfiles de empleados.";
+
+    document.querySelectorAll(".field-group button").forEach((boton) => {
+        boton.disabled = !editable;
+        boton.classList.toggle("disabled", !editable);
+        boton.title = editable ? "" : mensaje;
+    });
+
+    const botonFoto = document.getElementById("btn-cambiar-foto");
+    if (botonFoto) {
+        botonFoto.disabled = !editable;
+        botonFoto.classList.toggle("disabled", !editable);
+        botonFoto.title = editable ? "" : mensaje;
+    }
 }
 
 // Normaliza el nombre del avatar y aplica uno por defecto si no es valido.
@@ -126,6 +174,8 @@ function cargarDatosPerfil() {
     rolDisplay.title = rolEditable
         ? "Cambiar rol del usuario"
         : "Solo un SuperAdministrador puede cambiar roles de otros usuarios";
+
+    actualizarPermisosEdicionPerfil(userData);
 
     // Si estamos editando a otro usuario, cambiar título y añadir enlace de vuelta
     if (esEdicionAjena()) {
@@ -199,6 +249,10 @@ function cerrarSesion() {
 // Abre el modal de edicion y lo prepara segun el campo que se quiere modificar.
 function abrirModal(campo) {
     const userData = getDatosActuales();
+    if (!puedeEditarPerfil(userData)) {
+        alert("No tienes permisos para modificar los datos de este usuario.");
+        return;
+    }
 
     document.getElementById('campoAEditar').value = campo;
     document.getElementById('mensajeExito').style.display = 'none';
@@ -237,6 +291,11 @@ async function guardarEdicion() {
     const campo = document.getElementById('campoAEditar').value;
     const nuevoValor = document.getElementById('inputNuevoValor').value;
     const token = localStorage.getItem("token");
+
+    if (!puedeEditarPerfil(userData)) {
+        alert("No tienes permisos para modificar los datos de este usuario.");
+        return;
+    }
 
     if (!nuevoValor) return;
 
@@ -299,6 +358,11 @@ let avatarSeleccionadoTemporal = "";
 // Abre el modal de seleccion de avatar dejando marcado el avatar actual.
 function abrirModalFoto() {
     const userData = getDatosActuales();
+    if (!puedeEditarPerfil(userData)) {
+        alert("No tienes permisos para modificar este perfil.");
+        return;
+    }
+
     const avatarFileName = normalizarAvatar(userData.foto);
     avatarSeleccionadoTemporal = avatarFileName;
 
@@ -328,6 +392,11 @@ function seleccionarAvatar(nombreArchivo, elementoContenedor) {
 async function guardarFoto() {
     const userData = getDatosActuales();
     const token = localStorage.getItem("token");
+
+    if (!puedeEditarPerfil(userData)) {
+        alert("No tienes permisos para modificar este perfil.");
+        return;
+    }
 
     if (!avatarSeleccionadoTemporal) return;
 

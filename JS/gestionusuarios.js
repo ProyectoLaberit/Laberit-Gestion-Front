@@ -87,6 +87,13 @@ function renderizarTabla(usuarios) {
         const avatar = u.foto || "avatar_masculino.png";
         const rolBadge = badgeRol(u.rol);
         const esPropioUsuario = u.id === propioId;
+        const puedeEditar = puedeEditarUsuarioGestion(u);
+        const accionEditar = puedeEditar
+            ? `onclick="irAEditar(${u.id}, '${(u.nombre||'').replace(/'/g,"\\'")}', '${(u.email||'').replace(/'/g,"\\'")}', '${u.rol||''}', '${u.foto||''}')"`
+            : "disabled";
+        const tituloEditar = puedeEditar
+            ? "Editar usuario"
+            : "Un Administrador solo puede editar perfiles de empleados";
 
         return `
         <tr>
@@ -105,9 +112,9 @@ function renderizarTabla(usuarios) {
             <td class="text-end user-actions-cell" data-label="Acciones">
                 <div class="d-flex gap-2 justify-content-end user-actions">
                     <button class="btn btn-sm btn-outline-secondary"
-                        onclick="irAEditar(${u.id}, '${(u.nombre||'').replace(/'/g,"\\'")}', '${(u.email||'').replace(/'/g,"\\'")}', '${u.rol||''}', '${u.foto||''}')"
+                        ${accionEditar}
                         data-rol-minimo="ADMIN"
-                        title="Editar usuario">
+                        title="${tituloEditar}">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -148,6 +155,22 @@ function badgeRol(rol) {
     return `<span class="badge-rol badge-empleado">${rol}</span>`;
 }
 
+function esRolGestionProtegido(rol) {
+    return rol === "SuperAdministrador" || rol === "Administrador";
+}
+
+function puedeEditarUsuarioGestion(usuario) {
+    if (esSuperAdmin()) {
+        return true;
+    }
+
+    if (typeof esAdmin === "function" && esAdmin()) {
+        return usuario && !esRolGestionProtegido(usuario.rol);
+    }
+
+    return false;
+}
+
 // Filtra la tabla de usuarios usando el texto escrito en el buscador.
 function filtrarUsuarios() {
     const filtro = document.getElementById("input-busqueda").value.toLowerCase().trim();
@@ -162,6 +185,11 @@ function filtrarUsuarios() {
 // ── Editar: guarda los datos del usuario en localStorage y va a perfil.html ──
 // Guarda el usuario seleccionado y navega al perfil en modo edicion.
 function irAEditar(id, nombre, email, rol, foto) {
+    if (!puedeEditarUsuarioGestion({ rol })) {
+        alert("Un Administrador solo puede editar perfiles de empleados.");
+        return;
+    }
+
     localStorage.setItem("usuarioEditando", JSON.stringify({ id, nombre, email, rol, foto }));
     window.location.href = "perfil.html?edit=1";
 }
