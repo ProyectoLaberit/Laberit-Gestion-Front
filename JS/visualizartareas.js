@@ -45,12 +45,12 @@ function cargarBreadcrumb() {
     const proyecto = proyectos.find(p => String(p.id) === String(proyectoId));
 
     const nombreDept = localStorage.getItem("nombreDepartamentoVis") || "Departamento";
-    const { faseBreadcrumb, subfaseBreadcrumb } = obtenerNivelesBreadcrumbVisualizacion();
+    const { faseBreadcrumb, subfaseBreadcrumb, tareaBreadcrumb } = obtenerNivelesBreadcrumbVisualizacion();
 
     document.getElementById("bc-proyecto").innerText = proyecto ? proyecto.nombre : "Proyecto";
     document.getElementById("bc-fase").innerText = `Fase: ${faseBreadcrumb}`;
     document.getElementById("bc-subfase").innerText = `Subfase: ${subfaseBreadcrumb}`;
-    ocultarBreadcrumbDuplicado("bc-tarea");
+    document.getElementById("bc-tarea").innerText = `Tarea: ${tareaBreadcrumb}`;
     document.getElementById("bc-dept").innerText = nombreDept;
     document.getElementById("dept-nombre").innerText = nombreDept;
 }
@@ -59,18 +59,12 @@ function cargarBreadcrumb() {
 function obtenerNivelesBreadcrumbVisualizacion() {
     const faseGuardada = localStorage.getItem("faseSeleccionada") || "";
     const subfaseGuardada = localStorage.getItem("subfaseSeleccionada") || "";
+    const tareaGuardada = localStorage.getItem("nombreTarea") || "";
     const faseBreadcrumb = resolverFaseBreadcrumb(faseGuardada, subfaseGuardada);
-    const subfaseBreadcrumb = localStorage.getItem("nombreTarea") || "Subfase";
+    const subfaseBreadcrumb = subfaseGuardada || "Subfase";
+    const tareaBreadcrumb = tareaGuardada || "Tarea";
 
-    return { faseBreadcrumb, subfaseBreadcrumb };
-}
-
-// Oculta el nivel de tarea cuando ya aparece como "Subfase: ...".
-function ocultarBreadcrumbDuplicado(idElemento) {
-    const elemento = document.getElementById(idElemento);
-    if (elemento && elemento.parentElement) {
-        elemento.parentElement.style.display = "none";
-    }
+    return { faseBreadcrumb, subfaseBreadcrumb, tareaBreadcrumb };
 }
 
 // Inicializa el filtro de fechas con un rango por defecto de los ultimos 30 dias.
