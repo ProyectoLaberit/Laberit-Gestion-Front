@@ -17,7 +17,8 @@ async function pintarProyectos() {
     console.log("EJECUTANDO PINTAR PROYECTOS. Leyendo filtros...");
 
     const filtros = {
-        activo: document.getElementById("filtro-estado")?.value || "",
+        activo: document.getElementById("filtro-activo")?.value || "",
+        completado: document.getElementById("filtro-estado")?.value || "",
         desde: document.getElementById("filtro-desde")?.value || "",
         hasta: document.getElementById("filtro-hasta")?.value || ""
     };

@@ -44,8 +44,13 @@
                 
                  <select id="filtro-estado" onchange="pintarProyectos()" class="form-select form-select-sm border-0 bg-light project-filter-select" data-no-select2>
                     <option value="">Todos los estados</option>
-                    <option value="true">En Proceso</option>
-                    <option value="false">Completado</option>
+                    <option value="false">En Proceso</option>
+                    <option value="true">Completado</option>
+                </select>
+                <select id="filtro-activo" onchange="pintarProyectos()" class="form-select form-select-sm border-0 bg-light project-filter-select" data-no-select2>
+                    <option value="">Toda la actividad</option>
+                    <option value="true">Activo</option>
+                    <option value="false">Inactivo</option>
                 </select>
 
                 <div class="project-filter-date">
