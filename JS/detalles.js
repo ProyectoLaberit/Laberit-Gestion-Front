@@ -310,6 +310,13 @@ async function cargarHistorialExcels(proyectoId) {
     }
 
     const excels = result.data;
+    // Ordenar los excels para que el vigente salga obligatoriamente el primero
+    excels.sort((a, b) => {
+        if (a.vigente && !b.vigente) return -1;
+        if (!a.vigente && b.vigente) return 1;
+        return 0;
+    });
+
     const claveSeleccion = obtenerClaveExcelSeleccionado(proyectoId);
     const idPersistido = localStorage.getItem(claveSeleccion);
     const excelVigente = excels.find((excel) => excel.vigente) || null;
