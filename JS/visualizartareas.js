@@ -479,9 +479,9 @@ function renderTabla(filas, inicio, total) {
                 <td class="fw-semibold">${horasTotales}</td>
                 <td> 
                     <div class="d-flex gap-1 flex-wrap">
+                        ${botonBorrar}
                         ${botonEditar}
                         ${botonValidacion}
-                        ${botonBorrar}
                     </div>
                 </td>
             </tr>
