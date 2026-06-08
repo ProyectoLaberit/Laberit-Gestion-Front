@@ -71,11 +71,17 @@
                         <input type="date" class="form-control" id="fechaInicio">
                     </div>
 
-                    <div class="col-md-6 d-flex align-items-end">
+                    <div class="col-md-6 d-flex align-items-end gap-4 flex-wrap">
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="checkbox" id="proyectoActivo">
                             <label class="form-check-label fw-medium" for="proyectoActivo">
                                 Proyecto Activo
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="proyectoCompleto">
+                            <label class="form-check-label fw-medium" for="proyectoCompleto">
+                                Proyecto Completo
                             </label>
                         </div>
                     </div>
@@ -87,7 +93,7 @@
 
                     <div class="col-12 d-flex gap-3 mt-4">
                         <button type="submit" class="btn btn-guardar" id="btn-guardar-proyecto">Guardar cambios</button>
-                        <button type="button" id="btn-cancelar-proyecto" class="btn btn-cancelar text-center" onclick="window.location.href='proyectos.html'">Cancelar</button>
+                        <button type="button" id="btn-cancelar-proyecto" class="btn btn-cancelar text-center" onclick="volverAPaginaOrigen()">Cancelar</button>
                     </div>
                 </div>
             </form>

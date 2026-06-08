@@ -13,6 +13,36 @@ window.onload = async function () {
     await cargarProyectoActual();
 };
 
+// Devuelve una ruta segura a la pantalla desde la que se abrio la edicion.
+function obtenerPaginaRetorno() {
+    const parametros = new URLSearchParams(window.location.search);
+    const volver = parametros.get("volver");
+    const paginasPermitidas = new Set(["detalles.html", "gestionproyectos.html", "proyectos.html"]);
+
+    if (paginasPermitidas.has(volver)) {
+        return volver;
+    }
+
+    if (document.referrer) {
+        try {
+            const referrerUrl = new URL(document.referrer);
+            const paginaReferrer = referrerUrl.pathname.split("/").pop();
+            if (referrerUrl.origin === window.location.origin && paginasPermitidas.has(paginaReferrer)) {
+                return paginaReferrer;
+            }
+        } catch (error) {
+            console.error("No se pudo leer la pagina anterior:", error);
+        }
+    }
+
+    return "proyectos.html";
+}
+
+// Navega a la pantalla anterior conocida manteniendo el proyecto seleccionado.
+function volverAPaginaOrigen() {
+    window.location.href = obtenerPaginaRetorno();
+}
+
 // Refleja en la interfaz el nombre del archivo que acaba de seleccionar el usuario.
 function mostrarNombre(input) {
     const label = document.getElementById("labelArchivo");
@@ -43,8 +73,7 @@ async function cargarProyectoActual() {
         return;
     }
 
-    const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
-    proyectoActual = proyectos.find((proyecto) => String(proyecto.id) === String(proyectoId)) || null;
+    proyectoActual = await obtenerProyectoActualDesdeBackend(proyectoId);
 
     if (!proyectoActual) {
         if (feedback) {
@@ -58,10 +87,71 @@ async function cargarProyectoActual() {
     document.getElementById("descripcion").value = proyectoActual.descripcion || "";
     document.getElementById("fechaInicio").value = normalizarFechaInput(proyectoActual.fechaInicio);
     document.getElementById("proyectoActivo").checked = proyectoActual.activo === true || proyectoActual.activo === "true";
+    document.getElementById("proyectoCompleto").checked = obtenerEstadoCompletoProyecto(proyectoId, proyectoActual);
 
     seleccionarValorEnSelect("clockifyId", proyectoActual.clockifyId);
     seleccionarValorEnSelect("gitlabId", proyectoActual.gitlabId);
     actualizarModoPantalla();
+}
+
+// Recupera el proyecto actualizado del backend y usa la copia local como respaldo.
+async function obtenerProyectoActualDesdeBackend(proyectoId) {
+    const proyectosCache = JSON.parse(localStorage.getItem("proyectos") || "[]");
+    const proyectoCache = proyectosCache.find((proyecto) => String(proyecto.id) === String(proyectoId)) || null;
+
+    try {
+        const result = await peticionSegura("/proyectos/cargar");
+        if (result && result.success && Array.isArray(result.data)) {
+            const proyectosFusionados = fusionarProyectosConCache(result.data, proyectosCache);
+            localStorage.setItem("proyectos", JSON.stringify(proyectosFusionados));
+            return proyectosFusionados.find((proyecto) => String(proyecto.id) === String(proyectoId)) || proyectoCache;
+        }
+    } catch (error) {
+        console.error("No se pudo refrescar el proyecto desde backend:", error);
+    }
+
+    return proyectoCache;
+}
+
+// Mantiene campos que el backend no devuelve en listados porque solo son de escritura.
+function fusionarProyectosConCache(proyectosBackend, proyectosCache) {
+    return proyectosBackend.map((proyectoBackend) => {
+        const proyectoCache = proyectosCache.find((proyecto) => String(proyecto.id) === String(proyectoBackend.id));
+        return {
+            ...proyectoCache,
+            ...proyectoBackend,
+            clockifyId: proyectoBackend.clockifyId || proyectoCache?.clockifyId,
+            gitlabId: proyectoBackend.gitlabId || proyectoCache?.gitlabId
+        };
+    });
+}
+
+// Normaliza las señales que devuelve el backend para un proyecto completo.
+function esProyectoCompleto(proyecto) {
+    if (!proyecto) {
+        return false;
+    }
+
+    return proyecto.completado === true
+        || proyecto.completado === "true"
+        || proyecto.completado === 1
+        || proyecto.completado === "1"
+        || Boolean(proyecto.fechaFin);
+}
+
+// Da prioridad al cambio guardado en esta sesion para que el checkbox no quede desmarcado.
+function obtenerEstadoCompletoProyecto(proyectoId, proyecto) {
+    const estadoLocal = localStorage.getItem(obtenerClaveProyectoCompleto(proyectoId));
+
+    if (estadoLocal === "true") {
+        return true;
+    }
+
+    if (estadoLocal === "false") {
+        return false;
+    }
+
+    return esProyectoCompleto(proyecto);
 }
 
 // Ajusta titulos y mensajes segun el proyecto ya tenga Excel asociado o no.
@@ -144,6 +234,7 @@ async function guardarProyecto() {
     const descripcion = document.getElementById("descripcion").value;
     const fechaInicio = document.getElementById("fechaInicio").value || "";
     const activo = document.getElementById("proyectoActivo").checked;
+    const completado = document.getElementById("proyectoCompleto").checked;
     const gitlabId = document.getElementById("gitlabId").value;
     const clockifyId = document.getElementById("clockifyId").value;
     const id = localStorage.getItem("proyectoId");
@@ -154,6 +245,7 @@ async function guardarProyecto() {
         descripcion,
         fechaInicio,
         activo,
+        completado,
         gitlabId,
         clockifyId,
         enBaseDatos: false,
@@ -176,6 +268,31 @@ async function guardarProyecto() {
             if (botonCancelar) botonCancelar.disabled = false;
             return;
         }
+
+        const resultCompletado = await guardarEstadoCompletadoProyecto(id, completado);
+        if (!resultCompletado || !resultCompletado.success) {
+            feedback.className = "mt-3 text-center text-danger";
+            feedback.innerText = "Proyecto guardado, pero no se pudo actualizar el estado completo.";
+            if (botonGuardar) botonGuardar.disabled = false;
+            if (botonCancelar) botonCancelar.disabled = false;
+            return;
+        }
+
+        const datosActualizados = {
+            ...proyectoData,
+            ...(result.data || {}),
+            ...(resultCompletado.data || {}),
+            completado
+        };
+
+        if (completado) {
+            datosActualizados.fechaFin = datosActualizados.fechaFin || new Date().toISOString().slice(0, 10);
+        } else {
+            datosActualizados.fechaFin = null;
+        }
+
+        actualizarProyectoEnCache(id, datosActualizados);
+        localStorage.setItem(obtenerClaveProyectoCompleto(id), completado ? "true" : "false");
 
         if (tieneExcel) {
             feedback.innerText = "Proyecto guardado. Importando Excel...";
@@ -201,7 +318,7 @@ async function guardarProyecto() {
         }
 
         setTimeout(() => {
-            window.location.href = "proyectos.html";
+            volverAPaginaOrigen();
         }, 1500);
     } catch (error) {
         feedback.className = "mt-3 text-center text-danger";
@@ -210,6 +327,37 @@ async function guardarProyecto() {
         if (botonGuardar) botonGuardar.disabled = false;
         if (botonCancelar) botonCancelar.disabled = false;
     }
+}
+
+// Persiste el checkbox de proyecto completo con el endpoint dedicado del backend.
+async function guardarEstadoCompletadoProyecto(idProyecto, completado) {
+    return peticionSegura(`/proyectos/${idProyecto}/completado`, {
+        method: "PUT",
+        body: JSON.stringify({ completado })
+    });
+}
+
+// Mantiene localStorage sincronizado para que detalles.html pinte el estado completo al volver a entrar.
+function actualizarProyectoEnCache(idProyecto, datosActualizados) {
+    const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
+    const indice = proyectos.findIndex((proyecto) => String(proyecto.id) === String(idProyecto));
+
+    if (indice === -1) {
+        return;
+    }
+
+    proyectos[indice] = {
+        ...proyectos[indice],
+        ...datosActualizados,
+        clockifyId: datosActualizados.clockifyId || proyectos[indice].clockifyId,
+        gitlabId: datosActualizados.gitlabId || proyectos[indice].gitlabId
+    };
+    localStorage.setItem("proyectos", JSON.stringify(proyectos));
+}
+
+// Clave compartida con detalles.html para reflejar el cambio sin esperar a otra carga global.
+function obtenerClaveProyectoCompleto(idProyecto) {
+    return `proyecto-completado-${idProyecto}`;
 }
 
 // Sube el Excel del proyecto usando multipart para completar la importacion.
