@@ -96,7 +96,7 @@ async function guardarProyecto() {
 
         if (result && result.success) {
             feedback.className = "mt-3 text-center text-success";
-            feedback.innerText = "Proyecto subido correctamente. Importando Excel...";
+            feedback.innerText = "Importando Excel...";
 
             // 1. Recogemos el ID (Esto lo estabais haciendo perfecto)
             const idPro = result.data.id;
@@ -138,7 +138,7 @@ async function guardarProyecto() {
                     // Al subir el Excel por primera vez, borramos cualquier preferencia vieja (por si acaso)
                     localStorage.removeItem(`idExcelHistorialSeleccionado-${idPro}`);
 
-                    feedback.innerText = "Proyecto y Excel subidos correctamente. Sincronizando integraciones...";
+                    feedback.innerText = "Sincronizando integraciones...";
                     await sincronizarProyectoCreado(idPro, feedback, signal);
                     finalizarSubidaCorrecta();
                 } else {
@@ -148,7 +148,7 @@ async function guardarProyecto() {
                     limpiarEstadoSubida();
                 }
             } else {
-                feedback.innerText = "Proyecto creado sin Excel adjunto. Sincronizando integraciones...";
+                feedback.innerText = "Sin Excel adjunto. Sincronizando integraciones...";
                 await sincronizarProyectoCreado(idPro, feedback, signal);
                 finalizarSubidaCorrecta();
             }
@@ -177,7 +177,7 @@ async function guardarProyecto() {
 // Replica la sincronizacion global de detalles: primero GitLab y despues Clockify.
 async function sincronizarProyectoCreado(proyectoId, feedback, signal) {
     feedback.className = "mt-3 text-center text-success";
-    feedback.innerText = "Proyecto creado. Sincronizando GitLab...";
+    feedback.innerText = "Sincronizando GitLab...";
 
     const resultadoGitLab = await peticionSegura(`/gitlab/sincronizar/${proyectoId}`, {
         method: "GET",
