@@ -136,6 +136,10 @@ async function pintarProyectos() {
 
     contenedorExcel.innerHTML = generarTarjetas(proyectosConExcel, true);
     contenedorSinExcel.innerHTML = generarTarjetas(proyectosSinExcel, false);
+
+    if (typeof aplicarRestriccionesPorRol === "function") {
+        aplicarRestriccionesPorRol();
+    }
 }
 
 // Guarda el proyecto seleccionado y navega a su pantalla de detalles.
