@@ -98,7 +98,7 @@ async function pintarProyectos() {
                         </button>
                     `
                     : `
-                        <button onclick="anadirExcel('${p.id}')" class="btn btn-outline-dark btn-sm w-100 fw-medium">
+                        <button onclick="anadirExcel('${p.id}')" class="btn btn-outline-dark btn-sm w-100 fw-medium" data-rol-minimo="ADMIN">
                             Añadir Excel
                         </button>
                     `;
