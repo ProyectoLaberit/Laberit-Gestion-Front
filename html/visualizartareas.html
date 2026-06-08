@@ -151,7 +151,7 @@
 
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
             <div class="d-flex flex-wrap align-items-center gap-2">
-                <button class="btn btn-dark btn-sm px-3" id="btn-sincronizar" onclick="sincronizarImputaciones()">
+                <button class="btn btn-dark btn-sm px-3" id="btn-sincronizar" onclick="sincronizarImputaciones()" data-rol-minimo="ADMIN">
                     Sincronizar
                 </button>
                 <span class="text-muted small" id="estado-filtro">Preparado para cargar imputaciones.</span>
@@ -244,7 +244,7 @@
                     Cancelar
                 </button>
                 <button type="button" class="edit-modal-btn edit-modal-btn-primary" id="edit-modal-save-btn"
-                    onclick="guardarEdicionImputacion()">
+                    onclick="guardarEdicionImputacion()" data-rol-minimo="ADMIN">
                     Guardar
                 </button>
             </div>
@@ -311,7 +311,7 @@
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancelar</button>
-                        <button class="btn btn-danger flex-fill" id="btn-confirmar-eliminar-imputacion" disabled>
+                        <button class="btn btn-danger flex-fill" id="btn-confirmar-eliminar-imputacion" data-rol-minimo="SUPERADMIN" disabled>
                             Eliminar
                         </button>
                     </div>

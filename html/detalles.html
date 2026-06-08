@@ -214,15 +214,15 @@
             </div>
             <!-- Botones solo visibles para SuperAdministrador -->
             <div id="botones-admin" class="d-flex gap-2 mt-3 detalle-header-actions" style="display:none!important;">
-                <a href="editarproyecto.html" class="btn btn-sm btn-brand">Editar</a>
-                <a href="crearfases.html" class="btn btn-sm btn-outline-secondary">
+                <a href="editarproyecto.html" class="btn btn-sm btn-brand" data-rol-minimo="ADMIN">Editar</a>
+                <a href="crearfases.html" class="btn btn-sm btn-outline-secondary" data-rol-minimo="ADMIN">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"
                         viewBox="0 0 24 24" class="me-1" style="vertical-align:-1px;">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
                     Crear Nueva Tarea
                 </a>
-                <button class="btn btn-sm btn-outline-secondary" id="btn-sincronizar" onclick="sincronizar()">
+                <button class="btn btn-sm btn-outline-secondary" id="btn-sincronizar" onclick="sincronizar()" data-rol-minimo="ADMIN">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
                         viewBox="0 0 24 24" class="me-1" id="icon-sync" style="vertical-align:-1px;">
                         <polyline points="23 4 23 10 17 10"/>

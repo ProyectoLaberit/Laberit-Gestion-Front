@@ -113,6 +113,7 @@ function renderizarTabla(proyectos) {
                 <div class="d-flex gap-2 justify-content-end project-actions">
                     <button class="btn btn-sm btn-outline-secondary"
                         onclick="irAEditarProyecto(${Number(proyecto.id)})"
+                        data-rol-minimo="ADMIN"
                         title="Editar proyecto">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -122,7 +123,8 @@ function renderizarTabla(proyectos) {
                     </button>
                     ${esSuperAdmin() ? `
                     <button class="btn btn-sm btn-outline-danger"
-                        onclick="confirmarEliminarProyecto(${Number(proyecto.id)}, '${nombreSeguro}')">
+                        onclick="confirmarEliminarProyecto(${Number(proyecto.id)}, '${nombreSeguro}')"
+                        data-rol-minimo="SUPERADMIN">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <polyline points="3 6 5 6 21 6"/>
                             <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
