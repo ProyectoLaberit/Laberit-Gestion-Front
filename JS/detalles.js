@@ -13,13 +13,14 @@ let idsActuales = {};
 let resumenSubfases = {};
 let tareasSubfasesCompletadas = new Map();
 let idExcelSeleccionadoActual = null;
+let proyectoCompletoActual = false;
 
 // Inicializa la pantalla de detalles del proyecto y engancha sus eventos principales.
 async function cargarPaginaDetalles() {
     const proyectoId = localStorage.getItem("proyectoId");
 
-    const proyectos = JSON.parse(localStorage.getItem("proyectos") || "[]");
-    const proyectoActual = proyectos.find((p) => String(p.id) === String(proyectoId));
+    const proyectoActual = await obtenerProyectoActualDesdeBackend(proyectoId);
+    proyectoCompletoActual = obtenerEstadoCompletoProyecto(proyectoId, proyectoActual);
     document.getElementById("proyecto-nombre-display").innerText =
         proyectoActual ? proyectoActual.nombre : "Proyecto " + proyectoId;
 
@@ -48,6 +49,71 @@ async function cargarPaginaDetalles() {
     document.getElementById("input-busqueda").addEventListener("input", (e) => {
         renderizarTodo(e.target.value, estructuraActual, idsActuales);
     });
+}
+
+// Recupera el proyecto actualizado del backend para no depender de localStorage obsoleto.
+async function obtenerProyectoActualDesdeBackend(proyectoId) {
+    const proyectosCache = JSON.parse(localStorage.getItem("proyectos") || "[]");
+    const proyectoCache = proyectosCache.find((proyecto) => String(proyecto.id) === String(proyectoId)) || null;
+
+    try {
+        const result = await peticionSegura("/proyectos/cargar");
+        if (result && result.success && Array.isArray(result.data)) {
+            const proyectosFusionados = fusionarProyectosConCache(result.data, proyectosCache);
+            localStorage.setItem("proyectos", JSON.stringify(proyectosFusionados));
+            return proyectosFusionados.find((proyecto) => String(proyecto.id) === String(proyectoId)) || proyectoCache;
+        }
+    } catch (error) {
+        console.error("No se pudo refrescar el proyecto desde backend:", error);
+    }
+
+    return proyectoCache;
+}
+
+// Mantiene campos que el backend no devuelve en listados porque solo son de escritura.
+function fusionarProyectosConCache(proyectosBackend, proyectosCache) {
+    return proyectosBackend.map((proyectoBackend) => {
+        const proyectoCache = proyectosCache.find((proyecto) => String(proyecto.id) === String(proyectoBackend.id));
+        return {
+            ...proyectoCache,
+            ...proyectoBackend,
+            clockifyId: proyectoBackend.clockifyId || proyectoCache?.clockifyId,
+            gitlabId: proyectoBackend.gitlabId || proyectoCache?.gitlabId
+        };
+    });
+}
+
+// Normaliza las señales que puede devolver el backend para un proyecto finalizado.
+function esProyectoCompleto(proyecto) {
+    if (!proyecto) {
+        return false;
+    }
+
+    return proyecto.completado === true
+        || proyecto.completado === "true"
+        || proyecto.completado === 1
+        || proyecto.completado === "1"
+        || Boolean(proyecto.fechaFin);
+}
+
+// Combina el estado persistido en backend con el cambio que acabamos de guardar desde editarproyecto.
+function obtenerEstadoCompletoProyecto(proyectoId, proyecto) {
+    const estadoLocal = localStorage.getItem(obtenerClaveProyectoCompleto(proyectoId));
+
+    if (estadoLocal === "true") {
+        return true;
+    }
+
+    if (estadoLocal === "false") {
+        return false;
+    }
+
+    return esProyectoCompleto(proyecto);
+}
+
+// Clave compartida con editarproyecto.html para reflejar el completado al volver a detalles.
+function obtenerClaveProyectoCompleto(idProyecto) {
+    return `proyecto-completado-${idProyecto}`;
 }
 
 // Descarga el Excel actualmente seleccionado en el historial del proyecto.
@@ -485,7 +551,7 @@ function renderizarTodo(filtro = "", estr, ids) {
             const displayMin = formatoHoras(parseFloat(tiempos.tiempoEstimadoMin));
             const displayMax = formatoHoras(parseFloat(tiempos.tiempoEstimadoMax));
             const estado = tareasSubfasesCompletadas.get(String(idSub)) || { completada: false, datos: null };
-            const completada = estado.completada === true;
+            const completada = proyectoCompletoActual || estado.completada === true;
             const datos = estado.datos;
             const conteoTexto = Array.isArray(datos) && datos.length >= 2 ? `${datos[0]}/${datos[1]}` : "";
 

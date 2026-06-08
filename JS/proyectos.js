@@ -148,7 +148,7 @@ function verDetalles(proyectoId) {
 // Guarda el proyecto seleccionado y abre la pantalla para adjuntarle un Excel.
 function anadirExcel(proyectoId) {
     localStorage.setItem("proyectoId", proyectoId);
-    window.location.href = "editarproyecto.html";
+    window.location.href = "editarproyecto.html?volver=proyectos.html";
 }
 
 const usuarioData = localStorage.getItem("usuarioData");

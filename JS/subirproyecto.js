@@ -55,6 +55,7 @@ async function guardarProyecto() {
     // Comprobar si hay un archivo seleccionado en el input
     const fileInput = document.getElementById('archivoInput');
     const tieneExcel = fileInput.files.length > 0;
+    const completado = document.getElementById('proyectoCompleto').checked;
 
     // Recopilar campos incluyendo la bandera 'excels'
     const formData = {
@@ -62,6 +63,7 @@ async function guardarProyecto() {
         descripcion: document.getElementById('descripcion').value,
         fechaInicio: document.getElementById('fechaInicio').value,
         activo: document.getElementById('proyectoActivo').checked,
+        completado,
         gitlabId: document.getElementById('gitlabId').value,
         clockifyId: document.getElementById('clockifyId').value,
         excels: tieneExcel // Añadimos esta línea
@@ -140,6 +142,7 @@ async function guardarProyecto() {
 
                     feedback.innerText = "Sincronizando integraciones...";
                     await sincronizarProyectoCreado(idPro, feedback, signal);
+                    await aplicarCompletadoSiProcede(idPro, completado, feedback, signal);
                     finalizarSubidaCorrecta();
                 } else {
                     feedback.className = "mt-3 text-center text-danger";
@@ -150,6 +153,7 @@ async function guardarProyecto() {
             } else {
                 feedback.innerText = "Sin Excel adjunto. Sincronizando integraciones...";
                 await sincronizarProyectoCreado(idPro, feedback, signal);
+                await aplicarCompletadoSiProcede(idPro, completado, feedback, signal);
                 finalizarSubidaCorrecta();
             }
 
@@ -172,6 +176,35 @@ async function guardarProyecto() {
         restaurarBotonGuardar(botonGuardar);
         limpiarEstadoSubida();
     }
+}
+
+// Aplica el completado al final del alta, cuando ya existen las tareas importadas.
+async function aplicarCompletadoSiProcede(proyectoId, completado, feedback, signal) {
+    if (!completado) {
+        localStorage.setItem(obtenerClaveProyectoCompleto(proyectoId), "false");
+        return;
+    }
+
+    feedback.className = "mt-3 text-center text-success";
+    feedback.innerText = "Marcando proyecto como completo...";
+
+    const result = await peticionSegura(`/proyectos/${proyectoId}/completado`, {
+        method: "PUT",
+        body: JSON.stringify({ completado: true }),
+        signal
+    });
+
+    if (!result || !result.success) {
+        throw new Error((result && result.mensaje) || "Proyecto creado, pero no se pudo marcar como completo.");
+    }
+
+    localStorage.setItem(obtenerClaveProyectoCompleto(proyectoId), "true");
+    feedback.innerText = "Proyecto creado, sincronizado y marcado como completo.";
+}
+
+// Clave compartida con detalles.html para reflejar el completado al abrir el proyecto.
+function obtenerClaveProyectoCompleto(idProyecto) {
+    return `proyecto-completado-${idProyecto}`;
 }
 
 // Replica la sincronizacion global de detalles: primero GitLab y despues Clockify.

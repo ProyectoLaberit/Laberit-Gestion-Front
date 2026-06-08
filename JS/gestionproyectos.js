@@ -159,7 +159,7 @@ function filtrarProyectos() {
 function irAEditarProyecto(id) {
     localStorage.setItem("proyectoId", String(id));
     localStorage.setItem("proyectos", JSON.stringify(todosLosProyectos));
-    window.location.href = "editarproyecto.html";
+    window.location.href = "editarproyecto.html?volver=gestionproyectos.html";
 }
 
 // Abre el modal de confirmacion reforzada para borrar un proyecto.
