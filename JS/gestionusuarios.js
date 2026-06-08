@@ -135,6 +135,9 @@ function renderizarTabla(usuarios) {
             </td>
         </tr>`;
     }).join("");
+    if (typeof aplicarRestriccionesPorRol === "function") {
+        aplicarRestriccionesPorRol();
+    }
 }
 
 // Devuelve el badge HTML que representa visualmente el rol del usuario.

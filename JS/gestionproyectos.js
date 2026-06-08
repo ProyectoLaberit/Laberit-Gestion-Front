@@ -142,6 +142,9 @@ function renderizarTabla(proyectos) {
             </td>
         </tr>`;
     }).join("");
+    if (typeof aplicarRestriccionesPorRol === "function") {
+        aplicarRestriccionesPorRol();
+    }
 }
 
 // Filtra la tabla de proyectos usando el texto escrito en el buscador.
