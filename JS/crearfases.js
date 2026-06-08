@@ -226,8 +226,8 @@ async function crearEstimacion() {
 
     const idDepto = parseInt(document.getElementById("select-depto-est").value, 10);
     const tarea = document.getElementById("input-tarea-est").value.trim();
-    const tiempoMin = parseFloat(document.getElementById("input-tmin").value);
-    const tiempoMax = parseFloat(document.getElementById("input-tmax").value);
+    const tiempoMin = parsearHorasEnteras(document.getElementById("input-tmin").value);
+    const tiempoMax = parsearHorasEnteras(document.getElementById("input-tmax").value);
     const proyectoId = localStorage.getItem("proyectoId");
     let valido = true;
 
@@ -245,21 +245,21 @@ async function crearEstimacion() {
         document.getElementById("input-tarea-est").classList.remove("is-invalid");
     }
 
-    if (isNaN(tiempoMin) || tiempoMin < 0) {
+    if (!Number.isInteger(tiempoMin) || tiempoMin < 0) {
         document.getElementById("input-tmin").classList.add("is-invalid");
         valido = false;
     } else {
         document.getElementById("input-tmin").classList.remove("is-invalid");
     }
 
-    if (isNaN(tiempoMax) || tiempoMax < 0) {
+    if (!Number.isInteger(tiempoMax) || tiempoMax < 0) {
         document.getElementById("input-tmax").classList.add("is-invalid");
         valido = false;
     } else {
         document.getElementById("input-tmax").classList.remove("is-invalid");
     }
 
-    if (!isNaN(tiempoMin) && !isNaN(tiempoMax) && tiempoMin > tiempoMax) {
+    if (Number.isInteger(tiempoMin) && Number.isInteger(tiempoMax) && tiempoMin > tiempoMax) {
         document.getElementById("error-tiempos").style.display = "block";
         valido = false;
     } else {
@@ -292,6 +292,16 @@ async function crearEstimacion() {
     } else {
         mostrarError((result && result.mensaje) || "Error al crear la estimacion.");
     }
+}
+
+// Convierte el valor del input a entero, rechazando decimales y valores vacios.
+function parsearHorasEnteras(valor) {
+    const texto = String(valor || "").trim();
+    if (!/^\d+$/.test(texto)) {
+        return NaN;
+    }
+
+    return Number(texto);
 }
 
 // Guarda el contexto de la estimacion recien creada y abre su pantalla de detalle.

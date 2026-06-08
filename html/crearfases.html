@@ -224,7 +224,7 @@
                     <p class="section-label">Tiempo mínimo <span class="req">*</span></p>
                     <div class="tiempo-group">
                         <input type="number" class="form-control" id="input-tmin"
-                            placeholder="0" min="0" step="0.5">
+                            placeholder="0" min="0" step="1" inputmode="numeric">
                         <span class="tiempo-suffix">h</span>
                     </div>
                 </div>
@@ -232,13 +232,13 @@
                     <p class="section-label">Tiempo máximo <span class="req">*</span></p>
                     <div class="tiempo-group">
                         <input type="number" class="form-control" id="input-tmax"
-                            placeholder="0" min="0" step="0.5">
+                            placeholder="0" min="0" step="1" inputmode="numeric">
                         <span class="tiempo-suffix">h</span>
                     </div>
                 </div>
             </div>
             <div class="text-danger small mb-2" id="error-tiempos" style="display:none;">
-                El tiempo mínimo no puede ser mayor que el máximo.
+                Los tiempos deben ser enteros y el minimo no puede ser mayor que el maximo.
             </div>
 
             <div class="d-flex justify-content-end">
