@@ -106,6 +106,7 @@ function renderizarTabla(usuarios) {
                 <div class="d-flex gap-2 justify-content-end user-actions">
                     <button class="btn btn-sm btn-outline-secondary"
                         onclick="irAEditar(${u.id}, '${(u.nombre||'').replace(/'/g,"\\'")}', '${(u.email||'').replace(/'/g,"\\'")}', '${u.rol||''}', '${u.foto||''}')"
+                        data-rol-minimo="SUPERADMIN"
                         title="Editar usuario">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -115,7 +116,8 @@ function renderizarTabla(usuarios) {
                     </button>
                     ${!esPropioUsuario && esSuperAdmin() ? `
                     <button class="btn btn-sm btn-outline-danger"
-                        onclick="confirmarEliminar(${u.id}, '${(u.nombre||'').replace(/'/g,"\\'")}')">
+                        onclick="confirmarEliminar(${u.id}, '${(u.nombre||'').replace(/'/g,"\\'")}')"
+                        data-rol-minimo="SUPERADMIN">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <polyline points="3 6 5 6 21 6"/>
                             <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -133,6 +135,9 @@ function renderizarTabla(usuarios) {
             </td>
         </tr>`;
     }).join("");
+    if (typeof aplicarRestriccionesPorRol === "function") {
+        aplicarRestriccionesPorRol();
+    }
 }
 
 // Devuelve el badge HTML que representa visualmente el rol del usuario.

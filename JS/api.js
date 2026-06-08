@@ -64,7 +64,7 @@ const NAV_ITEMS = [
     {
         href: "altausuarios.html",
         label: "Alta Usuarios",
-        roles: ["SuperAdministrador", "Administrador"]
+        roles: ["SuperAdministrador"]
     },
     {
         href: "auditoria.html",
