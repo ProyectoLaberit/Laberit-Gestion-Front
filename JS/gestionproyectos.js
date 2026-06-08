@@ -59,7 +59,7 @@ async function cargarProyectos() {
 
     if (!result || !result.success) {
         document.getElementById("tabla-proyectos").innerHTML = `
-            <tr><td colspan="5" class="empty-state text-danger">
+            <tr><td colspan="6" class="empty-state text-danger">
                 Error al cargar los proyectos.
             </td></tr>`;
         return;
@@ -79,7 +79,7 @@ function renderizarTabla(proyectos) {
 
     if (proyectos.length === 0) {
         tbody.innerHTML = `
-            <tr><td colspan="5" class="empty-state">
+            <tr><td colspan="6" class="empty-state">
                 No se encontraron proyectos.
             </td></tr>`;
         return;
@@ -90,6 +90,7 @@ function renderizarTabla(proyectos) {
         const descripcion = proyecto.descripcion || "Sin descripcion";
         const fechaInicio = formatearFecha(proyecto.fechaInicio);
         const badgeEstado = obtenerBadgeEstado(proyecto.activo);
+        const badgeExcel = obtenerBadgeExcel(proyecto.excels);
 
         return `
         <tr>
@@ -108,6 +109,7 @@ function renderizarTabla(proyectos) {
             </td>
             <td class="text-muted" data-label="Descripcion">${escaparHtml(descripcion)}</td>
             <td data-label="Estado">${badgeEstado}</td>
+            <td data-label="Excel">${badgeExcel}</td>
             <td class="text-muted" data-label="Fecha inicio">${escaparHtml(fechaInicio)}</td>
             <td class="text-end project-actions-cell" data-label="Acciones">
                 <div class="d-flex gap-2 justify-content-end project-actions">
@@ -251,6 +253,16 @@ function obtenerBadgeEstado(activo) {
     }
 
     return '<span class="badge-estado badge-inactivo">Inactivo</span>';
+}
+
+// Devuelve el badge visual que indica si el proyecto tiene Excel asociado.
+function obtenerBadgeExcel(excels) {
+    const tieneExcel = excels === true || excels === "true";
+    if (tieneExcel) {
+        return '<span class="badge-estado badge-excel-si">Sí</span>';
+    }
+
+    return '<span class="badge-estado badge-excel-no">No</span>';
 }
 
 // Convierte la fecha del proyecto a un formato corto para la tabla.
